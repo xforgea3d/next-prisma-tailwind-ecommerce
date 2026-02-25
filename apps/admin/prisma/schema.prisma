@@ -38,10 +38,19 @@ enum RoleEnum {
 }
 
 model SiteSettings {
-  id                  Int     @id @default(1)
-  maintenance_enabled Boolean @default(false)
-  maintenance_message String? @default("Site is undergoing maintenance. We will be back shortly.")
-  
+  id                   Int      @id @default(1)
+  brand_name           String   @default("xForgea3D")
+  slogan               String   @default("Tasarım. Hassasiyet. xForgea3D.")
+  contact_email        String?
+  contact_phone        String?
+  whatsapp             String?
+  address_text         String?
+  instagram_url        String?
+  tiktok_url           String?
+  youtube_url          String?
+  maintenance_enabled  Boolean  @default(false)
+  maintenance_message  String?  @default("Bakım çalışmaları devam ediyor. Lütfen daha sonra tekrar deneyin.")
+
   updatedAt DateTime @updatedAt
 }
 
@@ -55,13 +64,17 @@ model Cart {
 }
 
 model CartItem {
-  cart      Cart    @relation(fields: [cartId], references: [userId])
-  cartId    String
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
-  count     Int
+  id             String  @id @default(cuid())
+  cart           Cart    @relation(fields: [cartId], references: [userId])
+  cartId         String
+  product        Product @relation(fields: [productId], references: [id])
+  productId      String
+  count          Int
+  isCustom       Boolean @default(false)
+  customSnapshot Json?
 
-  @@unique([cartId, productId], name: "UniqueCartItem")
+  @@index([cartId])
+  @@index([productId])
 }
 
 model Author {
@@ -87,13 +100,21 @@ model Brand {
   products Product[]
 }
 
+enum ProductTypeEnum {
+  READY
+  CUSTOM
+}
+
 model Product {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   description String?
   images      String[]
   keywords    String[]
   metadata    Json?
+
+  productType   ProductTypeEnum @default(READY)
+  customOptions Json?           // { colors, sizes, maxTextLength, allowFileUpload, basePriceAddition }
 
   price    Float @default(100)
   discount Float @default(0)
@@ -183,18 +204,24 @@ model Order {
 }
 
 model OrderItem {
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   String
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
-  count     Int
-  price     Float
-  discount  Float
+  id             String  @id @default(cuid())
+  order          Order   @relation(fields: [orderId], references: [id])
+  orderId        String
+  product        Product @relation(fields: [productId], references: [id])
+  productId      String
+  count          Int
+  price          Float
+  discount       Float
+  isCustom       Boolean @default(false)
+  customSnapshot Json?   // { text, color, size, fileUrl, note }
 
-  @@unique([orderId, productId], name: "UniqueOrderItem")
+  @@index([orderId])
+  @@index([productId])
 }
 
 enum OrderStatusEnum {
+  OnayBekleniyor
+  Uretimde
   Processing
   Shipped
   Delivered
@@ -365,5 +392,62 @@ model Banner {
   categories Category[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── CMS Models ────────────────────────────────────────────────
+
+model ContentPage {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  title_tr           String
+  body_html_tr       String?  @db.Text
+  is_published       Boolean  @default(false)
+  seo_title_tr       String?
+  seo_description_tr String?
+
+  updatedAt DateTime @updatedAt
+}
+
+model HomepageSection {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  title_tr     String
+  content_json Json?
+  is_enabled   Boolean  @default(true)
+  sort_order   Int      @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+enum BlogStatusEnum {
+  draft
+  published
+}
+
+model BlogPost {
+  id                 String         @id @default(cuid())
+  slug               String         @unique
+  title_tr           String
+  excerpt_tr         String?
+  body_html_tr       String?        @db.Text
+  cover_image_url    String?
+  tags               String[]
+  status             BlogStatusEnum @default(draft)
+  published_at       DateTime?
+  seo_title_tr       String?
+  seo_description_tr String?
+
+  updatedAt DateTime @updatedAt
+}
+
+model SeoSettings {
+  id                           Int      @id @default(1)
+  default_title_template_tr    String   @default("%s | xForgea3D")
+  default_meta_description_tr  String?
+  default_og_image_url         String?
+  robots_index                 Boolean  @default(true)
+  robots_follow                Boolean  @default(true)
+
   updatedAt DateTime @updatedAt
 }

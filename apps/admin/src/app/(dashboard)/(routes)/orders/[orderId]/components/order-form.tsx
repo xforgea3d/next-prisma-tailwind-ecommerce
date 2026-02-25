@@ -12,6 +12,13 @@ import {
    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from '@/components/ui/select'
 import type { OrderWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
@@ -20,71 +27,62 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import * as z from 'zod'
 
+const ORDER_STATUSES = [
+   { value: 'OnayBekleniyor', label: 'Onay Bekleniyor' },
+   { value: 'Uretimde', label: 'Üretimde' },
+   { value: 'Processing', label: 'İşlemde' },
+   { value: 'Shipped', label: 'Kargoya Verildi' },
+   { value: 'Delivered', label: 'Teslim Edildi' },
+   { value: 'ReturnProcessing', label: 'İade İşlemde' },
+   { value: 'ReturnCompleted', label: 'İade Tamamlandı' },
+   { value: 'Cancelled', label: 'İptal Edildi' },
+   { value: 'RefundProcessing', label: 'Para İadesi İşlemde' },
+   { value: 'RefundCompleted', label: 'Para İadesi Tamamlandı' },
+   { value: 'Denied', label: 'Reddedildi' },
+]
+
 const formSchema = z.object({
    status: z.string().min(1),
-   shipping: z.coerce.number().min(1),
-   payable: z.coerce.number().min(1),
+   shipping: z.coerce.number().min(0),
+   payable: z.coerce.number().min(0),
    discount: z.coerce.number().min(0),
    isPaid: z.boolean().default(false).optional(),
    isCompleted: z.boolean().default(false).optional(),
 })
 
-type ProductFormValues = z.infer<typeof formSchema>
+type OrderFormValues = z.infer<typeof formSchema>
 
-interface ProductFormProps {
+interface OrderFormProps {
    initialData: OrderWithIncludes | null
 }
 
-export const OrderForm: React.FC<ProductFormProps> = ({ initialData }) => {
+export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
    const params = useParams()
    const router = useRouter()
-
    const [loading, setLoading] = useState(false)
 
-   const toastMessage = 'Order updated.'
-   const action = 'Save changes'
-
    const defaultValues = initialData
-      ? {
-           ...initialData,
-        }
-      : {
-           status: '---',
-           shipping: 0,
-           payable: 0,
-           discount: 0,
-           isPaid: false,
-           isCompleted: false,
-        }
+      ? { ...initialData }
+      : { status: 'Processing', shipping: 0, payable: 0, discount: 0, isPaid: false, isCompleted: false }
 
-   const form = useForm<ProductFormValues>({
+   const form = useForm<OrderFormValues>({
       resolver: zodResolver(formSchema),
       defaultValues,
    })
 
-   const onSubmit = async (data: ProductFormValues) => {
+   const onSubmit = async (data: OrderFormValues) => {
       try {
          setLoading(true)
-
-         if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
-               method: 'PATCH',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         } else {
-            await fetch(`/api/products`, {
-               method: 'POST',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         }
-
+         await fetch(`/api/orders/${params.orderId}`, {
+            method: 'PATCH',
+            body: JSON.stringify(data),
+            cache: 'no-store',
+            headers: { 'Content-Type': 'application/json' },
+         })
          router.refresh()
-         router.push(`/products`)
-         toast.success(toastMessage)
-      } catch (error: any) {
-         toast.error('Something went wrong.')
+         toast.success('Sipariş güncellendi.')
+      } catch {
+         toast.error('Bir hata oluştu.')
       } finally {
          setLoading(false)
       }
@@ -92,106 +90,117 @@ export const OrderForm: React.FC<ProductFormProps> = ({ initialData }) => {
 
    return (
       <Form {...form}>
-         <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="block space-y-2 w-full"
-         >
+         <form onSubmit={form.handleSubmit(onSubmit)} className="block space-y-4 w-full pt-2">
+
+            {/* Status */}
             <FormField
                control={form.control}
-               name="shipping"
+               name="status"
                render={({ field }) => (
                   <FormItem>
-                     <FormLabel>Price</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
-                        />
-                     </FormControl>
+                     <FormLabel>Sipariş Durumu</FormLabel>
+                     <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <FormControl>
+                           <SelectTrigger>
+                              <SelectValue placeholder="Durum seçin" />
+                           </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                           {ORDER_STATUSES.map(({ value, label }) => (
+                              <SelectItem key={value} value={value}>{label}</SelectItem>
+                           ))}
+                        </SelectContent>
+                     </Select>
                      <FormMessage />
                   </FormItem>
                )}
             />
-            <FormField
-               control={form.control}
-               name="payable"
-               render={({ field }) => (
-                  <FormItem>
-                     <FormLabel>Discount</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
-                        />
-                     </FormControl>
-                     <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="discount"
-               render={({ field }) => (
-                  <FormItem>
-                     <FormLabel>Discount</FormLabel>
-                     <FormControl>
-                        <Input
-                           type="number"
-                           disabled={loading}
-                           placeholder="9.99"
-                           {...field}
-                        />
-                     </FormControl>
-                     <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="isPaid"
-               render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                           checked={field.value}
-                           onCheckedChange={field.onChange}
-                        />
-                     </FormControl>
-                     <div className="space-y-1 leading-none">
-                        <FormLabel>Featured</FormLabel>
-                        <FormDescription>
-                           This product will appear on the home page
-                        </FormDescription>
-                     </div>
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="isCompleted"
-               render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                           checked={field.value}
-                           onCheckedChange={field.onChange}
-                        />
-                     </FormControl>
-                     <div className="space-y-1 leading-none">
-                        <FormLabel>Available</FormLabel>
-                        <FormDescription>
-                           This product will appear in the store.
-                        </FormDescription>
-                     </div>
-                  </FormItem>
-               )}
-            />
-            <Button disabled={loading} className="ml-auto" type="submit">
-               {action}
+
+            <div className="grid grid-cols-3 gap-4">
+               {/* Shipping */}
+               <FormField
+                  control={form.control}
+                  name="shipping"
+                  render={({ field }) => (
+                     <FormItem>
+                        <FormLabel>Kargo Ücreti (₺)</FormLabel>
+                        <FormControl>
+                           <Input type="number" disabled={loading} placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                     </FormItem>
+                  )}
+               />
+
+               {/* Payable */}
+               <FormField
+                  control={form.control}
+                  name="payable"
+                  render={({ field }) => (
+                     <FormItem>
+                        <FormLabel>Ödenecek (₺)</FormLabel>
+                        <FormControl>
+                           <Input type="number" disabled={loading} placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                     </FormItem>
+                  )}
+               />
+
+               {/* Discount */}
+               <FormField
+                  control={form.control}
+                  name="discount"
+                  render={({ field }) => (
+                     <FormItem>
+                        <FormLabel>İndirim (₺)</FormLabel>
+                        <FormControl>
+                           <Input type="number" disabled={loading} placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                     </FormItem>
+                  )}
+               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+               {/* isPaid */}
+               <FormField
+                  control={form.control}
+                  name="isPaid"
+                  render={({ field }) => (
+                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                           <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                           <FormLabel>Ödendi</FormLabel>
+                           <FormDescription>Ödeme alındı olarak işaretle.</FormDescription>
+                        </div>
+                     </FormItem>
+                  )}
+               />
+
+               {/* isCompleted */}
+               <FormField
+                  control={form.control}
+                  name="isCompleted"
+                  render={({ field }) => (
+                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                           <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                           <FormLabel>Tamamlandı</FormLabel>
+                           <FormDescription>Sipariş tamamlandı olarak işaretle.</FormDescription>
+                        </div>
+                     </FormItem>
+                  )}
+               />
+            </div>
+
+            <Button disabled={loading} type="submit">
+               Değişiklikleri Kaydet
             </Button>
          </form>
       </Form>

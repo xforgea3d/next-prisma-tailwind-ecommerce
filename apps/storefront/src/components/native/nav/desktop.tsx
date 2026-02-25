@@ -11,38 +11,47 @@ import {
 } from '@/components/ui/navigation-menu'
 import config from '@/config/site'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import Link from 'next/link'
 import { forwardRef } from 'react'
 import { PackageOpenIcon } from 'lucide-react'
 
-const brands: { title: string; href: string; description: string }[] = [
+const collections: { title: string; href: string; description: string }[] = [
    {
-      title: 'Apple',
-      href: '/products?brand=apple',
-      description: 'Find the latest Apple products including iPhones, iPads, and MacBooks.',
+      title: 'Figürler',
+      href: '/products?category=figurler',
+      description: 'Özel tasarım 3D baskı figürler — oyun, anime, fantezi ve daha fazlası.',
    },
    {
-      title: 'Samsung',
-      href: '/products?brand=samsung',
-      description: 'Explore Samsung Galaxy phones, tablets, and smart home devices.',
+      title: 'Heykeller',
+      href: '/products?category=heykeller',
+      description: 'Dekoratif ve sanatsal 3D baskı heykeller, her mekâna değer katar.',
    },
    {
-      title: 'Sony',
-      href: '/products?brand=sony',
-      description: 'Discover Sony electronics, from PlayStation consoles to premium headphones.',
+      title: 'Dekoratif',
+      href: '/products?category=dekoratif',
+      description: 'Ev ve ofis için şık 3D baskı dekoratif objeler.',
    },
    {
-      title: 'Nike',
-      href: '/products?brand=nike',
-      description: 'Shop the latest Nike athletic shoes, apparel, and accessories.',
+      title: 'Aksesuarlar',
+      href: '/products?category=aksesuarlar',
+      description: 'Kişiselleştirilmiş 3D baskı aksesuarlar ve tamamlayıcı parçalar.',
    },
 ]
 
 export function MainNav() {
    return (
-      <div className="hidden md:flex gap-4">
-         <Link href="/" className="flex items-center">
-            <span className="hidden font-medium sm:inline-block">
+      <div className="hidden md:flex gap-4 items-center">
+         <Link href="/" className="flex items-center gap-2">
+            <Image
+               src="/logo.png"
+               alt="xForgea3D"
+               width={36}
+               height={36}
+               className="object-contain"
+               priority
+            />
+            <span className="font-bold text-lg tracking-tight hover:opacity-80 transition-opacity hidden lg:block">
                {config.name}
             </span>
          </Link>
@@ -59,7 +68,7 @@ export function NavMenu() {
                <Link href="/products" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                      <div className="font-normal text-foreground/70">
-                        Products
+                        Ürünler
                      </div>
                   </NavigationMenuLink>
                </Link>
@@ -67,7 +76,7 @@ export function NavMenu() {
             <NavigationMenuItem>
                <NavigationMenuTrigger>
                   <div className="font-normal text-foreground/70">
-                     Categories
+                     Kategoriler
                   </div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
@@ -80,42 +89,42 @@ export function NavMenu() {
                            >
                               <PackageOpenIcon className="h-6 w-6 mb-2" />
                               <div className="mb-2 mt-4 text-lg font-medium">
-                                 All Categories
+                                 Tüm Kategoriler
                               </div>
                               <p className="text-sm leading-tight text-muted-foreground">
-                                 Browse our entire catalog of products sorted by category.
+                                 Kategoriye göre sıralanmış tüm 3D baskı ürünlerimize göz atın.
                               </p>
                            </Link>
                         </NavigationMenuLink>
                      </li>
-                     <ListItem href="/products?category=electronics" title="Electronics">
-                        Computers, smartphones, and gadgets.
+                     <ListItem href="/products?category=figurler" title="Figürler">
+                        Oyun, anime ve fantezi figürleri.
                      </ListItem>
-                     <ListItem href="/products?category=clothing" title="Clothing">
-                        Men's and women's fashion and apparel.
+                     <ListItem href="/products?category=heykeller" title="Heykeller">
+                        Sanatsal ve dekoratif heykeller.
                      </ListItem>
                      <ListItem
-                        href="/products?category=home"
-                        title="Home & Garden"
+                        href="/products?category=dekoratif"
+                        title="Dekoratif & Aksesuarlar"
                      >
-                        Furniture, decor, and outdoor living.
+                        Ev, ofis ve kişisel aksesuarlar.
                      </ListItem>
                   </ul>
                </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
                <NavigationMenuTrigger>
-                  <div className="font-normal text-foreground/70">Brands</div>
+                  <div className="font-normal text-foreground/70">Koleksiyonlar</div>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                     {brands.map((brand) => (
+                     {collections.map((col) => (
                         <ListItem
-                           key={brand.title}
-                           title={brand.title}
-                           href={brand.href}
+                           key={col.title}
+                           title={col.title}
+                           href={col.href}
                         >
-                           {brand.description}
+                           {col.description}
                         </ListItem>
                      ))}
                   </ul>

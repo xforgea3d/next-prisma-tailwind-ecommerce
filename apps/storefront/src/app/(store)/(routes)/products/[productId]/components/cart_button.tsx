@@ -161,7 +161,7 @@ export function ButtonComponent({ product }) {
    if (count === 0) {
       return (
          <Button className="flex gap-2" onClick={onAddToCart}>
-            <ShoppingBasketIcon className="h-4" /> Add to Cart
+            <ShoppingBasketIcon className="h-4" /> Sepete Ekle
          </Button>
       )
    }

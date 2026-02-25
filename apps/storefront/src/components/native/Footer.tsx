@@ -1,49 +1,49 @@
 import { Separator } from '@/components/native/separator'
 import config from '@/config/site'
-import { GithubIcon, InstagramIcon, TwitterIcon } from 'lucide-react'
+import { InstagramIcon, TwitterIcon } from 'lucide-react'
 import Link from 'next/link'
 
 const data = [
    {
-      label: 'LEGAL',
+      label: 'YASAL',
       links: [
          {
-            label: 'Privacy Policy',
+            label: 'Gizlilik Politikası',
             url: '/privacy',
          },
          {
-            label: 'Terms & Conditions',
+            label: 'Kullanım Koşulları',
             url: '/terms',
          },
       ],
    },
    {
-      label: 'RESOURCES',
+      label: 'KAYNAKLAR',
       links: [
          {
             label: 'Blog',
             url: '/blog',
          },
          {
-            label: 'About',
+            label: 'Hakkımızda',
             url: '/about',
          },
          {
-            label: 'Contact',
+            label: 'İletişim',
             url: '/contact',
          },
       ],
    },
    {
-      label: 'SUPPORT',
+      label: 'DESTEK',
       links: [
          {
-            label: 'Telegram',
-            url: '/telegram',
+            label: 'S.S.S.',
+            url: '/faq',
          },
          {
-            label: 'FAQ',
-            url: '/faq',
+            label: 'Kargo Takibi',
+            url: '/shipping',
          },
       ],
    },
@@ -94,9 +94,11 @@ function Trademark() {
             <h2 className="whitespace-nowrap text-sm font-semibold uppercase">
                {config.name}
             </h2>
+            <span className="mt-1 text-xs text-neutral-500 dark:text-neutral-400 italic">
+               Tasarım. Hassasiyet. xForgea3D.
+            </span>
             <span className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-               © {new Date().getFullYear()} {config.name}™ . All Rights
-               Reserved.
+               © {new Date().getFullYear()} {config.name}™ . Tüm Hakları Saklıdır.
             </span>
          </span>
       </div>
@@ -107,28 +109,20 @@ function Socials() {
    return (
       <div className="mb-6 flex justify-center space-x-6 text-muted-foreground">
          <a
-            href="https://instagram.com/sesto_dev"
+            href="https://instagram.com/xforgea3d"
             target="_blank"
             rel="noreferrer"
          >
             <InstagramIcon className="h-4" />
-            <span className="sr-only">Instagram page</span>
+            <span className="sr-only">Instagram sayfası</span>
          </a>
          <a
-            href="https://twitter.com/sesto_dev"
+            href="https://twitter.com/xforgea3d"
             target="_blank"
             rel="noreferrer"
          >
             <TwitterIcon className="h-4" />
-            <span className="sr-only">Twitter page</span>
-         </a>
-         <a
-            href="https://github.com/sesto-dev"
-            target="_blank"
-            rel="noreferrer"
-         >
-            <GithubIcon className="h-4" />
-            <span className="sr-only">GitHub account</span>
+            <span className="sr-only">Twitter sayfası</span>
          </a>
       </div>
    )

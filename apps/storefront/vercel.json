@@ -1,9 +1,22 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
+    "buildCommand": "cd ../.. && npx turbo run build --filter=storefront",
+    "outputDirectory": "apps/storefront/.next",
+    "installCommand": "cd ../.. && npm install",
+    "framework": "nextjs",
     "cleanUrls": true,
     "headers": [
         {
-            "source": "/fonts/Inter/Inter.woff2",
+            "source": "/logo.png",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=604800"
+                }
+            ]
+        },
+        {
+            "source": "/_next/static/(.*)",
             "headers": [
                 {
                     "key": "Cache-Control",
@@ -12,7 +25,7 @@
             ]
         },
         {
-            "source": "/fonts/Yekan/Yekan.woff",
+            "source": "/fonts/(.*)",
             "headers": [
                 {
                     "key": "Cache-Control",
@@ -21,5 +34,11 @@
             ]
         }
     ],
-    "redirects": []
+    "redirects": [
+        {
+            "source": "/product",
+            "destination": "/products",
+            "permanent": true
+        }
+    ]
 }

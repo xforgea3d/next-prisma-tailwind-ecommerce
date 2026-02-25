@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form'
 import { Heading } from '@/components/ui/heading'
 import ImageUpload from '@/components/ui/image-upload'
+import { CustomOptionsEditor } from './custom-options-editor'
 import { Input } from '@/components/ui/input'
 import {
    Select,
@@ -40,6 +41,8 @@ const formSchema = z.object({
    discount: z.coerce.number().min(0),
    stock: z.coerce.number().min(0),
    categoryId: z.string().min(1),
+   productType: z.string().default('READY'),
+   customOptions: z.string().optional(), // stored as JSON string in form, parsed on save
    isFeatured: z.boolean().default(false).optional(),
    isAvailable: z.boolean().default(false).optional(),
 })
@@ -68,21 +71,27 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-           price: parseFloat(String(initialData?.price.toFixed(2))),
-           discount: parseFloat(String(initialData?.discount.toFixed(2))),
-        }
+         ...initialData,
+         price: parseFloat(String(initialData?.price.toFixed(2))),
+         discount: parseFloat(String(initialData?.discount.toFixed(2))),
+         productType: (initialData as any)?.productType ?? 'READY',
+         customOptions: (initialData as any)?.customOptions
+            ? JSON.stringify((initialData as any).customOptions, null, 2)
+            : '',
+      }
       : {
-           title: '---',
-           description: '---',
-           images: [],
-           price: 0,
-           discount: 0,
-           stock: 0,
-           categoryId: '---',
-           isFeatured: false,
-           isAvailable: false,
-        }
+         title: '---',
+         description: '---',
+         images: [],
+         price: 0,
+         discount: 0,
+         stock: 0,
+         categoryId: '---',
+         productType: 'READY',
+         customOptions: '',
+         isFeatured: false,
+         isAvailable: false,
+      }
 
    const form = useForm<ProductFormValues>({
       resolver: zodResolver(formSchema),
@@ -92,26 +101,31 @@ export const ProductForm: React.FC<ProductFormProps> = ({
    const onSubmit = async (data: ProductFormValues) => {
       try {
          setLoading(true)
-
+         // Parse customOptions JSON string back to object before sending
+         const payload = {
+            ...data,
+            customOptions: data.customOptions
+               ? JSON.parse(data.customOptions)
+               : null,
+         }
          if (initialData) {
             await fetch(`/api/products/${params.productId}`, {
                method: 'PATCH',
-               body: JSON.stringify(data),
+               body: JSON.stringify(payload),
                cache: 'no-store',
             })
          } else {
             await fetch(`/api/products`, {
                method: 'POST',
-               body: JSON.stringify(data),
+               body: JSON.stringify(payload),
                cache: 'no-store',
             })
          }
-
          router.refresh()
          router.push(`/products`)
          toast.success(toastMessage)
       } catch (error: any) {
-         toast.error('Something went wrong.')
+         toast.error('Bir hata oluştu.')
       } finally {
          setLoading(false)
       }
@@ -262,32 +276,67 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         </FormItem>
                      )}
                   />
+                  {/* Product Type */}
+                  <FormField
+                     control={form.control}
+                     name="productType"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Ürün Tipi</FormLabel>
+                           <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                              <FormControl>
+                                 <SelectTrigger>
+                                    <SelectValue placeholder="Ürün tipi seçin" />
+                                 </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                 <SelectItem value="READY">HAZIR — Standart Ürün</SelectItem>
+                                 <SelectItem value="CUSTOM">KİŞİYE ÖZEL — Özelleştirilebilir</SelectItem>
+                              </SelectContent>
+                           </Select>
+                           <FormMessage />
+                        </FormItem>
+                     )}
+                  />
+
+                  {/* Custom Options JSON Editor (Shown only if productType is CUSTOM) */}
+                  {form.watch('productType') === 'CUSTOM' && (
+                     <div className="col-span-1 md:col-span-3">
+                        <FormField
+                           control={form.control}
+                           name="customOptions"
+                           render={({ field }) => (
+                              <FormItem>
+                                 <FormControl>
+                                    <CustomOptionsEditor
+                                       disabled={loading}
+                                       value={field.value || ''}
+                                       onChange={field.onChange}
+                                    />
+                                 </FormControl>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
+                     </div>
+                  )}
+
+                  {/* Category */}
                   <FormField
                      control={form.control}
                      name="categoryId"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>Category</FormLabel>
-                           <Select
-                              disabled={loading}
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              defaultValue={field.value}
-                           >
+                           <FormLabel>Kategori</FormLabel>
+                           <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                               <FormControl>
                                  <SelectTrigger>
-                                    <SelectValue
-                                       defaultValue={field.value}
-                                       placeholder="Select a category"
-                                    />
+                                    <SelectValue defaultValue={field.value} placeholder="Kategori seçin" />
                                  </SelectTrigger>
                               </FormControl>
                               <SelectContent>
                                  {categories.map((category) => (
-                                    <SelectItem
-                                       key={category.id}
-                                       value={category.id}
-                                    >
+                                    <SelectItem key={category.id} value={category.id}>
                                        {category.title}
                                     </SelectItem>
                                  ))}
@@ -297,42 +346,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         </FormItem>
                      )}
                   />
+
+                  {/* isFeatured */}
                   <FormField
                      control={form.control}
                      name="isFeatured"
                      render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                            <FormControl>
-                              <Checkbox
-                                 checked={field.value}
-                                 onCheckedChange={field.onChange}
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                            </FormControl>
                            <div className="space-y-1 leading-none">
-                              <FormLabel>Featured</FormLabel>
-                              <FormDescription>
-                                 This product will appear on the home page
-                              </FormDescription>
+                              <FormLabel>Öne Çıkan</FormLabel>
+                              <FormDescription>Ana sayfada göster.</FormDescription>
                            </div>
                         </FormItem>
                      )}
                   />
+
+                  {/* isAvailable */}
                   <FormField
                      control={form.control}
                      name="isAvailable"
                      render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                            <FormControl>
-                              <Checkbox
-                                 checked={field.value}
-                                 onCheckedChange={field.onChange}
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                            </FormControl>
                            <div className="space-y-1 leading-none">
-                              <FormLabel>Available</FormLabel>
-                              <FormDescription>
-                                 This product will appear in the store.
-                              </FormDescription>
+                              <FormLabel>Satışta</FormLabel>
+                              <FormDescription>Mağazada görüntülensin.</FormDescription>
                            </div>
                         </FormItem>
                      )}

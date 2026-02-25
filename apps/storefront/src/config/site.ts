@@ -1,14 +1,14 @@
 const config = {
-   name: 'Store',
-   handle: '@sesto_dev',
-   url: 'https://pasargad.vercel.app',
+   name: 'xForgea3D',
+   handle: '@xforgea3d',
+   url: 'https://xforgea3d.com',
    ogImage:
-      'https://og-image.vercel.app/Store.png?theme=light&md=1&fontSize=100px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fvercel-triangle-black.svg',
+      'https://og-image.vercel.app/xForgea3D.png?theme=dark&md=1&fontSize=100px',
    description:
-      'Beautifully designed E-Commerce store built with Radix UI and Tailwind CSS.',
+      "Türkiye'nin premium 3D baskı markası. Yüksek kaliteli figürler, heykeller, dekoratif ürünler ve kişiye özel tasarımlar.",
    links: {
-      twitter: 'https://twitter.com/sesto_dev',
-      github: 'https://github.com/sesto-dev',
+      instagram: 'https://instagram.com/xforgea3d',
+      twitter: 'https://twitter.com/xforgea3d',
    },
 }
 

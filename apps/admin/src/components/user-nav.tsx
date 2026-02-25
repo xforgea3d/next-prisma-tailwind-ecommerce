@@ -36,23 +36,23 @@ export function UserNav() {
             <DropdownMenuGroup>
                <DropdownMenuItem>
                   <User className="mr-2 h-4" />
-                  <span>Profile</span>
+                  <span>Profil</span>
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                </DropdownMenuItem>
                <DropdownMenuItem>
                   <CreditCard className="mr-2 h-4" />
-                  <span>Billing</span>
+                  <span>Fatura</span>
                   <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                </DropdownMenuItem>
                <DropdownMenuItem>
                   <PlusCircle className="mr-2 h-4" />
-                  <span>New Team</span>
+                  <span>Yeni Takım</span>
                </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
                <LogOut className="mr-2 h-4" />
-               <span>Log out</span>
+               <span>Çıkış Yap</span>
                <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
             </DropdownMenuItem>
          </DropdownMenuContent>

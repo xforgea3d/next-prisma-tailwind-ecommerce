@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
@@ -13,43 +14,63 @@ export function MainNav({
    const routes = [
       {
          href: `/banners`,
-         label: 'Banners',
+         label: 'Bannerlar',
          active: pathname.includes(`/banners`),
       },
       {
          href: `/categories`,
-         label: 'Categories',
+         label: 'Kategoriler',
          active: pathname.includes(`/categories`),
       },
       {
          href: `/products`,
-         label: 'Products',
+         label: 'Ürünler',
          active: pathname.includes(`/products`),
       },
       {
          href: `/orders`,
-         label: 'Orders',
+         label: 'Siparişler',
          active: pathname.includes(`/orders`),
       },
       {
          href: `/payments`,
-         label: 'Payments',
+         label: 'Ödemeler',
          active: pathname.includes(`/payments`),
       },
       {
          href: `/users`,
-         label: 'Users',
+         label: 'Kullanıcılar',
          active: pathname.includes(`/users`),
       },
       {
          href: `/brands`,
-         label: 'Brands',
+         label: 'Koleksiyonlar',
          active: pathname.includes(`/brands`),
       },
       {
          href: `/codes`,
-         label: 'Codes',
+         label: 'Kodlar',
          active: pathname.includes(`/codes`),
+      },
+      {
+         href: `/settings/site`,
+         label: 'Site Ayarları',
+         active: pathname.includes(`/settings`),
+      },
+      {
+         href: `/content/pages`,
+         label: 'Sayfalar',
+         active: pathname.startsWith(`/content/pages`),
+      },
+      {
+         href: `/content/sections`,
+         label: 'Ana Sayfa',
+         active: pathname.startsWith(`/content/sections`),
+      },
+      {
+         href: `/content/blog`,
+         label: 'Blog',
+         active: pathname.startsWith(`/content/blog`),
       },
    ]
 
@@ -58,6 +79,17 @@ export function MainNav({
          className={cn('flex items-center space-x-4 lg:space-x-6', className)}
          {...props}
       >
+         <Link href="/" className="flex items-center gap-2 mr-2 flex-shrink-0">
+            <Image
+               src="/logo.png"
+               alt="xForgea3D"
+               width={28}
+               height={28}
+               className="object-contain"
+               priority
+            />
+            <span className="font-bold text-sm hidden lg:block">xForgea3D</span>
+         </Link>
          {routes.map((route) => (
             <Link
                key={route.href}

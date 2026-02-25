@@ -36,13 +36,13 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
+                  Veya şunununla devam et
                </span>
             </div>
          </div>
          <Button disabled={true} type="button">
             <MailIcon className="mr-2 h-4" />
-            Email Only (Supabase)
+            Sadece E-posta (Supabase)
          </Button>
       </div>
    )
@@ -102,7 +102,7 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
                className="text-sm font-light text-foreground/60"
                htmlFor="email"
             >
-               Email
+               E-posta
             </Label>
             <Input
                id="email"
@@ -121,7 +121,7 @@ function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
             disabled={isLoading || !isEmailValid(email)}
          >
             {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
-            Send Magic Link / OTP
+            Doğrulama Kodu Gönder
          </Button>
       </>
    )
@@ -182,7 +182,7 @@ function VerifyComponents({ isLoading, setIsLoading }) {
                className="text-sm font-light text-foreground/60"
                htmlFor="OTP"
             >
-               One-Time Password
+               Tek Kullanımlık Şifre
             </Label>
             <Input
                placeholder="123456"
@@ -193,7 +193,7 @@ function VerifyComponents({ isLoading, setIsLoading }) {
          </div>
          <Button onClick={onVerifyOTP} disabled={isLoading}>
             {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
-            Submit
+            Doğrula
          </Button>
       </>
    )

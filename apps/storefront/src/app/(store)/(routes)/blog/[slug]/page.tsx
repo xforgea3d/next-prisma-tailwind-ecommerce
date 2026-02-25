@@ -1,85 +1,62 @@
-import MDXComponents from '@/components/native/mdx/MDXComponents'
-import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
-import { format, parseISO } from 'date-fns'
-import { MDXRemote } from 'next-mdx-remote'
-import { serialize } from 'next-mdx-remote/serialize'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { format } from 'date-fns'
+import { tr } from 'date-fns/locale'
 
-export default async function Blog({ params }: { params: { slug: string } }) {
-   const blog = await prisma.blog.findUnique({
-      where: {
-         slug: params.slug,
-      },
-      include: { author: true },
-   })
-
-   const recommendations = await prisma.blog.findMany({
-      include: { author: true },
-      take: 3,
-   })
-
-   const mdx = await serialize(blog.content)
-
-   return (
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-         <Content blog={blog} mdx={mdx} />
-         <Recomendations recommendations={recommendations} />
-      </div>
-   )
+interface Props {
+   params: { slug: string }
 }
 
-function Content({ blog, mdx }) {
-   const { title, updatedAt } = blog
-
-   return (
-      <div className="rounded-lg bg-white p-6 text-justify text-neutral-900 dark:bg-neutral-800 dark:text-neutral-200 md:col-span-3">
-         <h1 className="mb-1 text-3xl font-medium">{title}</h1>
-         <p className="mt-2 text-sm font-medium text-neutral-400">
-            Last Updated @Date
-         </p>
-         <Separator />
-         <MDXRemote lazy {...mdx} components={MDXComponents} />
-      </div>
-   )
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+   const post = await prisma.blogPost.findUnique({
+      where: { slug: params.slug, status: 'published' },
+   })
+   if (!post) return {}
+   return {
+      title: post.seo_title_tr ?? post.title_tr,
+      description: post.seo_description_tr ?? post.excerpt_tr ?? undefined,
+      openGraph: post.cover_image_url ? { images: [post.cover_image_url] } : undefined,
+   }
 }
 
-function Recomendations({ recommendations }) {
-   return (
-      <div className="col-span-1">
-         {recommendations.map((rec) => {
-            const { slug, author, createdAt, updatedAt, title, image } = rec
+export default async function BlogPostPage({ params }: Props) {
+   const post = await prisma.blogPost.findUnique({
+      where: { slug: params.slug, status: 'published' },
+   })
+   if (!post) notFound()
 
-            return (
-               <div key={rec} className="mb-4 w-full">
-                  <Link href={`/blog/${slug}`}>
-                     <div className="w-full rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
-                        <div className="relative h-40 w-full">
-                           <Image
-                              className="rounded-t-lg"
-                              src={image}
-                              alt="Blog Post Cover"
-                              fill
-                              sizes="(min-width: 1000px) 30vw, 50vw"
-                              style={{ objectFit: 'cover' }}
-                           />
-                        </div>
-                        <div className="p-5">
-                           <div className="w-full">
-                              <h5 className="mb-3 text-justify font-medium tracking-tight text-neutral-900 dark:text-white">
-                                 {title}
-                              </h5>
-                              <p className="block text-sm text-neutral-700 dark:text-neutral-400">
-                                 <span>{author?.name}, Date</span>
-                              </p>
-                           </div>
-                        </div>
-                     </div>
-                  </Link>
-               </div>
-            )
-         })}
-      </div>
+   return (
+      <article className="max-w-3xl mx-auto px-4 py-12">
+         {post.cover_image_url && (
+            <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-8">
+               <Image src={post.cover_image_url} alt={post.title_tr} fill className="object-cover" />
+            </div>
+         )}
+         <div className="flex flex-wrap gap-2 mb-4">
+            {post.tags.map(tag => (
+               <span key={tag} className="text-xs px-2 py-1 rounded-full border text-muted-foreground">
+                  {tag}
+               </span>
+            ))}
+         </div>
+         <h1 className="text-3xl font-bold tracking-tight mb-3">{post.title_tr}</h1>
+         {post.published_at && (
+            <p className="text-sm text-muted-foreground mb-8">
+               {format(new Date(post.published_at), 'd MMMM yyyy', { locale: tr })}
+            </p>
+         )}
+         <div
+            className="prose prose-neutral dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: post.body_html_tr ?? '' }}
+         />
+         <div className="mt-12 pt-6 border-t">
+            <Link href="/blog" className="text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground">
+               ← Blog'a Dön
+            </Link>
+         </div>
+      </article>
    )
 }

@@ -1,3 +1,5 @@
+export const revalidate = 60
+
 import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
@@ -12,44 +14,38 @@ import {
 } from './components/options'
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? null
+   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? {}
 
    const orderBy = getOrderBy(sort)
 
-   const brands = await prisma.brand.findMany()
-   const categories = await prisma.category.findMany()
-   const products = await prisma.product.findMany({
-      where: {
-         isAvailable: isAvailable == 'true' || sort ? true : undefined,
-         brand: {
-            title: {
-               contains: brand,
-               mode: 'insensitive',
-            },
-         },
-         categories: {
-            some: {
-               title: {
-                  contains: category,
-                  mode: 'insensitive',
-               },
-            },
-         },
-      },
-      orderBy,
-      skip: (page - 1) * 12,
-      take: 12,
-      include: {
-         brand: true,
-         categories: true,
-      },
-   })
+   const whereClause = {
+      isAvailable: isAvailable === 'true' || sort ? true : undefined,
+      brand: brand
+         ? { title: { contains: brand, mode: 'insensitive' as const } }
+         : undefined,
+      categories: category
+         ? { some: { title: { contains: category, mode: 'insensitive' as const } } }
+         : undefined,
+   }
+
+   // Fetch all three in parallel
+   const [brands, categories, products] = await Promise.all([
+      prisma.brand.findMany({ orderBy: { title: 'asc' } }),
+      prisma.category.findMany({ orderBy: { title: 'asc' } }),
+      prisma.product.findMany({
+         where: whereClause,
+         orderBy,
+         skip: (Number(page) - 1) * 12,
+         take: 12,
+         include: { brand: true, categories: true },
+      }),
+   ])
 
    return (
       <>
          <Heading
-            title="Products"
-            description="Below is a list of products you have in your cart."
+            title="Ürünler"
+            description="Tüm 3D baskı ürünlerimize göz atın."
          />
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
             <SortBy initialData={sort} />

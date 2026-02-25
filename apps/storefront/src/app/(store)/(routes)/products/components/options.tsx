@@ -54,9 +54,7 @@ export function SortBy({ initialData }) {
                setValue(currentValue)
             }
 
-            // cast to string
             const search = current.toString()
-            // or const query = `${'?'.repeat(search.length && 1)}${search}`;
             const query = search ? `?${search}` : ''
 
             router.replace(`${pathname}${query}`, {
@@ -64,13 +62,13 @@ export function SortBy({ initialData }) {
             })
          }}
       >
-         <SelectTrigger className="w-full">
-            <SelectValue placeholder="Sort By" />
+         <SelectTrigger className="w-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm">
+            <SelectValue placeholder="Sırala..." />
          </SelectTrigger>
          <SelectContent>
-            <SelectItem value="featured">Featured</SelectItem>
-            <SelectItem value="most_expensive">Most Expensive</SelectItem>
-            <SelectItem value="least_expensive">Least Expensive</SelectItem>
+            <SelectItem value="featured">Öne Çıkanlar</SelectItem>
+            <SelectItem value="least_expensive">Artan Fiyat</SelectItem>
+            <SelectItem value="most_expensive">Azalan Fiyat</SelectItem>
          </SelectContent>
       </Select>
    )
@@ -101,20 +99,21 @@ export function CategoriesCombobox({ categories, initialCategory }) {
                variant="outline"
                role="combobox"
                aria-expanded={open}
-               className="w-full justify-between"
+               className="w-full justify-between hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm"
             >
-               {value ? getCategoryTitle() : 'Select category...'}
+               {value ? getCategoryTitle() : 'Kategori Seç...'}
                <ChevronsUpDown className="ml-2 h-4 shrink-0 opacity-50" />
             </Button>
          </PopoverTrigger>
          <PopoverContent className="w-full p-0">
             <Command>
-               <CommandInput placeholder="Search category..." />
-               <CommandEmpty>No category found.</CommandEmpty>
+               <CommandInput placeholder="Kategori ara..." />
+               <CommandEmpty>Kategori bulunamadı.</CommandEmpty>
                <CommandGroup>
                   {categories.map((category) => (
                      <CommandItem
                         key={category.title}
+                        value={category.title}
                         onSelect={(currentValue) => {
                            const current = new URLSearchParams(
                               Array.from(searchParams.entries())
@@ -128,9 +127,7 @@ export function CategoriesCombobox({ categories, initialCategory }) {
                               setValue(currentValue)
                            }
 
-                           // cast to string
                            const search = current.toString()
-                           // or const query = `${'?'.repeat(search.length && 1)}${search}`;
                            const query = search ? `?${search}` : ''
 
                            router.replace(`${pathname}${query}`, {
@@ -139,10 +136,11 @@ export function CategoriesCombobox({ categories, initialCategory }) {
 
                            setOpen(false)
                         }}
+                        className="cursor-pointer py-2"
                      >
                         <Check
                            className={cn(
-                              'mr-2 h-4 w-4',
+                              'mr-2 h-4 w-4 text-emerald-500',
                               value === category.title
                                  ? 'opacity-100'
                                  : 'opacity-0'
@@ -183,20 +181,21 @@ export function BrandCombobox({ brands, initialBrand }) {
                variant="outline"
                role="combobox"
                aria-expanded={open}
-               className="w-full justify-between"
+               className="w-full justify-between hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm"
             >
-               {value ? getBrandTitle() : 'Select brand...'}
+               {value ? getBrandTitle() : 'Marka Seç...'}
                <ChevronsUpDown className="ml-2 h-4 shrink-0 opacity-50" />
             </Button>
          </PopoverTrigger>
          <PopoverContent className="w-full p-0">
             <Command>
-               <CommandInput placeholder="Search brand..." />
-               <CommandEmpty>No brand found.</CommandEmpty>
+               <CommandInput placeholder="Marka ara..." />
+               <CommandEmpty>Marka bulunamadı.</CommandEmpty>
                <CommandGroup>
                   {brands.map((brand) => (
                      <CommandItem
                         key={brand.title}
+                        value={brand.title}
                         onSelect={(currentValue) => {
                            const current = new URLSearchParams(
                               Array.from(searchParams.entries())
@@ -210,9 +209,7 @@ export function BrandCombobox({ brands, initialBrand }) {
                               setValue(currentValue)
                            }
 
-                           // cast to string
                            const search = current.toString()
-                           // or const query = `${'?'.repeat(search.length && 1)}${search}`;
                            const query = search ? `?${search}` : ''
 
                            router.replace(`${pathname}${query}`, {
@@ -221,10 +218,11 @@ export function BrandCombobox({ brands, initialBrand }) {
 
                            setOpen(false)
                         }}
+                        className="cursor-pointer py-2"
                      >
                         <Check
                            className={cn(
-                              'mr-2 h-4',
+                              'mr-2 h-4 w-4 text-emerald-500',
                               value === brand.title
                                  ? 'opacity-100'
                                  : 'opacity-0'
@@ -251,34 +249,30 @@ export function AvailableToggle({ initialData }) {
    }, [initialData])
 
    return (
-      <div className="flex w-full border rounded-md items-center space-x-2">
-         <div className="mx-auto flex gap-2 items-center">
-            <Switch
-               checked={value}
-               onCheckedChange={(currentValue: boolean) => {
-                  const current = new URLSearchParams(
-                     Array.from(searchParams.entries())
-                  )
+      <div className="flex w-full border rounded-md h-10 px-3 items-center justify-between hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm">
+         <Label htmlFor="available" className="text-sm font-medium cursor-pointer">Sadece Mevcut</Label>
+         <Switch
+            checked={value}
+            onCheckedChange={(currentValue: boolean) => {
+               const current = new URLSearchParams(
+                  Array.from(searchParams.entries())
+               )
 
-                  current.set(
-                     'isAvailable',
-                     currentValue == true ? 'true' : 'false'
-                  )
-                  setValue(currentValue)
+               current.set(
+                  'isAvailable',
+                  currentValue == true ? 'true' : 'false'
+               )
+               setValue(currentValue)
 
-                  // cast to string
-                  const search = current.toString()
-                  // or const query = `${'?'.repeat(search.length && 1)}${search}`;
-                  const query = search ? `?${search}` : ''
+               const search = current.toString()
+               const query = search ? `?${search}` : ''
 
-                  router.replace(`${pathname}${query}`, {
-                     scroll: false,
-                  })
-               }}
-               id="available"
-            />
-            <Label htmlFor="available">Only Available</Label>
-         </div>
+               router.replace(`${pathname}${query}`, {
+                  scroll: false,
+               })
+            }}
+            id="available"
+         />
       </div>
    )
 }

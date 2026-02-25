@@ -34,26 +34,29 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
          const file = event.target.files?.[0]
          if (!file) return
 
-         const fileExt = file.name.split('.').pop()
-         const fileName = `${uuidv4()}.${fileExt}`
-         const filePath = `uploads/${fileName}`
+         const formData = new FormData()
+         formData.append('file', file)
 
-         const { error: uploadError, data } = await supabase.storage
-            .from('ecommerce')
-            .upload(filePath, file)
+         const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+         })
 
-         if (uploadError) {
-            throw uploadError
+         if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Failed to upload image')
          }
 
-         const { data: { publicUrl } } = supabase.storage
-            .from('ecommerce')
-            .getPublicUrl(filePath)
+         const data = await response.json()
+         if (data.url) {
+            onChange(data.url)
+         } else {
+            throw new Error('No URL returned from upload API')
+         }
 
-         onChange(publicUrl)
       } catch (error) {
          console.error('Error uploading image:', error)
-         alert('Failed to upload image. Make sure the "ecommerce" bucket exists and is public.')
+         alert('Failed to upload image. Server error.')
       } finally {
          setIsUploading(false)
          if (inputRef.current) {

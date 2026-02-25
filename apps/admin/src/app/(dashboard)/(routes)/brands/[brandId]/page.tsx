@@ -1,3 +1,4 @@
+export const revalidate = 30
 import prisma from '@/lib/prisma'
 
 import { BrandForm } from './components/brand-form'

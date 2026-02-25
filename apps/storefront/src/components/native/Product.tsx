@@ -1,26 +1,20 @@
 import { ImageSkeleton } from '@/components/native/icons'
-import { Badge } from '@/components/ui/badge'
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardFooter,
-   CardHeader,
-   CardTitle,
-} from '@/components/ui/card'
 import { ProductWithIncludes } from '@/types/prisma'
 import Image from 'next/image'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 export const ProductGrid = ({
    products,
+   priority = false,
 }: {
    products: ProductWithIncludes[]
+   priority?: boolean
 }) => {
    return (
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-         {products.map((product) => (
-            <Product product={product} key={product.id} />
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+         {products.map((product, i) => (
+            <Product product={product} key={product.id} priority={priority || i < 4} />
          ))}
       </div>
    )
@@ -28,90 +22,108 @@ export const ProductGrid = ({
 
 export const ProductSkeletonGrid = () => {
    return (
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-         {[...Array(12)].map(() => (
-            <ProductSkeleton key={Math.random()} />
+      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+         {[...Array(8)].map((_, i) => (
+            <ProductSkeleton key={i} />
          ))}
       </div>
    )
 }
 
-export const Product = ({ product }: { product: ProductWithIncludes }) => {
-   function Price() {
-      if (product?.discount > 0) {
-         const price = product?.price - product?.discount
-         const percentage = (product?.discount / product?.price) * 100
-         return (
-            <div className="flex gap-2 items-center">
-               <Badge className="flex gap-4" variant="destructive">
-                  <div className="line-through">${product?.price}</div>
-                  <div>%{percentage.toFixed(2)}</div>
-               </Badge>
-               <h2 className="">${price.toFixed(2)}</h2>
-            </div>
-         )
-      }
-
-      return <h2>${product?.price}</h2>
-   }
+export const Product = ({
+   product,
+   priority = false,
+}: {
+   product: ProductWithIncludes
+   priority?: boolean
+}) => {
+   const hasDiscount = product?.discount > 0
+   const displayPrice = hasDiscount ? product.price - product.discount : product.price
+   const discountPct = hasDiscount
+      ? Math.round((product.discount / product.price) * 100)
+      : 0
 
    return (
-      <Link className="" href={`/products/${product.id}`}>
-         <Card className="h-full">
-            <CardHeader className="p-0">
-               <div className="relative h-60 w-full">
+      <Link href={`/products/${product.id}`} className="group block">
+         <div className={cn(
+            "relative overflow-hidden rounded-xl border bg-card transition-all duration-300",
+            "hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-1",
+            "dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.05)]"
+         )}>
+            {/* Image container */}
+            <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+               {product?.images?.[0] ? (
                   <Image
-                     className="rounded-t-lg"
-                     src={product?.images[0]}
-                     alt="product image"
+                     className="object-cover transition-transform duration-500 group-hover:scale-105"
+                     src={product.images[0]}
+                     alt={product.title}
                      fill
-                     sizes="(min-width: 1000px) 30vw, 50vw"
-                     style={{ objectFit: 'cover' }}
+                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                     priority={priority}
                   />
-               </div>
-            </CardHeader>
-            <CardContent className="grid gap-1 p-4">
-               <Badge variant="outline" className="w-min text-neutral-500">
-                  {product?.categories[0]?.title}
-               </Badge>
-
-               <h2 className="mt-2">{product.title}</h2>
-               <p className="text-xs text-neutral-500 text-justify">
-                  {product.description}
-               </p>
-            </CardContent>
-            <CardFooter>
-               {product?.isAvailable ? (
-                  <Price />
                ) : (
-                  <Badge variant="secondary">Out of stock</Badge>
+                  <div className="flex h-full w-full items-center justify-center">
+                     <ImageSkeleton />
+                  </div>
                )}
-            </CardFooter>
-         </Card>
+
+               {/* Discount badge overlay */}
+               {hasDiscount && (
+                  <div className="absolute top-2 left-2">
+                     <span className="inline-flex items-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+                        -{discountPct}%
+                     </span>
+                  </div>
+               )}
+
+               {/* Out of stock overlay */}
+               {!product?.isAvailable && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+                     <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-neutral-800 shadow">
+                        Tükendi
+                     </span>
+                  </div>
+               )}
+            </div>
+
+            {/* Card body */}
+            <div className="p-4 space-y-2">
+               {product?.categories?.[0]?.title && (
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                     {product.categories[0].title}
+                  </p>
+               )}
+
+               <h3 className="font-semibold text-sm leading-snug line-clamp-2 group-hover:text-foreground transition-colors">
+                  {product.title}
+               </h3>
+
+               <div className="flex items-baseline gap-2 pt-1">
+                  <span className="text-lg font-bold tracking-tight">
+                     {displayPrice.toFixed(2)} ₺
+                  </span>
+                  {hasDiscount && (
+                     <span className="text-sm text-muted-foreground line-through">
+                        {product.price.toFixed(2)} ₺
+                     </span>
+                  )}
+               </div>
+            </div>
+         </div>
       </Link>
    )
 }
 
 export function ProductSkeleton() {
    return (
-      <Link href="#">
-         <div className="animate-pulse rounded-lg border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
-            <div className="relative h-full w-full">
-               <div className="flex h-40 w-full items-center justify-center rounded bg-neutral-300 dark:bg-neutral-700 ">
-                  <ImageSkeleton />
-               </div>
-            </div>
-            <div className="p-5">
-               <div className="w-full">
-                  <div className="mb-4 h-2.5 w-48 rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="mb-2.5 h-2 max-w-[480px] rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="mb-2.5 h-2 rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="mb-2.5 h-2 max-w-[440px] rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="mb-2.5 h-2 max-w-[460px] rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-                  <div className="h-2 max-w-[360px] rounded-full bg-neutral-200 dark:bg-neutral-700"></div>
-               </div>
-            </div>
+      <div className="animate-pulse rounded-xl border bg-card overflow-hidden">
+         <div className="h-56 sm:h-64 w-full bg-neutral-200 dark:bg-neutral-700" />
+         <div className="p-4 space-y-3">
+            <div className="h-2 w-16 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-3 w-full rounded-full bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-3 w-3/4 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-5 w-20 rounded-full bg-neutral-200 dark:bg-neutral-700 mt-2" />
          </div>
-      </Link>
+      </div>
    )
 }

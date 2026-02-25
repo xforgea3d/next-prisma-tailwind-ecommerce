@@ -1,9 +1,10 @@
 'use client'
 
 import { CommandMenu } from '@/components/composites/command'
-import { MobileNav } from '@/components/native//nav/mobile'
-import { UserNav } from '@/components/native//nav/user'
+import { MobileNav } from '@/components/native/nav/mobile'
+import { UserNav } from '@/components/native/nav/user'
 import { MainNav } from '@/components/native/nav/desktop'
+import { CartNav } from '@/components/native/nav/cart-nav'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { LogInIcon, MoonIcon, ShoppingBasketIcon, SunIcon } from 'lucide-react'
@@ -31,24 +32,16 @@ export default function Header() {
    )
 }
 
-export function CartNav() {
-   return (
-      <Link href="/cart">
-         <Button size="icon" variant="outline" className="h-9">
-            <ShoppingBasketIcon className="h-4" />
-         </Button>
-      </Link>
-   )
-}
+
 
 function LoginDialog() {
    return (
-      <Link href="/login">
-         <Button className="font-medium flex gap-2">
+      <Button className="font-medium flex gap-2" asChild>
+         <Link href="/login">
             <LogInIcon className="h-4" />
-            <p>Login</p>
-         </Button>
-      </Link>
+            <p>Giriş Yap</p>
+         </Link>
+      </Button>
    )
 }
 

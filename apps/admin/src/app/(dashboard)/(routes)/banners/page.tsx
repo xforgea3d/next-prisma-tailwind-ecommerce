@@ -1,3 +1,4 @@
+export const revalidate = 30
 import { format } from 'date-fns'
 
 import prisma from '@/lib/prisma'

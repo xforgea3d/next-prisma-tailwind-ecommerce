@@ -49,45 +49,45 @@ export function UserNav() {
          </DropdownMenuTrigger>
          <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuGroup>
-               <Link href="/profile/addresses">
-                  <DropdownMenuItem className="flex gap-2">
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/profile/addresses">
                      <MapPinIcon className="h-4" />
-                     Edit Addresses
-                  </DropdownMenuItem>
-               </Link>
-               <Link href="/profile/edit">
-                  <DropdownMenuItem className="flex gap-2">
+                     Adreslerim
+                  </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/profile/edit">
                      <UserIcon className="h-4" />
-                     Edit Profile
-                  </DropdownMenuItem>
-               </Link>
-               <Link href="/profile/orders">
-                  <DropdownMenuItem className="flex gap-2">
+                     Profilim
+                  </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/profile/orders">
                      <ListOrderedIcon className="h-4" />
-                     Orders
-                  </DropdownMenuItem>
-               </Link>
-               <Link href="/profile/payments">
-                  <DropdownMenuItem className="flex gap-2">
+                     Siparişlerim
+                  </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/profile/payments">
                      <CreditCardIcon className="h-4" />
-                     Payments
-                  </DropdownMenuItem>
-               </Link>
+                     Ödemelerim
+                  </Link>
+               </DropdownMenuItem>
                <DropdownMenuSeparator />
-               <Link href="/cart">
-                  <DropdownMenuItem className="flex gap-2">
-                     <ShoppingBasketIcon className="h-4" /> Cart
-                  </DropdownMenuItem>
-               </Link>
-               <Link href="/wishlist">
-                  <DropdownMenuItem className="flex gap-2">
-                     <HeartIcon className="h-4" /> Wishlist
-                  </DropdownMenuItem>
-               </Link>
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/cart">
+                     <ShoppingBasketIcon className="h-4" /> Sepet
+                  </Link>
+               </DropdownMenuItem>
+               <DropdownMenuItem className="flex gap-2" asChild>
+                  <Link href="/wishlist">
+                     <HeartIcon className="h-4" /> Favoriler
+                  </Link>
+               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex gap-2" onClick={onLogout}>
-               <LogOutIcon className="h-4" /> Logout
+               <LogOutIcon className="h-4" /> Çıkış Yap
             </DropdownMenuItem>
          </DropdownMenuContent>
       </DropdownMenu>

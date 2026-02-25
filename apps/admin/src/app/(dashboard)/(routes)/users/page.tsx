@@ -1,3 +1,4 @@
+export const revalidate = 30
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
 import prisma from '@/lib/prisma'

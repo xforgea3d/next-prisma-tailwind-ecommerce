@@ -1,7 +1,14 @@
+export const revalidate = 60
+
 import Carousel from '@/components/native/Carousel'
+import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
-import { ChevronRightIcon } from 'lucide-react'
+import {
+   ChevronRightIcon,
+   Layers3Icon,
+   SparklesIcon,
+} from 'lucide-react'
 import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 
@@ -32,39 +39,99 @@ export async function generateMetadata(
    }
 }
 
+export async function generateStaticParams() {
+   // Pre-render the top 20 most popular product pages at build time
+   const products = await prisma.product.findMany({
+      where: { isAvailable: true },
+      select: { id: true },
+      take: 20,
+      orderBy: { orders: { _count: 'desc' } },
+   })
+   return products.map((p) => ({ productId: p.id }))
+}
+
 export default async function Product({
    params,
 }: {
    params: { productId: string }
 }) {
-   const product = await prisma.product.findUnique({
-      where: {
-         id: params.productId,
-      },
-      include: {
-         brand: true,
-         categories: true,
-      },
-   })
+   // Fetch product and related products in PARALLEL
+   const [product, relatedProducts] = await Promise.all([
+      prisma.product.findUnique({
+         where: { id: params.productId },
+         include: { brand: true, categories: true },
+      }),
+      prisma.product.findMany({
+         where: {
+            isAvailable: true,
+            NOT: { id: params.productId },
+         },
+         include: { brand: true, categories: true },
+         take: 4,
+         orderBy: { createdAt: 'desc' },
+      }),
+   ])
 
-   if (isVariableValid(product)) {
-      return (
-         <>
-            <Breadcrumbs product={product} />
-            <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
-               <ImageColumn product={product} />
+   if (!isVariableValid(product)) return null
+
+   // Filter related to same category after both queries resolve
+   const sameCategory = relatedProducts.filter((p) =>
+      p.categories.some((c) =>
+         product.categories.some((pc) => pc.id === c.id)
+      )
+   )
+   const finalRelated = sameCategory.length > 0 ? sameCategory : relatedProducts.slice(0, 4)
+
+
+   return (
+      <div className="space-y-10">
+
+         {/* Breadcrumbs */}
+         <Breadcrumbs product={product} />
+
+         {/* Main product area — image gallery + data panel */}
+         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            {/* Image Gallery — takes 6 cols on large */}
+            <div className="lg:col-span-6 w-full">
+               <div className="sticky top-20 rounded-xl overflow-hidden border bg-neutral-100 dark:bg-neutral-900 min-h-[60vh]">
+                  <Carousel images={product?.images} />
+               </div>
+            </div>
+
+            {/* Data Panel — takes 6 cols on large */}
+            <div className="lg:col-span-6 w-full">
                <DataSection product={product} />
             </div>
-         </>
-      )
-   }
+         </div>
+
+         <Separator />
+
+         {/* Koleksiyonun Hikayesi — Storytelling block */}
+         <StoryBlock product={product} />
+
+         {/* Related Products */}
+         {finalRelated.length > 0 && (
+            <>
+               <Separator />
+               <RelatedProductsBlock products={finalRelated} />
+            </>
+         )}
+
+      </div>
+   )
 }
 
-const ImageColumn = ({ product }) => {
+import { ProductGrid } from '@/components/native/Product'
+
+const RelatedProductsBlock = ({ products }) => {
    return (
-      <div className="relative min-h-[50vh] w-full col-span-1">
-         <Carousel images={product?.images} />
-      </div>
+      <section className="space-y-6">
+         <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">İlgili Ürünler</h2>
+            <p className="text-sm text-muted-foreground">İlginizi çekebilecek diğer tasarımlarımıza göz atın.</p>
+         </div>
+         <ProductGrid products={products} />
+      </section>
    )
 }
 
@@ -75,26 +142,98 @@ const Breadcrumbs = ({ product }) => {
             <li className="inline-flex items-center">
                <Link
                   href="/"
-                  className="inline-flex items-center text-sm font-medium"
+                  className="inline-flex items-center text-sm font-medium hover:text-foreground transition-colors"
                >
-                  Home
+                  Ana Sayfa
                </Link>
             </li>
             <li>
                <div className="flex items-center gap-2">
                   <ChevronRightIcon className="h-4" />
-                  <Link className="text-sm font-medium" href="/products">
-                     Products
+                  <Link
+                     className="text-sm font-medium hover:text-foreground transition-colors"
+                     href="/products"
+                  >
+                     Ürünler
                   </Link>
                </div>
             </li>
             <li aria-current="page">
                <div className="flex items-center gap-2">
                   <ChevronRightIcon className="h-4" />
-                  <span className="text-sm font-medium">{product?.title}</span>
+                  <span className="text-sm font-medium text-foreground">
+                     {product?.title}
+                  </span>
                </div>
             </li>
          </ol>
       </nav>
+   )
+}
+
+const StoryBlock = ({ product }) => {
+   const collectionName = product?.brand?.title ?? 'xForgea3D'
+
+   return (
+      <section className="rounded-xl border overflow-hidden">
+         {/* Header */}
+         <div className="bg-muted/40 px-8 py-6 border-b flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-foreground/5">
+               <SparklesIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+               <p className="text-xs uppercase tracking-[0.15em] font-semibold text-muted-foreground">
+                  {collectionName} Koleksiyonu
+               </p>
+               <h2 className="text-xl font-bold tracking-tight mt-0.5">
+                  Koleksiyonun Hikayesi
+               </h2>
+            </div>
+         </div>
+
+         {/* Body */}
+         <div className="px-8 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+               <p>
+                  Her xForgea3D ürünü, yalnızca bir nesne değil — bir hikâyenin parçasıdır.{' '}
+                  <span className="font-semibold text-foreground">{product?.title}</span>,{' '}
+                  {collectionName} koleksiyonunun ruhunu taşıyan, özenle tasarlanmış ve
+                  katman katman inşa edilmiş bir eserdir.
+               </p>
+               <p>
+                  Bu koleksiyon; sanatı, teknolojiyi ve kişiselleştirmeyi bir araya getirerek
+                  her parçayı benzersiz kılar. İster bir hediye, ister koleksiyonunuzun
+                  yeni üyesi olsun — bu ürün sizin için üretilmiştir.
+               </p>
+            </div>
+
+            <div className="space-y-4">
+               {[
+                  {
+                     icon: <Layers3Icon className="h-5 w-5 text-muted-foreground" />,
+                     title: 'Katman Katman Üretim',
+                     desc: 'Her detay, endüstriyel 3D yazıcılarımızda 0.1mm hassasiyetle hayata geçiyor.',
+                  },
+                  {
+                     icon: <SparklesIcon className="h-5 w-5 text-muted-foreground" />,
+                     title: 'El İşçiliği Kalitesi',
+                     desc: 'Dijital üretim sonrası her ürün manuel kalite kontrolden geçer; çapaklar temizlenir, yüzeyler işlenir.',
+                  },
+               ].map(({ icon, title, desc }) => (
+                  <div key={title} className="flex items-start gap-4 rounded-lg border p-4">
+                     <div className="flex-shrink-0 p-2 rounded-lg bg-foreground/5">
+                        {icon}
+                     </div>
+                     <div>
+                        <h3 className="text-sm font-semibold">{title}</h3>
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                           {desc}
+                        </p>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
    )
 }

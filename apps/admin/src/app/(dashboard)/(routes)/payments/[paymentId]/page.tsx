@@ -1,3 +1,4 @@
+export const revalidate = 30
 import {
    Accordion,
    AccordionContent,

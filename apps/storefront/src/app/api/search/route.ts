@@ -1,0 +1,40 @@
+import prisma from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url)
+        const query = searchParams.get('q')
+
+        if (!query || query.length < 2) {
+            return NextResponse.json({ products: [] })
+        }
+
+        // Prisma üzerinden sadece isim ve açıklamada arama yapıyoruz (sadece müsait ürünler, maksimum 5 sonuç)
+        const products = await prisma.product.findMany({
+            where: {
+                isAvailable: true,
+                OR: [
+                    { title: { contains: query, mode: 'insensitive' } },
+                    { description: { contains: query, mode: 'insensitive' } }
+                ]
+            },
+            select: {
+                id: true,
+                title: true,
+                price: true,
+                images: true,
+                categories: {
+                    select: { title: true }
+                }
+            },
+            take: 5
+        })
+
+        return NextResponse.json({ products })
+
+    } catch (error) {
+        console.error('[SEARCH_GET]', error)
+        return new NextResponse("Internal Error", { status: 500 })
+    }
+}
