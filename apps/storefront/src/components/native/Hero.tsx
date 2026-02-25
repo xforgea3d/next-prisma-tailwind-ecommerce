@@ -17,27 +17,33 @@ function PrinterAnimation() {
             <div className="absolute w-[200px] h-[200px] bg-amber-400/10 dark:bg-amber-500/10 blur-[60px] rounded-full -translate-x-12 translate-y-12 mix-blend-screen" />
 
             <div className="relative w-full h-full flex items-center justify-center" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(5deg) rotateY(-10deg)' }}>
-                {/* 3D Printer Enclosure */}
-                <div className="relative w-[340px] h-[380px] rounded-3xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100/40 dark:bg-neutral-900/40 backdrop-blur-sm shadow-2xl flex flex-col items-center overflow-hidden">
+                {/* 3D Printer Enclosure (Removed overflow-hidden so the model can pop out) */}
+                <div className="relative w-[340px] h-[380px] rounded-3xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100/40 dark:bg-neutral-900/40 backdrop-blur-sm shadow-2xl flex flex-col items-center transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+                    {/* Inner Background & Glare (Clipped so backgrounds don't bleed out of borders) */}
+                    <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
+                        <div className="absolute inset-0 bg-gradient-to-b from-neutral-200/50 to-neutral-50/50 dark:from-neutral-900/50 dark:to-neutral-950/80 shadow-[inset_0_10px_30px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_10px_30px_rgba(0,0,0,0.5)]" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 dark:from-white/0 dark:via-white/5 dark:to-white/0" style={{ transform: 'translateX(-20%) skewX(-15deg)' }} />
+                    </div>
+
                     {/* Top frame/light bar */}
-                    <div className="w-full h-8 bg-neutral-200 dark:bg-neutral-950 border-b border-neutral-300 dark:border-neutral-800 flex items-center justify-center shadow-inner z-20">
+                    <div className="w-full h-8 bg-neutral-200 dark:bg-neutral-950 border-b border-neutral-300 dark:border-neutral-800 flex items-center justify-center shadow-inner z-20 rounded-t-3xl relative">
                         <div className="w-32 h-1 bg-orange-400/50 rounded-full shadow-[0_0_10px_#f97316]" />
                     </div>
 
                     {/* Internal build chamber */}
-                    <div className="relative flex-1 w-full bg-gradient-to-b from-neutral-200/50 to-neutral-50/50 dark:from-neutral-900/50 dark:to-neutral-950/80 shadow-[inset_0_10px_30px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_10px_30px_rgba(0,0,0,0.5)] flex flex-col items-center justify-end pb-8">
+                    <div className="relative flex-1 w-full flex flex-col items-center justify-end pb-8">
 
                         {/* Z-Axis Rods */}
                         <div className="absolute left-10 top-0 bottom-8 w-2 bg-gradient-to-r from-neutral-300 to-neutral-400 dark:from-neutral-700 dark:to-neutral-600 rounded-full" />
                         <div className="absolute right-10 top-0 bottom-8 w-2 bg-gradient-to-r from-neutral-300 to-neutral-400 dark:from-neutral-700 dark:to-neutral-600 rounded-full" />
 
-                        {/* Print Bed (moves UP then slowly DOWN over 6 seconds) */}
-                        <div className="absolute bottom-8 w-[240px] h-6 bg-neutral-300 dark:bg-neutral-800 rounded-lg shadow-xl border-t border-neutral-200 dark:border-neutral-700 animate-bed-drop z-10 flex justify-center">
-                            {/* The printed object container (Sits on bed, overflow hidden, heights out) */}
-                            <div className="absolute bottom-6 w-32 h-[200px] flex items-end justify-center overflow-hidden animate-model-grow">
-                                {/* The solid object filling the space */}
-                                <div className="w-32 h-[200px] flex-shrink-0 relative">
-                                    <svg viewBox="0 0 100 120" preserveAspectRatio="none" className="w-full h-full drop-shadow-[0_0_15px_rgba(249,115,22,0.6)]">
+                        {/* Print Bed (moves UP then slowly DOWN over cycle) */}
+                        <div className="absolute bottom-8 w-[240px] h-6 bg-neutral-300 dark:bg-neutral-800 rounded-lg shadow-xl border-t border-neutral-200 dark:border-neutral-700 animate-bed-drop z-10 flex justify-center transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+                            {/* The Printed Object Wrapper - Ejects out towards the user */}
+                            <div className="absolute bottom-6 w-32 h-[200px] flex items-end justify-center z-30 animate-model-eject transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+                                {/* Solid object filling the space, layer by layer growth via clip path */}
+                                <div className="w-32 h-[200px] flex-shrink-0 relative animate-model-grow drop-shadow-[0_0_15px_rgba(249,115,22,0.6)]">
+                                    <svg viewBox="0 0 100 120" preserveAspectRatio="none" className="w-full h-full">
                                         {/* Low Poly Vase Base */}
                                         <path d="M20,120 L80,120 L90,60 L70,20 L50,0 L30,20 L10,60 Z" fill="#f97316" />
                                         {/* Details inside */}
@@ -48,7 +54,7 @@ function PrinterAnimation() {
                                         <path d="M50,80 L10,60 L20,120 L50,120 Z" fill="rgba(0,0,0,0.25)" />
                                         <path d="M50,80 L50,120 L80,120 L90,60 Z" fill="rgba(0,0,0,0.1)" />
                                     </svg>
-                                    <div className="absolute inset-x-0 top-0 h-1 bg-white/50 blur-[1px]" />
+                                    <div className="absolute inset-x-0 top-0 h-1 bg-white/60 blur-[1px]" />
                                 </div>
                             </div>
                         </div>
@@ -72,8 +78,6 @@ function PrinterAnimation() {
 
                     </div>
 
-                    {/* Glass glare effect (front panel) */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 dark:from-white/0 dark:via-white/5 dark:to-white/0 pointer-events-none z-30" style={{ transform: 'translateX(-20%) skewX(-15deg)' }} />
                 </div>
             </div>
 
@@ -82,38 +86,61 @@ function PrinterAnimation() {
                 .animate-spin-slow { animation: spin 0.8s linear infinite; }
                 
                 @keyframes head-move {
-                    0% { transform: translate(60px, -50%); }
+                    0%, 5% { transform: translate(140px, -50%); }
                     10% { transform: translate(220px, -50%); }
                     20% { transform: translate(100px, -50%); }
                     30% { transform: translate(240px, -50%); }
                     40% { transform: translate(80px, -50%); }
                     50% { transform: translate(190px, -50%); }
-                    60% { transform: translate(110px, -50%); }
-                    70% { transform: translate(210px, -50%); }
-                    80% { transform: translate(90px, -50%); }
-                    90% { transform: translate(260px, -50%); }
-                    100% { transform: translate(60px, -50%); }
+                    60% { transform: translate(130px, -50%); }
+                    /* Ejection phase (65% to 95%) - Move carriage far right out of the way */
+                    65%, 95% { transform: translate(260px, -50%); }
+                    100% { transform: translate(140px, -50%); }
                 }
-                .animate-print-head {
-                    animation: head-move 6s ease-in-out infinite;
-                }
+                .animate-print-head { animation: head-move 8s ease-in-out infinite; }
 
                 @keyframes bed-drop {
-                    0%, 10% { transform: translateY(-200px); }
-                    90%, 100% { transform: translateY(0); }
+                    0%, 5% { transform: translateY(-200px); }
+                    65%, 85% { transform: translateY(0); }
+                    100% { transform: translateY(-200px); }
                 }
-                .animate-bed-drop {
-                    animation: bed-drop 6s ease-in-out infinite;
-                }
+                .animate-bed-drop { animation: bed-drop 8s ease-in-out infinite; }
 
-                @keyframes grow-model {
-                    0%, 10% { height: 0%; opacity: 0; }
-                    15% { opacity: 1; }
-                    90%, 100% { height: 100%; opacity: 1; }
+                @keyframes model-grow {
+                    0%, 5% { clip-path: inset(100% 0 0 0); }
+                    65%, 85% { clip-path: inset(0% 0 0 0); }
+                    100% { clip-path: inset(100% 0 0 0); }
                 }
-                .animate-model-grow {
-                    animation: grow-model 6s ease-in-out infinite;
+                .animate-model-grow { animation: model-grow 8s ease-in-out infinite; }
+
+                @keyframes filament-glow {
+                    0%, 4% { opacity: 0; }
+                    5%, 63% { opacity: 1; height: 24px; }
+                    64%, 100% { opacity: 0; }
                 }
+                .animate-filament-glow { animation: filament-glow 8s ease-in-out infinite; }
+
+                @keyframes model-eject {
+                    0%, 65% { 
+                        transform: translateZ(0) translateY(0) scale(1) rotateY(0) rotateX(0); 
+                        opacity: 1; 
+                    }
+                    /* Allow brief rest to display finished state */
+                    70% { 
+                        transform: translateZ(0) translateY(0) scale(1) rotateY(0) rotateX(0); 
+                        opacity: 1; 
+                    }
+                    /* Launch model dramatically out of the printer towards user */
+                    85% { 
+                        transform: translateZ(350px) translateY(-20px) translateX(60px) scale(1.6) rotateY(-15deg) rotateX(10deg); 
+                        opacity: 0; 
+                    }
+                    100% { 
+                        transform: translateZ(0) translateY(0) scale(1); 
+                        opacity: 0; 
+                    }
+                }
+                .animate-model-eject { animation: model-eject 8s ease-in-out infinite; }
 
                 @keyframes spin {
                     from { transform: rotate(0deg); }
