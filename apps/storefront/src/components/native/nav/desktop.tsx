@@ -14,28 +14,62 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import { forwardRef } from 'react'
-import { PackageOpenIcon } from 'lucide-react'
+import { PackageOpenIcon, SparklesIcon } from 'lucide-react'
 
-const collections: { title: string; href: string; description: string }[] = [
+// ── Category definitions matching EXACT DB titles ────────────────────────────
+// Nav filter passes the exact category title — products page uses .contains insensitive
+// so 'Figürler' will match DB title 'Figürler' correctly.
+const categories = [
    {
       title: 'Figürler',
-      href: '/products?category=figurler',
-      description: 'Özel tasarım 3D baskı figürler — oyun, anime, fantezi ve daha fazlası.',
+      href: '/products?category=Figürler',
+      description: 'Oyun, anime ve fantezi karakterlerinin detaylı 3D baskı figürleri.',
+      emoji: '🎮',
    },
    {
       title: 'Heykeller',
-      href: '/products?category=heykeller',
-      description: 'Dekoratif ve sanatsal 3D baskı heykeller, her mekâna değer katar.',
+      href: '/products?category=Heykeller',
+      description: 'Antik ve modern sanat eserlerinin 3D baskı replikalları.',
+      emoji: '🏛️',
    },
    {
       title: 'Dekoratif',
-      href: '/products?category=dekoratif',
-      description: 'Ev ve ofis için şık 3D baskı dekoratif objeler.',
+      href: '/products?category=Dekoratif',
+      description: 'Ev ve ofis için şık 3D baskı dekoratif parçalar.',
+      emoji: '🎨',
    },
    {
       title: 'Aksesuarlar',
-      href: '/products?category=aksesuarlar',
-      description: 'Kişiselleştirilmiş 3D baskı aksesuarlar ve tamamlayıcı parçalar.',
+      href: '/products?category=Aksesuarlar',
+      description: 'Telefon tutucular, organizerlar ve kişisel aksesuarlar.',
+      emoji: '⚙️',
+   },
+]
+
+const collections = [
+   {
+      title: 'Oyun Koleksiyonu',
+      href: '/products?category=Figürler',
+      description: 'Elden Ring, Zelda, anime ve popüler oyun karakterleri.',
+      badge: 'Yeni',
+   },
+   {
+      title: 'Sanat & Heykel',
+      href: '/products?category=Heykeller',
+      description: 'Rodin, Yunan mitolojisi ve modern sanat eserleri.',
+      badge: null,
+   },
+   {
+      title: 'Ev Dekoru',
+      href: '/products?category=Dekoratif',
+      description: 'Geometrik duvar sanatı, süsler ve dekoratif parçalar.',
+      badge: null,
+   },
+   {
+      title: 'Kişisel Aksesuarlar',
+      href: '/products?category=Aksesuarlar',
+      description: 'Masaüstü organizerlar, telefon tutucular ve daha fazlası.',
+      badge: null,
    },
 ]
 
@@ -64,76 +98,111 @@ export function NavMenu() {
    return (
       <NavigationMenu>
          <NavigationMenuList>
+            {/* Ürünler */}
             <NavigationMenuItem>
                <Link href="/products" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                     <div className="font-normal text-foreground/70">
-                        Ürünler
-                     </div>
+                     <span className="font-normal text-foreground/70">Ürünler</span>
                   </NavigationMenuLink>
                </Link>
             </NavigationMenuItem>
+
+            {/* Kategoriler — dropdown with image background */}
             <NavigationMenuItem>
                <NavigationMenuTrigger>
-                  <div className="font-normal text-foreground/70">
-                     Kategoriler
-                  </div>
+                  <span className="font-normal text-foreground/70">Kategoriler</span>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                     <li className="row-span-3">
+                  <ul className="grid gap-3 p-4 md:w-[420px] lg:w-[520px] lg:grid-cols-[.72fr_1fr]">
+                     {/* Left: visual hero card */}
+                     <li className="row-span-4">
                         <NavigationMenuLink asChild>
                            <Link
-                              className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                              className="group relative flex h-full w-full select-none flex-col justify-end rounded-xl overflow-hidden no-underline outline-none focus:shadow-md"
                               href="/products"
                            >
-                              <PackageOpenIcon className="h-6 w-6 mb-2" />
-                              <div className="mb-2 mt-4 text-lg font-medium">
-                                 Tüm Kategoriler
+                              {/* AI-generated background */}
+                              <div className="absolute inset-0">
+                                 <Image
+                                    src="/nav-bg.png"
+                                    alt="3D Baskı Kategoriler"
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    sizes="200px"
+                                 />
+                                 {/* Dark gradient overlay for text readability */}
+                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                               </div>
-                              <p className="text-sm leading-tight text-muted-foreground">
-                                 Kategoriye göre sıralanmış tüm 3D baskı ürünlerimize göz atın.
-                              </p>
+                              {/* Text */}
+                              <div className="relative z-10 p-5">
+                                 <PackageOpenIcon className="h-5 w-5 mb-2 text-orange-400" />
+                                 <div className="text-base font-bold text-white mb-1">Tüm Kategoriler</div>
+                                 <p className="text-xs leading-snug text-white/70">
+                                    Tüm 3D baskı ürünlerimize kategoriye göre göz atın.
+                                 </p>
+                              </div>
                            </Link>
                         </NavigationMenuLink>
                      </li>
-                     <ListItem href="/products?category=figurler" title="Figürler">
-                        Oyun, anime ve fantezi figürleri.
-                     </ListItem>
-                     <ListItem href="/products?category=heykeller" title="Heykeller">
-                        Sanatsal ve dekoratif heykeller.
-                     </ListItem>
-                     <ListItem
-                        href="/products?category=dekoratif"
-                        title="Dekoratif & Aksesuarlar"
-                     >
-                        Ev, ofis ve kişisel aksesuarlar.
-                     </ListItem>
-                  </ul>
-               </NavigationMenuContent>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-               <NavigationMenuTrigger>
-                  <div className="font-normal text-foreground/70">Koleksiyonlar</div>
-               </NavigationMenuTrigger>
-               <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-2 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                     {collections.map((col) => (
-                        <ListItem
-                           key={col.title}
-                           title={col.title}
-                           href={col.href}
+                     {/* Right: category list */}
+                     {categories.map(c => (
+                        <CategoryListItem
+                           key={c.title}
+                           href={c.href}
+                           title={`${c.emoji} ${c.title}`}
                         >
-                           {col.description}
-                        </ListItem>
+                           {c.description}
+                        </CategoryListItem>
                      ))}
                   </ul>
                </NavigationMenuContent>
             </NavigationMenuItem>
+
+            {/* Koleksiyonlar — dropdown with image background */}
+            <NavigationMenuItem>
+               <NavigationMenuTrigger>
+                  <span className="font-normal text-foreground/70">Koleksiyonlar</span>
+               </NavigationMenuTrigger>
+               <NavigationMenuContent>
+                  <div className="p-4 w-[480px] md:w-[560px]">
+                     {/* Hero banner */}
+                     <div className="relative w-full h-28 rounded-xl overflow-hidden mb-3">
+                        <Image
+                           src="/nav-bg.png"
+                           alt="Koleksiyonlar"
+                           fill
+                           className="object-cover object-top"
+                           sizes="560px"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 flex items-center px-5">
+                           <div>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400">xForgea3D</p>
+                              <p className="text-white font-bold text-lg leading-tight mt-0.5">Özel Koleksiyonlar</p>
+                              <p className="text-white/65 text-xs mt-0.5">Kategorize edilmiş seçkin ürün grupları</p>
+                           </div>
+                        </div>
+                     </div>
+                     {/* Collection grid */}
+                     <ul className="grid grid-cols-2 gap-2">
+                        {collections.map(c => (
+                           <CollectionItem key={c.title} href={c.href} title={c.title} badge={c.badge}>
+                              {c.description}
+                           </CollectionItem>
+                        ))}
+                     </ul>
+                  </div>
+               </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Atölye */}
             <NavigationMenuItem>
                <Link href="/atolye" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                     <div className="font-normal text-orange-500 font-medium">✦ Atölye</div>
+                     <span className="font-semibold text-orange-500 flex items-center gap-1">
+                        <SparklesIcon className="h-3 w-3" />
+                        Atölye
+                     </span>
                   </NavigationMenuLink>
                </Link>
             </NavigationMenuItem>
@@ -142,30 +211,52 @@ export function NavMenu() {
    )
 }
 
-const ListItem = forwardRef<
+// ── Item Components ──────────────────────────────────────────────────────────
+
+const CategoryListItem = forwardRef<
    React.ElementRef<'a'>,
-   React.ComponentPropsWithoutRef<'a'>
->(({ className, title, children, href, ...props }, ref) => {
+   React.ComponentPropsWithoutRef<'a'> & { href: string; title: string }
+>(({ className, title, children, href, ...props }, ref) => (
+   <li>
+      <NavigationMenuLink asChild>
+         <Link
+            href={href}
+            ref={ref}
+            className={cn(
+               'block select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent',
+               className
+            )}
+            {...props}
+         >
+            <div className="text-sm font-semibold leading-none mb-1">{title}</div>
+            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{children}</p>
+         </Link>
+      </NavigationMenuLink>
+   </li>
+))
+CategoryListItem.displayName = 'CategoryListItem'
+
+function CollectionItem({
+   href, title, children, badge,
+}: { href: string; title: string; children: React.ReactNode; badge: string | null }) {
    return (
       <li>
          <NavigationMenuLink asChild>
             <Link
                href={href}
-               ref={ref}
-               className={cn(
-                  'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-                  className
-               )}
-               {...props}
+               className="group block select-none rounded-lg border border-transparent p-3 leading-none no-underline outline-none transition-all hover:border-border hover:bg-accent"
             >
-               <div className="text-sm font-medium leading-none">{title}</div>
-               <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                  {children}
-               </p>
+               <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-sm font-semibold">{title}</span>
+                  {badge && (
+                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/15 text-orange-500 uppercase tracking-wider">
+                        {badge}
+                     </span>
+                  )}
+               </div>
+               <p className="text-xs leading-snug text-muted-foreground line-clamp-2">{children}</p>
             </Link>
          </NavigationMenuLink>
       </li>
    )
-})
-
-ListItem.displayName = 'ListItem'
+}

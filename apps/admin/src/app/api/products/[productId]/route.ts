@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 export async function GET(
    req: Request,
@@ -46,6 +47,11 @@ export async function DELETE(
          },
       })
 
+      // Immediately revalidate storefront pages so the deleted product disappears
+      revalidatePath('/')
+      revalidatePath('/products')
+      revalidatePath(`/products/${params.productId}`)
+
       return NextResponse.json(product)
    } catch (error) {
       console.error('[PRODUCT_DELETE]', error)
@@ -69,22 +75,32 @@ export async function PATCH(
       }
 
       const {
-         data: { title, price, discount, stock, isFeatured, isAvailable },
+         data: { title, description, price, discount, stock, isFeatured, isAvailable, images, keywords, categoryIds },
       } = await req.json()
 
       const product = await prisma.product.update({
-         where: {
-            id: params.productId,
-         },
+         where: { id: params.productId },
          data: {
-            title,
-            price,
-            discount,
-            stock,
-            isFeatured,
-            isAvailable,
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(price !== undefined && { price: Number(price) }),
+            ...(discount !== undefined && { discount: Number(discount) }),
+            ...(stock !== undefined && { stock: Number(stock) }),
+            ...(isFeatured !== undefined && { isFeatured }),
+            ...(isAvailable !== undefined && { isAvailable }),
+            ...(images !== undefined && { images }),
+            ...(keywords !== undefined && { keywords }),
+            ...(categoryIds !== undefined && {
+               categories: { set: categoryIds.map((id: string) => ({ id })) },
+            }),
          },
+         include: { brand: true, categories: true },
       })
+
+      // Immediately bust the storefront cache for this product and listing pages
+      revalidatePath('/')
+      revalidatePath('/products')
+      revalidatePath(`/products/${params.productId}`)
 
       return NextResponse.json(product)
    } catch (error) {
