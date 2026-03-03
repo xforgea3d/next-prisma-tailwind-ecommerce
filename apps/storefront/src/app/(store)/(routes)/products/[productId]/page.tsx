@@ -69,8 +69,6 @@ export async function generateStaticParams() {
       const products = await prisma.product.findMany({
          where: { isAvailable: true },
          select: { id: true },
-         take: 20,
-         orderBy: { orders: { _count: 'desc' } },
       })
       return products.map((p) => ({ productId: p.id }))
    } catch {
@@ -94,7 +92,12 @@ export default async function Product({
             isAvailable: true,
             NOT: { id: params.productId },
          },
-         include: { brand: true, categories: true },
+         select: {
+            id: true, title: true, price: true, discount: true,
+            images: true, isAvailable: true, stock: true, isFeatured: true,
+            brand: { select: { id: true, title: true } },
+            categories: { select: { id: true, title: true } },
+         },
          take: 4,
          orderBy: { createdAt: 'desc' },
       }),

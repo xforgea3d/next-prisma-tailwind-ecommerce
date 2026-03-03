@@ -38,7 +38,12 @@ export default async function Products({ searchParams }) {
             orderBy,
             skip: (Number(page) - 1) * 12,
             take: 12,
-            include: { brand: true, categories: true },
+            select: {
+               id: true, title: true, price: true, discount: true,
+               images: true, isAvailable: true, stock: true, isFeatured: true,
+               brand: { select: { id: true, title: true } },
+               categories: { select: { id: true, title: true } },
+            },
          }),
       ])
    } catch (e) {

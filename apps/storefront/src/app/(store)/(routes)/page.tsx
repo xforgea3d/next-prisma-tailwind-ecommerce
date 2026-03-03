@@ -30,7 +30,12 @@ export default async function Index() {
       ;[featuredProducts, blogs, banners] = await Promise.all([
          prisma.product.findMany({
             where: { isAvailable: true, isFeatured: true },
-            include: { brand: true, categories: true },
+            select: {
+               id: true, title: true, price: true, discount: true,
+               images: true, isAvailable: true, stock: true, isFeatured: true,
+               brand: { select: { id: true, title: true } },
+               categories: { select: { id: true, title: true } },
+            },
             take: 8,
             orderBy: { createdAt: 'desc' },
          }),
