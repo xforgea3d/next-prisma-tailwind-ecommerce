@@ -134,6 +134,7 @@ model Product {
   brandId String
 
   categories Category[]
+  carModels  CarModel[] @relation("CarModelProducts")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -400,6 +401,37 @@ model Banner {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ── Car Brand / Model (Oto Yedek Parça) ──────────────────────
+
+model CarBrand {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  logoUrl   String?
+  sortOrder Int        @default(0)
+  models    CarModel[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CarModel {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String
+  imageUrl  String?
+  yearRange String?
+  brand     CarBrand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brandId   String
+  products  Product[] @relation("CarModelProducts")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, brandId])
+  @@index([brandId])
 }
 
 // ── CMS Models ────────────────────────────────────────────────

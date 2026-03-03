@@ -50,13 +50,13 @@ export const Product = ({
             <div className={cn(
                "relative flex flex-col h-full overflow-hidden rounded-xl border bg-card transition-all duration-300",
                "group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:-translate-y-1",
-               "dark:group-hover:shadow-[0_8px_30px_rgb(255,255,255,0.05)]"
+               "dark:group-hover:shadow-[0_8px_30px_rgba(249,115,22,0.12)] dark:group-hover:border-orange-500/25"
             )}>
                {/* Image container */}
                <div className="relative h-56 sm:h-64 w-full flex-shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                   {product?.images?.[0] ? (
                      <Image
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                         src={product.images[0]}
                         alt={product.title}
                         fill

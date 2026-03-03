@@ -31,6 +31,9 @@ export async function POST(req: Request) {
             ...(data.categoryIds?.length && {
                categories: { connect: data.categoryIds.map((id: string) => ({ id })) },
             }),
+            ...(data.carModelIds?.length && {
+               carModels: { connect: data.carModelIds.map((id: string) => ({ id })) },
+            }),
          },
          include: { brand: true, categories: true },
       })
@@ -56,7 +59,7 @@ export async function GET(req: Request) {
             ...(categoryId && { categories: { some: { id: categoryId } } }),
             ...(isFeatured !== null && { isFeatured: isFeatured === 'true' }),
          },
-         include: { brand: true, categories: true },
+         include: { brand: true, categories: true, carModels: true },
          orderBy: { createdAt: 'desc' },
       })
 

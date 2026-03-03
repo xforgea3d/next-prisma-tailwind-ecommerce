@@ -75,7 +75,7 @@ export async function PATCH(
       }
 
       const {
-         data: { title, description, price, discount, stock, isFeatured, isAvailable, images, keywords, categoryIds },
+         data: { title, description, price, discount, stock, isFeatured, isAvailable, images, keywords, categoryIds, carModelIds },
       } = await req.json()
 
       const product = await prisma.product.update({
@@ -93,8 +93,11 @@ export async function PATCH(
             ...(categoryIds !== undefined && {
                categories: { set: categoryIds.map((id: string) => ({ id })) },
             }),
+            ...(carModelIds !== undefined && {
+               carModels: { set: carModelIds.map((id: string) => ({ id })) },
+            }),
          },
-         include: { brand: true, categories: true },
+         include: { brand: true, categories: true, carModels: true },
       })
 
       // Bust admin layout cache and storefront pages

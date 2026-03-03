@@ -45,7 +45,12 @@ export function MainNav({
       {
          href: `/brands`,
          label: 'Koleksiyonlar',
-         active: pathname.includes(`/brands`),
+         active: pathname.includes(`/brands`) && !pathname.includes(`/car-brands`),
+      },
+      {
+         href: `/car-brands`,
+         label: 'Araç Markaları',
+         active: pathname.includes(`/car-brands`),
       },
       {
          href: `/content/blog`,

@@ -13,12 +13,10 @@ import config from '@/config/site'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
-import { forwardRef, useState } from 'react'
-import { PackageOpenIcon, SparklesIcon } from 'lucide-react'
+import { forwardRef, useState, useEffect, useCallback } from 'react'
+import { PackageOpenIcon, SparklesIcon, CarIcon } from 'lucide-react'
 
 // ── Category definitions matching EXACT DB titles ────────────────────────────
-// Nav filter passes the exact category title — products page uses .contains insensitive
-// so 'Figürler' will match DB title 'Figürler' correctly.
 const categories = [
    {
       title: 'Figürler',
@@ -77,6 +75,23 @@ const collections = [
    },
 ]
 
+// ── Types ────────────────────────────────────────────────────────────────────
+interface CarModel {
+   id: string
+   name: string
+   slug: string
+   imageUrl: string | null
+   yearRange: string | null
+}
+
+interface CarBrand {
+   id: string
+   name: string
+   slug: string
+   logoUrl: string | null
+   models: CarModel[]
+}
+
 export function MainNav() {
    return (
       <div className="hidden md:flex gap-4 items-center">
@@ -102,6 +117,23 @@ export function NavMenu() {
    const [activeCatImg, setActiveCatImg] = useState('/nav-bg.png')
    const [activeCatTitle, setActiveCatTitle] = useState('Tüm Kategoriler')
    const [activeCatDesc, setActiveCatDesc] = useState('Tüm 3D baskı ürünlerimize kategoriye göre göz atın.')
+
+   // ── Car brands lazy-load (fetch only when mega menu opens) ──
+   const [carBrands, setCarBrands] = useState<CarBrand[]>([])
+   const [carBrandsLoaded, setCarBrandsLoaded] = useState(false)
+   const [activeBrand, setActiveBrand] = useState<CarBrand | null>(null)
+
+   const loadCarBrands = useCallback(() => {
+      if (carBrandsLoaded) return
+      setCarBrandsLoaded(true)
+      fetch('/api/car-brands')
+         .then(r => r.json())
+         .then((data: CarBrand[]) => {
+            setCarBrands(data)
+            if (data.length > 0) setActiveBrand(data[0])
+         })
+         .catch(() => setCarBrandsLoaded(false))
+   }, [carBrandsLoaded])
 
    return (
       <NavigationMenu>
@@ -133,17 +165,15 @@ export function NavMenu() {
                               {/* AI-generated background */}
                               <div className="absolute inset-0">
                                  <Image
-                                    key={activeCatImg} // Force re-render on change to trigger fade if needed
+                                    key={activeCatImg}
                                     src={activeCatImg}
                                     alt={activeCatTitle}
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     sizes="200px"
                                  />
-                                 {/* Dark gradient overlay for text readability */}
                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                               </div>
-                              {/* Text */}
                               <div className="relative z-10 p-5 transition-all duration-300">
                                  <PackageOpenIcon className="h-5 w-5 mb-2 text-orange-400" />
                                  <div className="text-base font-bold text-white mb-1">{activeCatTitle}</div>
@@ -169,8 +199,107 @@ export function NavMenu() {
                            {c.description}
                         </CategoryListItem>
                      ))}
-                     {/* Reset when hovering the wrapper (optional, but good UX to leave the last hovered) */}
                   </ul>
+               </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* ── Araç Parçaları — Mega Menu ─────────────────────────── */}
+            <NavigationMenuItem>
+               <NavigationMenuTrigger onMouseEnter={loadCarBrands} onFocus={loadCarBrands}>
+                  <span className="font-normal text-foreground/70 flex items-center gap-1">
+                     <CarIcon className="h-3.5 w-3.5" />
+                     Araç Parçaları
+                  </span>
+               </NavigationMenuTrigger>
+               <NavigationMenuContent>
+                  <div className="p-4 w-[560px] lg:w-[680px]">
+                     {carBrands.length === 0 ? (
+                        <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
+                           Araç markaları yükleniyor...
+                        </div>
+                     ) : (
+                        <div className="grid grid-cols-[200px_1fr] gap-4">
+                           {/* Left panel: Brand logos grid */}
+                           <div className="space-y-2">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mb-2">Markalar</p>
+                              <div className="grid grid-cols-2 gap-1.5 max-h-[320px] overflow-y-auto pr-1">
+                                 {carBrands.map(brand => (
+                                    <button
+                                       key={brand.id}
+                                       onMouseEnter={() => setActiveBrand(brand)}
+                                       className={cn(
+                                          'flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-all cursor-pointer',
+                                          activeBrand?.id === brand.id
+                                             ? 'bg-orange-500/10 border border-orange-500/30 text-foreground'
+                                             : 'hover:bg-accent border border-transparent text-muted-foreground hover:text-foreground'
+                                       )}
+                                    >
+                                       {brand.logoUrl ? (
+                                          <Image
+                                             src={brand.logoUrl}
+                                             alt={brand.name}
+                                             width={28}
+                                             height={28}
+                                             className="object-contain"
+                                          />
+                                       ) : (
+                                          <div className="w-7 h-7 rounded-full bg-foreground/10 flex items-center justify-center text-[10px] font-bold">
+                                             {brand.name.charAt(0)}
+                                          </div>
+                                       )}
+                                       <span className="text-[10px] font-medium leading-tight">{brand.name}</span>
+                                    </button>
+                                 ))}
+                              </div>
+                           </div>
+
+                           {/* Right panel: Selected brand's models */}
+                           <div className="border-l border-border pl-4">
+                              {activeBrand && (
+                                 <>
+                                    <div className="flex items-center gap-2 mb-3">
+                                       <p className="text-sm font-bold">{activeBrand.name}</p>
+                                       <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/15 text-orange-500 uppercase tracking-wider">
+                                          {activeBrand.models.length} Model
+                                       </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
+                                       {activeBrand.models.map(model => (
+                                          <NavigationMenuLink asChild key={model.id}>
+                                             <Link
+                                                href={`/products?carModel=${model.slug}`}
+                                                prefetch={true}
+                                                className="group flex flex-col rounded-lg border border-transparent p-2.5 transition-all hover:border-border hover:bg-accent"
+                                             >
+                                                {model.imageUrl ? (
+                                                   <div className="relative w-full h-20 rounded-md overflow-hidden mb-2 bg-muted">
+                                                      <Image
+                                                         src={model.imageUrl}
+                                                         alt={model.name}
+                                                         fill
+                                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                                         sizes="150px"
+                                                      />
+                                                   </div>
+                                                ) : (
+                                                   <div className="w-full h-20 rounded-md bg-foreground/5 flex items-center justify-center mb-2">
+                                                      <CarIcon className="h-6 w-6 text-muted-foreground/40" />
+                                                   </div>
+                                                )}
+                                                <span className="text-xs font-semibold">{model.name}</span>
+                                                {model.yearRange && (
+                                                   <span className="text-[10px] text-muted-foreground">{model.yearRange}</span>
+                                                )}
+                                             </Link>
+                                          </NavigationMenuLink>
+                                       ))}
+                                    </div>
+                                 </>
+                              )}
+                           </div>
+                        </div>
+                     )}
+                  </div>
                </NavigationMenuContent>
             </NavigationMenuItem>
 

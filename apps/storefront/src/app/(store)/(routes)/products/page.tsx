@@ -14,7 +14,7 @@ import {
 } from './components/options'
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, page = 1 } = searchParams ?? {}
+   const { sort, isAvailable, brand, category, carModel, page = 1 } = searchParams ?? {}
 
    const orderBy = getOrderBy(sort)
 
@@ -25,6 +25,9 @@ export default async function Products({ searchParams }) {
          : undefined,
       categories: category
          ? { some: { title: { contains: category, mode: 'insensitive' as const } } }
+         : undefined,
+      carModels: carModel
+         ? { some: { slug: carModel } }
          : undefined,
    }
 

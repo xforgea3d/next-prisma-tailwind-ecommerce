@@ -3,18 +3,28 @@
 import { useEffect, useRef } from 'react'
 
 // ─── Particle Burst Effect ────────────────────────────────────────────────────
+// Pre-calculate particle offsets in JS since CSS can't do Math.cos/sin
 function Particles() {
+  const particles = [...Array(12)].map((_, i) => {
+    const angle = (i / 12) * Math.PI * 2
+    const dist = 18 + (i % 4) * 6
+    const tx = Math.cos(angle) * dist
+    const ty = Math.sin(angle) * dist
+    const size = 2 + (i % 3)
+    return { tx, ty, size, delay: (i / 12) * 8 }
+  })
+
   return (
     <div className="printer-particles absolute pointer-events-none" aria-hidden>
-      {[...Array(12)].map((_, i) => (
+      {particles.map((p, i) => (
         <div
           key={i}
           className="particle absolute rounded-full"
           style={{
-            '--delay': `${(i / 12) * 8}s`,
-            '--angle': `${(i / 12) * 360}deg`,
-            '--dist': `${18 + (i % 4) * 6}px`,
-            '--size': `${2 + (i % 3)}px`,
+            '--delay': `${p.delay}s`,
+            '--tx': `${p.tx}px`,
+            '--ty': `${p.ty}px`,
+            '--size': `${p.size}px`,
           } as React.CSSProperties}
         />
       ))}
@@ -125,7 +135,7 @@ export default function PrinterAnimation() {
                   <div className="printer-nozzle absolute -bottom-[6px] flex justify-center items-end" style={{ clipPath: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)' }}>
                     <div className="printer-hotend-glow absolute bottom-0 w-1.5 h-1.5 bg-orange-400 rounded-full" />
                   </div>
-                  {/* Filament glow strand */}
+                  {/* Filament glow strand — extends from nozzle toward active layer */}
                   <div className="printer-filament absolute -bottom-[28px] left-1/2 -translate-x-1/2 w-[3px] rounded-full shadow-[0_0_8px_#f97316,0_0_20px_rgba(249,115,22,0.5)]" />
                   {/* Particles burst around nozzle */}
                   <Particles />
@@ -363,21 +373,18 @@ export default function PrinterAnimation() {
             rgba(90,90,90,1) 90%,
             rgba(60,60,60,0) 100%);
           box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-          /* Starts near bed (large top value), ascends as print progresses */
+          /* Starts near bed, ascends as print progresses — synced timing */
           animation: gantry-z-v3 8s ease-in-out infinite;
         }
         @keyframes gantry-z-v3 {
-          /* Start exactly at bottom of object (297px + 35px nozzle offset = 332px bed top) */
           0%, 4%    { top: 297px; }
-          /* Perfectly track the growing clip-path top (117px + 35px nozzle offset = 152px object top) */
           62%       { top: 117px; }
-          /* Eject phase parking */
           70%, 100% { top: 30px; }
         }
 
-        /* ── Print head: X-axis travel tracking the object's width exact contour ── */
+        /* ── Print head: X-axis travel — ease-in-out synced with gantry-z ── */
         .printer-head {
-          animation: head-x-v4 8s linear infinite;
+          animation: head-x-v4 8s ease-in-out infinite;
           left: 0;
         }
         .printer-head-body {
@@ -388,41 +395,74 @@ export default function PrinterAnimation() {
             0 8px 24px rgba(0,0,0,0.7),
             inset 0 1px 0 rgba(255,255,255,0.06);
         }
+
+        /*
+         * head_left = 70 + svg_x * 0.9
+         * Layer map (SVG coords → pixel left):
+         *   Y=140 base:     X=15-85  → left=84-147
+         *   Y=120 base-mid: X=10-90  → left=79-151
+         *   Y=105 pedestal:  X=20-80  → left=88-142
+         *   Y=85  body:     X=30-70  → left=97-133
+         *   Y=60  arms:     X=12-88  → left=81-149
+         *   Y=38  shoulders: X=24-76  → left=92-138
+         *   Y=28  neck:     X=35-65  → left=102-129
+         *   Y=16  head:     X=35-65  → left=102-129
+         *   Y=0   tip:      X=50     → left=115
+         *
+         * Each layer does 2-3 sweeps (left→right, right→left) for FDM realism
+         */
         @keyframes head-x-v4 {
-          0%, 4% { left: 90px; } /* Start center */
-          /* Base Y=140 */
-          4.1% { left: 58px; }
-          7% { left: 121px; }
-          10% { left: 58px; }
-          13% { left: 121px; }
-          /* Pedestal Y=105 */
-          16% { left: 63px; }
-          19% { left: 117px; }
-          /* Tapering Y=90 */
-          22% { left: 68px; }
-          25% { left: 112px; }
-          /* Body Y=85 */
-          28% { left: 72px; }
-          31% { left: 108px; }
-          /* Arms jut out Y=60 */
-          34% { left: 61px; }
-          37% { left: 118px; }
-          /* Shoulders/Arms mid */
-          40% { left: 64px; }
-          43% { left: 115px; }
-          /* Neck base Y=38 */
-          46% { left: 66px; }
-          49% { left: 113px; }
-          /* Neck mid Y=28 */
-          52% { left: 72px; }
-          /* Head base Y=16 */
-          55% { left: 108px; }
-          /* Head mid */
-          58% { left: 77px; }
-          60% { left: 103px; }
-          /* Tip center Y=0 */
-          62% { left: 90px; }
-          /* Eject phase: rapid park away to the far right */
+          0%, 4%  { left: 115px; }
+
+          /* ── Base Y=140: X=15-85 → left=84-147 (2 sweeps) ── */
+          5%   { left: 84px; }
+          7%   { left: 147px; }
+          9%   { left: 84px; }
+          11%  { left: 147px; }
+
+          /* ── Base-top Y=120: X=10-90 → left=79-151 (2 sweeps) ── */
+          13%  { left: 79px; }
+          15%  { left: 151px; }
+          17%  { left: 79px; }
+
+          /* ── Pedestal Y=105: X=20-80 → left=88-142 (2 sweeps) ── */
+          19%  { left: 88px; }
+          21%  { left: 142px; }
+          23%  { left: 88px; }
+
+          /* ── Body lower Y=85: X=30-70 → left=97-133 (2 sweeps) ── */
+          25%  { left: 97px; }
+          27%  { left: 133px; }
+          29%  { left: 97px; }
+          31%  { left: 133px; }
+
+          /* ── Arms Y=60: X=12-88 → left=81-149 (3 sweeps — wider area) ── */
+          33%  { left: 81px; }
+          35%  { left: 149px; }
+          37%  { left: 81px; }
+          39%  { left: 149px; }
+          41%  { left: 81px; }
+
+          /* ── Shoulders Y=38: X=24-76 → left=92-138 (2 sweeps) ── */
+          43%  { left: 92px; }
+          45%  { left: 138px; }
+          47%  { left: 92px; }
+
+          /* ── Neck Y=28: X=35-65 → left=102-129 (2 sweeps) ── */
+          49%  { left: 102px; }
+          51%  { left: 129px; }
+          53%  { left: 102px; }
+
+          /* ── Head Y=16: X=35-65 → left=102-129 (2 sweeps) ── */
+          55%  { left: 102px; }
+          57%  { left: 129px; }
+          59%  { left: 102px; }
+
+          /* ── Tip Y=0: X=50 → left=115 (converge to center) ── */
+          61%  { left: 129px; }
+          62%  { left: 115px; }
+
+          /* ── Eject phase: rapid park to far right ── */
           66%, 100% { left: 240px; }
         }
 
@@ -451,7 +491,7 @@ export default function PrinterAnimation() {
           to   { transform: rotate(360deg); }
         }
 
-        /* ── Nozzle \u0026 Hotend ────────────────────── */
+        /* ── Nozzle & Hotend ────────────────────── */
         .printer-nozzle {
           width: 10px; height: 10px;
           background: linear-gradient(to bottom, #aaaaaa, #555555);
@@ -478,26 +518,21 @@ export default function PrinterAnimation() {
           62.1%, 100% { height: 0px; opacity: 0; }
         }
 
-        /* ── Particles ────────────────────────────── */
+        /* ── Particles — pre-calculated JS offsets ── */
         .printer-particles { top: 100%; left: 50%; width: 0; height: 0; }
         .particle {
           width:  var(--size);
           height: var(--size);
           background: radial-gradient(circle, rgba(249,115,22,0.9) 0%, rgba(251,191,36,0.4) 100%);
           box-shadow: 0 0 4px rgba(249,115,22,0.7);
-          animation: particle-burst 8s ease-in-out infinite var(--delay);
+          animation: particle-burst 8s ease-in-out infinite;
+          animation-delay: var(--delay);
           opacity: 0;
         }
         @keyframes particle-burst {
           0%, 4%   { transform: translate(0,0) scale(0.3); opacity: 0; }
           4.1%     { transform: translate(0,0) scale(1.0); opacity: 1; }
-          12%      {
-            transform:
-              translateX(calc(Math.cos(var(--angle)) * var(--dist)))
-              translateY(calc(Math.sin(var(--angle)) * var(--dist)))
-              scale(0);
-            opacity: 0;
-          }
+          12%      { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
           100%     { opacity: 0; }
         }
 
@@ -511,7 +546,6 @@ export default function PrinterAnimation() {
           box-shadow:
             0 -2px 8px rgba(249,115,22,0.10),
             0 4px 16px rgba(0,0,0,0.5);
-          /* No animation — bed stays fixed */
         }
 
         /* ── Printed object wrapper ───────────────── */
@@ -533,8 +567,6 @@ export default function PrinterAnimation() {
           62%, 65%  { clip-path: inset(0% 0% 0% 0%);  }
           100%      { clip-path: inset(0% 0% 0% 0%);  }
         }
-
-        /* ── Active scanline removed for real FDM realism ── */
 
         /* ── Layer lines ─────────────────────────── */
         .layer-line {

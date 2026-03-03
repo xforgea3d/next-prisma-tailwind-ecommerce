@@ -114,7 +114,7 @@ export default async function RootLayout({
          <body className={inter.className} suppressHydrationWarning>
             <OrganizationJsonLd />
             <WebSiteJsonLd />
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                <NavigationProgressBar />
                <LazyToastProvider />
                <ModalProvider />

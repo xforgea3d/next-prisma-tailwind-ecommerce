@@ -26,8 +26,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 import type { ProductWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Category } from '@prisma/client'
-import { Trash } from 'lucide-react'
+import { Category, CarModel } from '@prisma/client'
+import { Trash, X } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -42,21 +43,26 @@ const formSchema = z.object({
    stock: z.coerce.number().min(0),
    categoryId: z.string().min(1),
    productType: z.string().default('READY'),
-   customOptions: z.string().optional(), // stored as JSON string in form, parsed on save
+   customOptions: z.string().optional(),
+   carModelIds: z.string().array().optional(),
    isFeatured: z.boolean().default(false).optional(),
    isAvailable: z.boolean().default(false).optional(),
 })
 
 type ProductFormValues = z.infer<typeof formSchema>
 
+type CarModelWithBrand = CarModel & { brand: { name: string } }
+
 interface ProductFormProps {
    initialData: ProductWithIncludes | null
    categories: Category[]
+   carModels?: CarModelWithBrand[]
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
    initialData,
    categories,
+   carModels = [],
 }) => {
    const params = useParams()
    const router = useRouter()
@@ -78,6 +84,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          customOptions: (initialData as any)?.customOptions
             ? JSON.stringify((initialData as any).customOptions, null, 2)
             : '',
+         carModelIds: (initialData as any)?.carModels?.map((m: any) => m.id) ?? [],
       }
       : {
          title: '---',
@@ -89,6 +96,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          categoryId: '---',
          productType: 'READY',
          customOptions: '',
+         carModelIds: [],
          isFeatured: false,
          isAvailable: false,
       }
@@ -346,6 +354,63 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         </FormItem>
                      )}
                   />
+
+                  {/* Araç Modelleri */}
+                  {carModels.length > 0 && (
+                     <div className="col-span-1 md:col-span-3">
+                        <FormField
+                           control={form.control}
+                           name="carModelIds"
+                           render={({ field }) => (
+                              <FormItem>
+                                 <FormLabel>Uyumlu Araç Modelleri</FormLabel>
+                                 <FormDescription>Bu ürünün hangi araç modellerine uygun olduğunu seçin.</FormDescription>
+                                 <div className="flex flex-wrap gap-1.5 mb-2">
+                                    {(field.value || []).map((id: string) => {
+                                       const model = carModels.find(m => m.id === id)
+                                       if (!model) return null
+                                       return (
+                                          <Badge key={id} variant="secondary" className="gap-1">
+                                             {model.brand.name} {model.name}
+                                             <button
+                                                type="button"
+                                                onClick={() => field.onChange(field.value?.filter((v: string) => v !== id))}
+                                             >
+                                                <X className="h-3 w-3" />
+                                             </button>
+                                          </Badge>
+                                       )
+                                    })}
+                                 </div>
+                                 <Select
+                                    disabled={loading}
+                                    onValueChange={(val) => {
+                                       if (!field.value?.includes(val)) {
+                                          field.onChange([...(field.value || []), val])
+                                       }
+                                    }}
+                                 >
+                                    <FormControl>
+                                       <SelectTrigger>
+                                          <SelectValue placeholder="Araç modeli ekle..." />
+                                       </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                       {carModels
+                                          .filter(m => !field.value?.includes(m.id))
+                                          .map(m => (
+                                             <SelectItem key={m.id} value={m.id}>
+                                                {m.brand.name} — {m.name} {m.yearRange ? `(${m.yearRange})` : ''}
+                                             </SelectItem>
+                                          ))}
+                                    </SelectContent>
+                                 </Select>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
+                     </div>
+                  )}
 
                   {/* isFeatured */}
                   <FormField

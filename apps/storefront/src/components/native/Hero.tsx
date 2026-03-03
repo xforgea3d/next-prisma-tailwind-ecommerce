@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button'
 import { ArrowRightIcon, SparklesIcon, LayersIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
-// Lazy-load animation — ssr:false so heavy CSS keyframes only run on client
-// Hero itself remains a Server Component for fast initial paint
 const PrinterAnimation = dynamic(() => import('./PrinterAnimation'), { ssr: false })
+const HeroStats = dynamic(() => import('./HeroStats'), { ssr: false })
 
 export default function Hero() {
     return (
@@ -48,19 +47,8 @@ export default function Hero() {
                     Elegoo 3D yazıcılarımızla her baskı hassasiyetle hayata geçiyor.
                 </p>
 
-                {/* Stats */}
-                <div className="mt-6 flex gap-6">
-                    {[
-                        { value: '500+', label: 'Ürün Çeşidi' },
-                        { value: '7/24', label: 'Üretim' },
-                        { value: '2 Gün', label: 'Hızlı Kargo' },
-                    ].map(({ value, label }) => (
-                        <div key={label}>
-                            <div className="text-xl md:text-2xl font-black text-foreground leading-none">{value}</div>
-                            <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">{label}</div>
-                        </div>
-                    ))}
-                </div>
+                {/* Stats with animated counters */}
+                <HeroStats />
 
                 {/* CTAs */}
                 <div className="mt-7 flex flex-wrap gap-3">

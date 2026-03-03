@@ -12,6 +12,10 @@ export const docsConfig: DocsConfig = {
          href: '/products',
       },
       {
+         title: 'Araç Parçaları',
+         href: '/products?category=Aksesuarlar',
+      },
+      {
          title: 'Blog',
          href: '/blog',
          external: false,
