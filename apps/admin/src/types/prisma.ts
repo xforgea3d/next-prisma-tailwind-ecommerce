@@ -18,7 +18,7 @@ export type ProductWithIncludes = Prisma.ProductGetPayload<{
    }
 }>
 
-export type UserWithIncludes = Prisma.UserGetPayload<{
+export type ProfileWithIncludes = Prisma.ProfileGetPayload<{
    include: {
       addresses: true
       orders: {

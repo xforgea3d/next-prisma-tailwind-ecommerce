@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { revalidateStorefront } from '@/lib/revalidate-storefront'
 
 export async function POST(req: Request) {
    try {
@@ -32,8 +33,9 @@ export async function POST(req: Request) {
          },
       })
 
-      // Revalidate storefront layout since categories are in the nav
+      // Bust admin cache and storefront
       revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products'])
 
       return NextResponse.json(category)
    } catch (error) {

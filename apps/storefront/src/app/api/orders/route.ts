@@ -8,21 +8,17 @@ import { NextResponse } from 'next/server'
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
-
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
       const orders = await prisma.order.findMany({
-         where: {
-            userId,
-         },
+         where: { userId },
          include: {
             address: true,
             payments: true,
             refund: true,
-            orderItems: true,
+            orderItems: { include: { product: true } },
          },
+         orderBy: { createdAt: 'desc' },
       })
 
       return NextResponse.json(orders)
@@ -35,92 +31,99 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
-
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
       const { addressId, discountCode } = await req.json()
 
+      if (!addressId) return new NextResponse('addressId is required', { status: 400 })
+
+      // Validate discount code if provided
       if (discountCode) {
-         await prisma.discountCode.findUniqueOrThrow({
-            where: {
-               code: discountCode,
-               stock: {
-                  gte: 1,
-               },
-            },
+         const now = new Date()
+         const dc = await prisma.discountCode.findUnique({
+            where: { code: discountCode },
          })
+         if (!dc || dc.stock < 1 || dc.endDate < now || dc.startDate > now) {
+            return new NextResponse('Geçersiz veya süresi dolmuş indirim kodu', { status: 400 })
+         }
       }
 
       const cart = await prisma.cart.findUniqueOrThrow({
-         where: {
-            userId,
-         },
-         include: {
-            items: {
-               include: {
-                  product: true,
-               },
-            },
-         },
+         where: { userId },
+         include: { items: { include: { product: true } } },
       })
+
+      if (!cart.items.length) {
+         return new NextResponse('Sepet boş', { status: 400 })
+      }
 
       const { tax, total, discount, payable } = calculateCosts({ cart })
 
       const order = await prisma.order.create({
          data: {
-            user: {
-               connect: {
-                  id: userId,
-               },
-            },
-            status: 'Processing',
+            user: { connect: { id: userId } },
+            status: 'OnayBekleniyor',
             total,
             tax,
             payable,
             discount,
             shipping: 0,
-            address: {
-               connect: { id: addressId },
-            },
+            address: { connect: { id: addressId } },
+            ...(discountCode && {
+               discountCode: { connect: { code: discountCode } },
+            }),
             orderItems: {
-               create: cart?.items.map((orderItem) => ({
-                  count: orderItem.count,
-                  price: orderItem.product.price,
-                  discount: orderItem.product.discount,
-                  product: {
-                     connect: {
-                        id: orderItem.productId,
-                     },
-                  },
+               create: cart.items.map((item) => ({
+                  count: item.count,
+                  price: item.product.price,
+                  discount: item.product.discount,
+                  product: { connect: { id: item.productId } },
                })),
             },
          },
+         include: { orderItems: true, address: true },
       })
 
-      const owners = await prisma.owner.findMany()
-
-      const notifications = await prisma.notification.createMany({
-         data: owners.map((owner) => ({
-            userId: owner.id,
-            content: `Order #${order.number} was created was created with a value of $${payable}.`,
-         })),
-      })
-
-      for (const owner of owners) {
-         await sendMail({
-            name: config.name,
-            to: owner.email,
-            subject: 'An order was created.',
-            html: await render(
-               Mail({
-                  id: order.id,
-                  payable: payable.toFixed(2),
-                  orderNum: order.number.toString(),
-               })
-            ),
+      // Decrement discount code stock if used
+      if (discountCode) {
+         await prisma.discountCode.update({
+            where: { code: discountCode },
+            data: { stock: { decrement: 1 } },
          })
+      }
+
+      // Notify admin profiles (role === 'admin')
+      try {
+         const admins = await prisma.profile.findMany({
+            where: { role: 'admin' },
+         })
+
+         if (admins.length) {
+            await prisma.notification.createMany({
+               data: admins.map((admin) => ({
+                  userId: admin.id,
+                  content: `Sipariş #${order.number} oluşturuldu — ${payable.toFixed(2)} TL.`,
+               })),
+            })
+
+            for (const admin of admins) {
+               await sendMail({
+                  name: config.name,
+                  to: admin.email,
+                  subject: 'Yeni sipariş alındı.',
+                  html: await render(
+                     Mail({
+                        id: order.id,
+                        payable: payable.toFixed(2),
+                        orderNum: order.number.toString(),
+                     })
+                  ),
+               }).catch((e) => console.error('[ADMIN_MAIL]', e))
+            }
+         }
+      } catch (notifyError) {
+         // Don't fail the order if notifications fail
+         console.error('[ORDER_NOTIFY]', notifyError)
       }
 
       return NextResponse.json(order)
@@ -130,13 +133,13 @@ export async function POST(req: Request) {
    }
 }
 
-function calculateCosts({ cart }) {
-   let total = 0,
-      discount = 0
+function calculateCosts({ cart }: { cart: { items: Array<{ count: number; product: { price: number; discount: number } }> } }) {
+   let total = 0
+   let discount = 0
 
-   for (const item of cart?.items) {
-      total += item?.count * item?.product?.price
-      discount += item?.count * item?.product?.discount
+   for (const item of cart.items) {
+      total += item.count * item.product.price
+      discount += item.count * item.product.discount
    }
 
    const afterDiscount = total - discount

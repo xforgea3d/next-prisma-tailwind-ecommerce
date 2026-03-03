@@ -12,7 +12,13 @@ import {
    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import type { OrderWithIncludes } from '@/types/prisma'
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from '@/components/ui/select'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -20,19 +26,24 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import * as z from 'zod'
 
+const PAYMENT_STATUSES = [
+   { value: 'Processing', label: 'İşlemde' },
+   { value: 'Paid', label: 'Ödendi' },
+   { value: 'Failed', label: 'Başarısız' },
+   { value: 'Denied', label: 'Reddedildi' },
+]
+
 const formSchema = z.object({
    status: z.string().min(1),
-   shipping: z.coerce.number().min(1),
    payable: z.coerce.number().min(1),
-   discount: z.coerce.number().min(0),
-   isPaid: z.boolean().default(false).optional(),
-   isCompleted: z.boolean().default(false).optional(),
+   fee: z.coerce.number().optional(),
+   isSuccessful: z.boolean().default(false).optional(),
 })
 
 type PaymentFormValues = z.infer<typeof formSchema>
 
 interface PaymentFormProps {
-   initialData: OrderWithIncludes | null
+   initialData: any | null
 }
 
 export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
@@ -41,21 +52,19 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
 
    const [loading, setLoading] = useState(false)
 
-   const toastMessage = 'Order updated.'
+   const toastMessage = 'Payment updated.'
    const action = 'Save changes'
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-        }
+         ...initialData,
+      }
       : {
-           status: '---',
-           shipping: 0,
-           payable: 0,
-           discount: 0,
-           isPaid: false,
-           isCompleted: false,
-        }
+         status: 'Processing',
+         payable: 0,
+         fee: 0,
+         isSuccessful: false,
+      }
 
    const form = useForm<PaymentFormValues>({
       resolver: zodResolver(formSchema),
@@ -67,13 +76,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
+            await fetch(`/api/payments/${params.paymentId}`, {
                method: 'PATCH',
                body: JSON.stringify(data),
                cache: 'no-store',
             })
          } else {
-            await fetch(`/api/products`, {
+            await fetch(`/api/payments`, {
                method: 'POST',
                body: JSON.stringify(data),
                cache: 'no-store',
@@ -81,8 +90,8 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
          }
 
          router.refresh()
-         router.push(`/products`)
          toast.success(toastMessage)
+         router.push(`/payments`)
       } catch (error: any) {
          toast.error('Something went wrong.')
       } finally {
@@ -94,33 +103,37 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
       <Form {...form}>
          <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8 w-full"
+            className="space-y-4 w-full"
          >
-            <div>
-               <FormField
-                  control={form.control}
-                  name="shipping"
-                  render={({ field }) => (
-                     <FormItem>
-                        <FormLabel>Price</FormLabel>
+            <FormField
+               control={form.control}
+               name="status"
+               render={({ field }) => (
+                  <FormItem>
+                     <FormLabel>Ödeme Durumu</FormLabel>
+                     <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
                         <FormControl>
-                           <Input
-                              type="number"
-                              disabled={loading}
-                              placeholder="9.99"
-                              {...field}
-                           />
+                           <SelectTrigger>
+                              <SelectValue placeholder="Durum seçin" />
+                           </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                     </FormItem>
-                  )}
-               />
+                        <SelectContent>
+                           {PAYMENT_STATUSES.map(({ value, label }) => (
+                              <SelectItem key={value} value={value}>{label}</SelectItem>
+                           ))}
+                        </SelectContent>
+                     </Select>
+                     <FormMessage />
+                  </FormItem>
+               )}
+            />
+            <div className="grid grid-cols-2 gap-4">
                <FormField
                   control={form.control}
                   name="payable"
                   render={({ field }) => (
                      <FormItem>
-                        <FormLabel>Discount</FormLabel>
+                        <FormLabel>Ödenecek Tutar (₺)</FormLabel>
                         <FormControl>
                            <Input
                               type="number"
@@ -135,64 +148,45 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
                />
                <FormField
                   control={form.control}
-                  name="discount"
+                  name="fee"
                   render={({ field }) => (
                      <FormItem>
-                        <FormLabel>Discount</FormLabel>
+                        <FormLabel>Komisyon (Fee)</FormLabel>
                         <FormControl>
                            <Input
                               type="number"
                               disabled={loading}
-                              placeholder="9.99"
+                              placeholder="0.00"
                               {...field}
                            />
                         </FormControl>
                         <FormMessage />
-                     </FormItem>
-                  )}
-               />
-               <FormField
-                  control={form.control}
-                  name="isPaid"
-                  render={({ field }) => (
-                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                           <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                           />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                           <FormLabel>Featured</FormLabel>
-                           <FormDescription>
-                              This product will appear on the home page
-                           </FormDescription>
-                        </div>
-                     </FormItem>
-                  )}
-               />
-               <FormField
-                  control={form.control}
-                  name="isCompleted"
-                  render={({ field }) => (
-                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                           <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                           />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                           <FormLabel>Available</FormLabel>
-                           <FormDescription>
-                              This product will appear in the store.
-                           </FormDescription>
-                        </div>
                      </FormItem>
                   )}
                />
             </div>
-            <Button disabled={loading} className="ml-auto" type="submit">
+
+            <FormField
+               control={form.control}
+               name="isSuccessful"
+               render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                     <FormControl>
+                        <Checkbox
+                           checked={field.value}
+                           onCheckedChange={field.onChange}
+                        />
+                     </FormControl>
+                     <div className="space-y-1 leading-none">
+                        <FormLabel>Başarılı (isSuccessful)</FormLabel>
+                        <FormDescription>
+                           Ödeme başarıyla tamamlandı olarak işaretle.
+                        </FormDescription>
+                     </div>
+                  </FormItem>
+               )}
+            />
+            <Button disabled={loading} type="submit">
                {action}
             </Button>
          </form>

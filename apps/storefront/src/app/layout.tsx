@@ -1,21 +1,99 @@
 import { ModalProvider } from '@/providers/modal-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { ToastProvider } from '@/providers/toast-provider'
-import { NavigationProgressBar } from '@/components/native/NavigationProgressBar'
+import { OrganizationJsonLd, WebSiteJsonLd } from './json-ld'
 import { Inter } from 'next/font/google'
-import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
+import type { Metadata } from 'next'
+
+const NavigationProgressBar = dynamic(
+   () => import('@/components/native/NavigationProgressBar').then(mod => ({ default: mod.NavigationProgressBar })),
+   { ssr: false }
+)
 
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-   title: 'xForgea3D — Premium 3D Baskı Ürünleri',
-   description: "Türkiye'nin premium 3D baskı markası. Yüksek kaliteli figürler, heykeller ve dekoratif ürünler.",
-   keywords: ['3D Baskı', 'Figür', 'Heykel', 'Dekoratif', 'Türkiye', 'xForgea3D'],
-   authors: [{ name: 'xForgea3D', url: 'https://xforgea3d.com' }],
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xforgea3d.com'
+
+export const metadata: Metadata = {
+   metadataBase: new URL(SITE_URL),
+   title: {
+      default: 'xForgea3D — Premium 3D Baski Urunleri',
+      template: '%s | xForgea3D',
+   },
+   description:
+      "Turkiye'nin premium 3D baski markasi. Yuksek kaliteli figurler, heykeller, dekoratif urunler, oto yedek parca aksesuarlari ve kisiye ozel 3D baski cozumleri. xForgea3D ile tasariminizi gercege donusturun.",
+   keywords: [
+      '3D baski',
+      '3D yazici urunleri',
+      'figur',
+      'heykel',
+      'dekoratif urunler',
+      'oto yedek parca',
+      '3D baski aksesuar',
+      'kisiye ozel 3D baski',
+      'PLA figur',
+      'recine baski',
+      'Turkiye 3D baski',
+      'xForgea3D',
+      '3D printing Turkey',
+      '3D printed figurines',
+      '3D printed car parts',
+   ],
+   authors: [{ name: 'xForgea3D', url: SITE_URL }],
    creator: 'xForgea3D',
    publisher: 'xForgea3D',
+   formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+   },
+   openGraph: {
+      type: 'website',
+      locale: 'tr_TR',
+      url: SITE_URL,
+      siteName: 'xForgea3D',
+      title: 'xForgea3D — Premium 3D Baski Urunleri',
+      description:
+         "Turkiye'nin premium 3D baski markasi. Figurler, heykeller, dekoratif urunler ve kisiye ozel 3D baski cozumleri.",
+      images: [
+         {
+            url: '/og-image.jpg',
+            width: 1200,
+            height: 630,
+            alt: 'xForgea3D — Premium 3D Baski Urunleri',
+         },
+      ],
+   },
+   twitter: {
+      card: 'summary_large_image',
+      title: 'xForgea3D — Premium 3D Baski Urunleri',
+      description:
+         "Turkiye'nin premium 3D baski markasi. Figurler, heykeller ve kisiye ozel 3D baski cozumleri.",
+      images: ['/og-image.jpg'],
+      creator: '@xforgea3d',
+   },
+   robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+         index: true,
+         follow: true,
+         'max-video-preview': -1,
+         'max-image-preview': 'large',
+         'max-snippet': -1,
+      },
+   },
+   alternates: {
+      canonical: SITE_URL,
+   },
+   verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION ?? undefined,
+      yandex: process.env.YANDEX_VERIFICATION ?? undefined,
+   },
+   category: '3D Printing',
 }
 
 export default async function RootLayout({
@@ -26,10 +104,10 @@ export default async function RootLayout({
    return (
       <html lang="tr" suppressHydrationWarning>
          <body className={inter.className} suppressHydrationWarning>
+            <OrganizationJsonLd />
+            <WebSiteJsonLd />
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-               <Suspense fallback={null}>
-                  <NavigationProgressBar />
-               </Suspense>
+               <NavigationProgressBar />
                <ToastProvider />
                <ModalProvider />
                {children}

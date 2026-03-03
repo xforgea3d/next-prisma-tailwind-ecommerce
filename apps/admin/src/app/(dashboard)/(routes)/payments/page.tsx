@@ -7,23 +7,26 @@ import type { PaymentColumn } from './components/columns'
 
 export default async function PaymentsPage() {
    const payments = await prisma.payment.findMany({
-      where: {},
-      include: {
-         provider: true,
-         user: true,
-         order: true,
+      select: {
+         id: true,
+         number: true,
+         status: true,
+         payable: true,
+         isSuccessful: true,
+         createdAt: true,
       },
       orderBy: {
          updatedAt: 'desc',
       },
+      take: 100,
    })
 
    const formattedPayments: PaymentColumn[] = payments.map((payment) => ({
       id: payment.id,
-      number: 'Payment #' + payment.number.toString(),
+      number: 'Ödeme #' + payment.number.toString(),
       status: payment.status,
       date: payment.createdAt.toUTCString(),
-      payable: '$' + payment.payable.toString(),
+      payable: payment.payable.toFixed(2) + ' ₺',
       isSuccessful: payment.isSuccessful,
       createdAt: format(payment.createdAt, 'MMMM do, yyyy'),
    }))

@@ -108,11 +108,11 @@ export function NavMenu() {
          <NavigationMenuList>
             {/* Ürünler */}
             <NavigationMenuItem>
-               <Link href="/products" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/products" prefetch={true}>
                      <span className="font-normal text-foreground/70">Ürünler</span>
-                  </NavigationMenuLink>
-               </Link>
+                  </Link>
+               </NavigationMenuLink>
             </NavigationMenuItem>
 
             {/* Kategoriler — dropdown with image background */}
@@ -128,6 +128,7 @@ export function NavMenu() {
                            <Link
                               className="group relative flex h-full w-full select-none flex-col justify-end rounded-xl overflow-hidden no-underline outline-none focus:shadow-md"
                               href="/products"
+                              prefetch={true}
                            >
                               {/* AI-generated background */}
                               <div className="absolute inset-0">
@@ -212,14 +213,23 @@ export function NavMenu() {
 
             {/* Atölye */}
             <NavigationMenuItem>
-               <Link href="/atolye" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/atolye" prefetch={true}>
                      <span className="font-semibold text-orange-500 flex items-center gap-1">
                         <SparklesIcon className="h-3 w-3" />
                         Atölye
                      </span>
-                  </NavigationMenuLink>
-               </Link>
+                  </Link>
+               </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            {/* Blog */}
+            <NavigationMenuItem>
+               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/blog" prefetch={true}>
+                     <span className="font-normal text-foreground/70">Blog</span>
+                  </Link>
+               </NavigationMenuLink>
             </NavigationMenuItem>
          </NavigationMenuList>
       </NavigationMenu>
@@ -237,6 +247,7 @@ const CategoryListItem = forwardRef<
          <Link
             href={href}
             ref={ref}
+            prefetch={true}
             className={cn(
                'block select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent',
                className
@@ -259,6 +270,7 @@ function CollectionItem({
          <NavigationMenuLink asChild>
             <Link
                href={href}
+               prefetch={true}
                className="group block select-none rounded-lg border border-transparent p-3 leading-none no-underline outline-none transition-all hover:border-border hover:bg-accent"
             >
                <div className="flex items-center gap-1.5 mb-1">

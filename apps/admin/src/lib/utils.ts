@@ -7,9 +7,9 @@ export function cn(...inputs: ClassValue[]) {
    return twMerge(clsx(inputs))
 }
 
-export const formatter = new Intl.NumberFormat('en-US', {
+export const formatter = new Intl.NumberFormat('tr-TR', {
    style: 'currency',
-   currency: 'USD',
+   currency: 'TRY',
    maximumFractionDigits: 2,
 })
 
@@ -33,6 +33,6 @@ export function getErrorResponse(
    )
 }
 
-export function isVariableValid(variable) {
+export function isVariableValid(variable: unknown) {
    return variable !== null && variable !== undefined
 }

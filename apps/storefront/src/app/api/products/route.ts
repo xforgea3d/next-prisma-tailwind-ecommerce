@@ -4,10 +4,25 @@ import { NextResponse } from 'next/server'
 export async function GET(req: Request) {
    try {
       const products = await prisma.product.findMany({
-         include: {
-            brand: true,
-            categories: true,
+         where: { isAvailable: true },
+         select: {
+            id: true,
+            title: true,
+            description: true,
+            images: true,
+            price: true,
+            discount: true,
+            stock: true,
+            isAvailable: true,
+            isFeatured: true,
+            productType: true,
+            customOptions: true,
+            keywords: true,
+            brand: { select: { id: true, title: true, logo: true } },
+            categories: { select: { id: true, title: true } },
+            createdAt: true,
          },
+         orderBy: { createdAt: 'desc' },
       })
 
       return NextResponse.json(products)

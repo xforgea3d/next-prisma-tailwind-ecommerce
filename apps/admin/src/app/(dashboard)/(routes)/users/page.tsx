@@ -7,11 +7,15 @@ import { UsersTable } from './components/table'
 import { UserColumn } from './components/table'
 
 export default async function UsersPage() {
-   const users = await prisma.user.findMany({
-      include: {
-         orders: true,
+   const users = await prisma.profile.findMany({
+      select: {
+         id: true,
+         name: true,
+         email: true,
+         phone: true,
+         _count: { select: { orders: true } },
       },
-      take: 10,
+      take: 50,
       orderBy: {
          updatedAt: 'desc',
       },
@@ -22,12 +26,12 @@ export default async function UsersPage() {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      orders: user.orders.length,
+      orders: user._count.orders,
    }))
 
    return (
       <div className="block space-y-4 my-6">
-         <Heading title="Users" description="Manage products for your store" />
+         <Heading title={`Kullanıcılar (${users.length})`} description="Mağaza kullanıcılarını yönet" />
          <Separator />
          <UsersTable data={formattedUsers} />
       </div>

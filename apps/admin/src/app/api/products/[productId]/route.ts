@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { revalidateStorefront } from '@/lib/revalidate-storefront'
 import { revalidatePath } from 'next/cache'
 
 export async function GET(
@@ -47,10 +48,9 @@ export async function DELETE(
          },
       })
 
-      // Immediately revalidate storefront pages so the deleted product disappears
-      revalidatePath('/')
-      revalidatePath('/products')
-      revalidatePath(`/products/${params.productId}`)
+      // Bust admin layout cache and storefront pages
+      revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products', `/products/${params.productId}`])
 
       return NextResponse.json(product)
    } catch (error) {
@@ -97,10 +97,9 @@ export async function PATCH(
          include: { brand: true, categories: true },
       })
 
-      // Immediately bust the storefront cache for this product and listing pages
-      revalidatePath('/')
-      revalidatePath('/products')
-      revalidatePath(`/products/${params.productId}`)
+      // Bust admin layout cache and storefront pages
+      revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products', `/products/${params.productId}`])
 
       return NextResponse.json(product)
    } catch (error) {

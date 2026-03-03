@@ -17,7 +17,7 @@ export const CartGrid = () => {
             <div className="md:col-span-2">
                <Card>
                   <CardContent className="p-4">
-                     <p>Your Cart is empty...</p>
+                     <p>Sepetiniz boş.</p>
                   </CardContent>
                </Card>
             </div>

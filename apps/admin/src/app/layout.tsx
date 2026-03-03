@@ -10,8 +10,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-   title: 'Admin Dashboard',
-   description: 'E-Commerce Store Admin Dashboard',
+   title: 'xForgea3D — Yönetim Paneli',
+   description: 'xForgea3D 3D Baskı Mağazası Yönetim Paneli',
 }
 
 export default async function RootLayout({
@@ -20,7 +20,7 @@ export default async function RootLayout({
    children: React.ReactNode
 }) {
    return (
-      <html lang="en" suppressHydrationWarning>
+      <html lang="tr" suppressHydrationWarning>
          <body className={inter.className} suppressHydrationWarning>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                <Suspense fallback={null}>

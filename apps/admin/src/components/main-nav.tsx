@@ -48,26 +48,6 @@ export function MainNav({
          active: pathname.includes(`/brands`),
       },
       {
-         href: `/codes`,
-         label: 'Kodlar',
-         active: pathname.includes(`/codes`),
-      },
-      {
-         href: `/settings/site`,
-         label: 'Site Ayarları',
-         active: pathname.includes(`/settings`),
-      },
-      {
-         href: `/content/pages`,
-         label: 'Sayfalar',
-         active: pathname.startsWith(`/content/pages`),
-      },
-      {
-         href: `/content/sections`,
-         label: 'Ana Sayfa',
-         active: pathname.startsWith(`/content/sections`),
-      },
-      {
          href: `/content/blog`,
          label: 'Blog',
          active: pathname.startsWith(`/content/blog`),

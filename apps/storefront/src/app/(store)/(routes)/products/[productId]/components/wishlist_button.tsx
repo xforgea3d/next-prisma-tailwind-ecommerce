@@ -4,6 +4,7 @@ import { Spinner } from '@/components/native/icons'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { HeartIcon } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export default function WishlistButton({ product }) {
@@ -15,28 +16,24 @@ export default function WishlistButton({ product }) {
    useEffect(() => {
       async function getWishlist() {
          try {
-            const response = await fetch(`/api/wishlist`, {
-               cache: 'no-store',
-               method: 'GET',
-            })
-
+            const response = await fetch('/api/wishlist')
             const json = await response.json()
-
             setWishlist(json)
-            setFetchingWishlist(false)
          } catch (error) {
             console.error({ error })
+         } finally {
+            setFetchingWishlist(false)
          }
       }
 
       if (authenticated) getWishlist()
+      else setFetchingWishlist(false)
    }, [authenticated])
 
    function isProductInWishlist() {
-      for (let i = 0; i < wishlist?.length; i++) {
-         if (wishlist[i]?.id === product?.id) {
-            return true
-         }
+      if (!wishlist) return false
+      for (let i = 0; i < wishlist.length; i++) {
+         if (wishlist[i]?.id === product?.id) return true
       }
       return false
    }
@@ -44,75 +41,71 @@ export default function WishlistButton({ product }) {
    async function onAddToWishlist() {
       try {
          setFetchingWishlist(true)
-
-         const response = await fetch(`/api/wishlist`, {
+         const response = await fetch('/api/wishlist', {
             method: 'POST',
             body: JSON.stringify({ productId: product?.id, connect: true }),
-            cache: 'no-store',
-            headers: {
-               'Content-Type': 'application/json-string',
-            },
+            headers: { 'Content-Type': 'application/json' },
          })
-
          const json = await response.json()
-
          setWishlist(json)
-         setFetchingWishlist(false)
       } catch (error) {
          console.error({ error })
+      } finally {
+         setFetchingWishlist(false)
       }
    }
 
    async function onRemoveFromWishlist() {
       try {
          setFetchingWishlist(true)
-
-         const response = await fetch(`/api/wishlist`, {
+         const response = await fetch('/api/wishlist', {
             method: 'DELETE',
             body: JSON.stringify({ productId: product.id, connect: false }),
-            cache: 'no-store',
-            headers: {
-               'Content-Type': 'application/json-string',
-            },
+            headers: { 'Content-Type': 'application/json' },
          })
-
          const json = await response.json()
-
          setWishlist(json)
-         setFetchingWishlist(false)
       } catch (error) {
          console.error({ error })
+      } finally {
+         setFetchingWishlist(false)
       }
    }
 
    if (!authenticated) {
-      return
+      return (
+         <Button asChild variant="outline" size="icon" className="flex-shrink-0" title="Favorilere Ekle">
+            <Link href="/login">
+               <HeartIcon className="h-4 w-4" />
+            </Link>
+         </Button>
+      )
    }
 
    if (fetchingWishlist)
       return (
-         <Button disabled>
+         <Button disabled variant="outline" size="icon" className="flex-shrink-0">
             <Spinner />
          </Button>
       )
 
    if (!isProductInWishlist()) {
       return (
-         <Button className="flex gap-2" onClick={onAddToWishlist}>
-            <HeartIcon className="h-4" /> Add to Wishlist
+         <Button variant="outline" size="icon" className="flex-shrink-0" onClick={onAddToWishlist} title="Favorilere Ekle">
+            <HeartIcon className="h-4 w-4" />
          </Button>
       )
    }
 
-   if (isProductInWishlist()) {
-      return (
-         <Button
-            variant="outline"
-            className="flex gap-2"
-            onClick={onRemoveFromWishlist}
-         >
-            <HeartIcon className="h-4" /> Remove from Wishlist
-         </Button>
-      )
-   }
+   return (
+      <Button
+         variant="outline"
+         size="icon"
+         className="flex-shrink-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+         onClick={onRemoveFromWishlist}
+         title="Favorilerden Çıkar"
+      >
+         <HeartIcon className="h-4 w-4 fill-current" />
+      </Button>
+   )
 }

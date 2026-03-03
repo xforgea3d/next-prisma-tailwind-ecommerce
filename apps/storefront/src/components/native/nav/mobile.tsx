@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { docsConfig } from '@/config/docs'
 import Config from '@/config/site'
 import { cn } from '@/lib/utils'
@@ -26,6 +26,7 @@ export function MobileNav() {
             </Button>
          </SheetTrigger>
          <SheetContent side="left" className="pr-0">
+            <SheetTitle className="sr-only">Mobil Menü</SheetTitle>
             <MobileLink
                href="/"
                className="flex items-center"
@@ -92,6 +93,7 @@ function MobileLink({
    return (
       <Link
          href={href}
+         prefetch={true}
          onClick={() => {
             router.push(href.toString())
             onOpenChange?.(false)

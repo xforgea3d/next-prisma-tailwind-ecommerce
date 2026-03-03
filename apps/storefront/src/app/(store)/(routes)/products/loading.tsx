@@ -1,13 +1,12 @@
-import { ProductSkeletonGrid } from '@/components/native/Product'
+import { Loader2 } from 'lucide-react'
 
 export default function Loading() {
     return (
-        <div className="py-10 space-y-6 animate-in fade-in duration-300 w-full">
-            <div className="space-y-4">
-                <div className="h-8 w-48 bg-neutral-200 dark:bg-neutral-800 rounded-md animate-pulse"></div>
-                <div className="h-4 w-64 bg-neutral-200 dark:bg-neutral-800 rounded-md animate-pulse"></div>
+        <div className="flex min-h-[60vh] w-full items-center justify-center">
+            <div className="flex flex-col items-center gap-4 text-muted-foreground">
+                <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+                <p className="text-sm font-medium animate-pulse">Ürünler listeleniyor...</p>
             </div>
-            <ProductSkeletonGrid />
         </div>
     )
 }

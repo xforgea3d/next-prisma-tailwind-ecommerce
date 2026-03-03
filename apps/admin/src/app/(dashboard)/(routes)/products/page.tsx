@@ -13,14 +13,20 @@ import { ProductColumn } from './components/table'
 
 export default async function ProductsPage() {
    const products = await prisma.product.findMany({
-      include: {
-         orders: true,
-         categories: true,
-         brand: true,
+      select: {
+         id: true,
+         title: true,
+         price: true,
+         discount: true,
+         isAvailable: true,
+         categories: { select: { title: true }, take: 1 },
+         brand: { select: { title: true } },
+         _count: { select: { orders: true } },
       },
       orderBy: {
          createdAt: 'desc',
       },
+      take: 100,
    })
 
    const formattedProducts: ProductColumn[] = products.map((product) => ({
@@ -28,8 +34,8 @@ export default async function ProductsPage() {
       title: product.title,
       price: formatter.format(product.price),
       discount: formatter.format(product.discount),
-      category: product.categories[0].title,
-      sales: product.orders.length,
+      category: product.categories[0]?.title || '-',
+      sales: product._count.orders,
       isAvailable: product.isAvailable,
    }))
 

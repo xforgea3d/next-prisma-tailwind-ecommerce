@@ -1,9 +1,17 @@
 {
    "name": "next-prisma-tailwind-ecommerce",
    "version": "1.0.0",
+   "private": true,
+   "workspaces": [
+      "apps/*"
+   ],
    "scripts": {
       "prepare": "husky install",
-      "update": "npx npm-check-updates -u"
+      "update": "npx npm-check-updates -u",
+      "dev:storefront": "npm run dev --workspace=apps/storefront",
+      "dev:admin": "npm run dev --workspace=apps/admin",
+      "build:storefront": "npm run build --workspace=apps/storefront",
+      "build:admin": "npm run build --workspace=apps/admin"
    },
    "author": {
       "name": "Sesto",

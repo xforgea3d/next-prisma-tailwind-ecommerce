@@ -12,7 +12,7 @@ import {
    FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import type { UserWithIncludes } from '@/types/prisma'
+import type { ProfileWithIncludes } from '@/types/prisma'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -24,13 +24,12 @@ const formSchema = z.object({
    name: z.string().min(1),
    email: z.string().min(1),
    phone: z.string().min(1),
-   isBanned: z.boolean().default(false).optional(),
 })
 
 type UserFormValues = z.infer<typeof formSchema>
 
 interface UserFormProps {
-   initialData: UserWithIncludes | null
+   initialData: ProfileWithIncludes | null
 }
 
 export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
@@ -44,14 +43,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
 
    const defaultValues = initialData
       ? {
-           ...initialData,
-        }
+         ...initialData,
+      }
       : {
-           name: '---',
-           phone: '---',
-           email: '---',
-           isBanned: false,
-        }
+         name: '---',
+         phone: '---',
+         email: '---',
+      }
 
    const form = useForm<UserFormValues>({
       resolver: zodResolver(formSchema),
@@ -63,13 +61,13 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
+            await fetch(`/api/users/${params.userId}`, {
                method: 'PATCH',
                body: JSON.stringify(data),
                cache: 'no-store',
             })
          } else {
-            await fetch(`/api/products`, {
+            await fetch(`/api/users`, {
                method: 'POST',
                body: JSON.stringify(data),
                cache: 'no-store',
@@ -77,7 +75,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          }
 
          router.refresh()
-         router.push(`/products`)
+         router.push(`/users`)
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Something went wrong.')
@@ -140,27 +138,6 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
                         />
                      </FormControl>
                      <FormMessage />
-                  </FormItem>
-               )}
-            />
-            <FormField
-               control={form.control}
-               name="isBanned"
-               render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                           checked={field.value}
-                           onCheckedChange={field.onChange}
-                        />
-                     </FormControl>
-                     <div className="space-y-1 leading-none">
-                        <FormLabel>Banned</FormLabel>
-                        <FormDescription>
-                           This user will not be able to submit reviews or
-                           orders.
-                        </FormDescription>
-                     </div>
                   </FormItem>
                )}
             />

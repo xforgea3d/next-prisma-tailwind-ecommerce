@@ -4,21 +4,14 @@ import { NextResponse } from 'next/server'
 export async function GET(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
-
-      const user = await prisma.user.findUniqueOrThrow({
-         where: { id: userId, isEmailVerified: true },
+      const profile = await prisma.profile.findUniqueOrThrow({
+         where: { id: userId },
          include: {
             cart: {
                include: {
-                  items: {
-                     include: {
-                        product: true,
-                     },
-                  },
+                  items: { include: { product: true } },
                },
             },
             addresses: true,
@@ -27,16 +20,44 @@ export async function GET(req: Request) {
       })
 
       return NextResponse.json({
-         phone: user.phone,
-         email: user.email,
-         name: user.name,
-         birthday: user.birthday,
-         addresses: user.addresses,
-         wishlist: user.wishlist,
-         cart: user.cart,
+         phone: profile.phone,
+         email: profile.email,
+         name: profile.name,
+         avatar: profile.avatar,
+         addresses: profile.addresses,
+         wishlist: profile.wishlist,
+         cart: profile.cart,
       })
    } catch (error) {
       console.error('[PROFILE_GET]', error)
+      return new NextResponse('Internal error', { status: 500 })
+   }
+}
+
+export async function PATCH(req: Request) {
+   try {
+      const userId = req.headers.get('X-USER-ID')
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
+
+      const { name, phone, avatar } = await req.json()
+
+      const profile = await prisma.profile.update({
+         where: { id: userId },
+         data: {
+            ...(name !== undefined && { name }),
+            ...(phone !== undefined && { phone }),
+            ...(avatar !== undefined && { avatar }),
+         },
+      })
+
+      return NextResponse.json({
+         phone: profile.phone,
+         email: profile.email,
+         name: profile.name,
+         avatar: profile.avatar,
+      })
+   } catch (error) {
+      console.error('[PROFILE_PATCH]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }

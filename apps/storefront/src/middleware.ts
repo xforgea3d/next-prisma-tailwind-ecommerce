@@ -11,18 +11,12 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function middleware(request: NextRequest) {
    const { pathname } = request.nextUrl
 
-   // ── Always allow: auth callbacks, static assets, public pages ─────────
-   const alwaysAllow = [
-      '/auth/callback', '/maintenance', '/_next/', '/login',
-      '/favicon', '/api/maintenance-status', '/logo',
-   ]
-   if (alwaysAllow.some(p => pathname.startsWith(p))) {
-      return NextResponse.next()
-   }
-
    // ── Always allow public API routes ─────────────────────────────────────
    if (pathname.startsWith('/api/auth')) return NextResponse.next()
    if (pathname.startsWith('/api/custom-order')) return NextResponse.next()
+   if (pathname.startsWith('/api/products')) return NextResponse.next()
+   if (pathname.startsWith('/api/revalidate')) return NextResponse.next()
+   if (pathname.startsWith('/api/search')) return NextResponse.next()
 
    // ── Session check (only for protected paths) ───────────────────────────
    const { supabaseResponse, user } = await updateSession(request)
@@ -42,5 +36,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
    // ONLY protect these routes — do NOT run middleware on every page
-   matcher: ['/profile/:path*', '/checkout/:path*', '/api/:path*'],
+   matcher: [
+      '/profile/:path*',
+      '/checkout/:path*',
+      // We protect all APIs by default, but exclude public ones at the top of the function
+      '/api/:path*'
+   ],
 }

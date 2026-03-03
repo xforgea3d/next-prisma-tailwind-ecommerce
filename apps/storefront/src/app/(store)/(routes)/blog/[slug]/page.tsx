@@ -1,10 +1,13 @@
 import prisma from '@/lib/prisma'
+import { BlogPostJsonLd } from '@/app/json-ld'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xforgea3d.com'
 
 interface Props {
    params: { slug: string }
@@ -18,7 +21,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
    return {
       title: post.seo_title_tr ?? post.title_tr,
       description: post.seo_description_tr ?? post.excerpt_tr ?? undefined,
-      openGraph: post.cover_image_url ? { images: [post.cover_image_url] } : undefined,
+      openGraph: {
+         type: 'article',
+         title: post.seo_title_tr ?? post.title_tr,
+         description: post.seo_description_tr ?? post.excerpt_tr ?? undefined,
+         url: `${SITE_URL}/blog/${post.slug}`,
+         ...(post.cover_image_url && {
+            images: [{ url: post.cover_image_url, alt: post.title_tr }],
+         }),
+         publishedTime: post.published_at?.toISOString(),
+         tags: post.tags,
+         locale: 'tr_TR',
+         siteName: 'xForgea3D',
+      },
+      twitter: {
+         card: 'summary_large_image',
+         title: post.seo_title_tr ?? post.title_tr,
+         description: post.seo_description_tr ?? post.excerpt_tr ?? undefined,
+         ...(post.cover_image_url && { images: [post.cover_image_url] }),
+      },
+      alternates: {
+         canonical: `${SITE_URL}/blog/${post.slug}`,
+      },
    }
 }
 
@@ -30,6 +54,9 @@ export default async function BlogPostPage({ params }: Props) {
 
    return (
       <article className="max-w-3xl mx-auto px-4 py-12">
+         {/* JSON-LD BlogPosting Schema */}
+         <BlogPostJsonLd post={post} />
+
          {post.cover_image_url && (
             <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-8">
                <Image src={post.cover_image_url} alt={post.title_tr} fill className="object-cover" />
@@ -54,7 +81,7 @@ export default async function BlogPostPage({ params }: Props) {
          />
          <div className="mt-12 pt-6 border-t">
             <Link href="/blog" className="text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground">
-               ← Blog'a Dön
+               ← Blog'a Don
             </Link>
          </div>
       </article>

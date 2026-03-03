@@ -1,155 +1,11 @@
-'use client'
-
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowRightIcon, SparklesIcon, LayersIcon } from 'lucide-react'
+import dynamic from 'next/dynamic'
 
-/**
- * Animated 3D Printer SVG — clearly shows a printer nozzle depositing
- * filament layer by layer to build a figure. Much more recognizable than
- * the abstract "layer prism" shown before.
- */
-function PrinterAnimation() {
-    return (
-        <div className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-[500px] h-[500px] items-center justify-center overflow-hidden pointer-events-none" style={{ perspective: 1000 }}>
-            {/* Ambient Background Glows */}
-            <div className="absolute w-[300px] h-[300px] bg-orange-500/20 dark:bg-orange-600/20 blur-[100px] rounded-full mix-blend-screen" />
-            <div className="absolute w-[200px] h-[200px] bg-amber-400/10 dark:bg-amber-500/10 blur-[60px] rounded-full -translate-x-12 translate-y-12 mix-blend-screen" />
-
-            <div className="relative w-full h-full flex items-center justify-center" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(5deg) rotateY(-10deg)' }}>
-                {/* 3D Printer Enclosure (Removed overflow-hidden so the model can pop out) */}
-                <div className="relative w-[340px] h-[380px] rounded-3xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100/40 dark:bg-neutral-900/40 backdrop-blur-sm shadow-2xl flex flex-col items-center transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
-                    {/* Inner Background & Glare (Clipped so backgrounds don't bleed out of borders) */}
-                    <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
-                        <div className="absolute inset-0 bg-gradient-to-b from-neutral-200/50 to-neutral-50/50 dark:from-neutral-900/50 dark:to-neutral-950/80 shadow-[inset_0_10px_30px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_10px_30px_rgba(0,0,0,0.5)]" />
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 dark:from-white/0 dark:via-white/5 dark:to-white/0" style={{ transform: 'translateX(-20%) skewX(-15deg)' }} />
-                    </div>
-
-                    {/* Top frame/light bar */}
-                    <div className="w-full h-8 bg-neutral-200 dark:bg-neutral-950 border-b border-neutral-300 dark:border-neutral-800 flex items-center justify-center shadow-inner z-20 rounded-t-3xl relative">
-                        <div className="w-32 h-1 bg-orange-400/50 rounded-full shadow-[0_0_10px_#f97316]" />
-                    </div>
-
-                    {/* Internal build chamber */}
-                    <div className="relative flex-1 w-full flex flex-col items-center justify-end pb-8">
-
-                        {/* Z-Axis Rods */}
-                        <div className="absolute left-10 top-0 bottom-8 w-2 bg-gradient-to-r from-neutral-300 to-neutral-400 dark:from-neutral-700 dark:to-neutral-600 rounded-full" />
-                        <div className="absolute right-10 top-0 bottom-8 w-2 bg-gradient-to-r from-neutral-300 to-neutral-400 dark:from-neutral-700 dark:to-neutral-600 rounded-full" />
-
-                        {/* Print Bed (moves UP then slowly DOWN over cycle) */}
-                        <div className="absolute bottom-8 w-[240px] h-6 bg-neutral-300 dark:bg-neutral-800 rounded-lg shadow-xl border-t border-neutral-200 dark:border-neutral-700 animate-bed-drop z-10 flex justify-center transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
-                            {/* The Printed Object Wrapper - Ejects out towards the user */}
-                            <div className="absolute bottom-6 w-32 h-[200px] flex items-end justify-center z-30 animate-model-eject transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
-                                {/* Solid object filling the space, layer by layer growth via clip path */}
-                                <div className="w-32 h-[200px] flex-shrink-0 relative animate-model-grow drop-shadow-[0_0_15px_rgba(249,115,22,0.6)]">
-                                    <svg viewBox="0 0 100 120" preserveAspectRatio="none" className="w-full h-full">
-                                        {/* Low Poly Vase Base */}
-                                        <path d="M20,120 L80,120 L90,60 L70,20 L50,0 L30,20 L10,60 Z" fill="#f97316" />
-                                        {/* Details inside */}
-                                        <path d="M50,0 L30,20 L50,40 Z" fill="rgba(0,0,0,0.2)" />
-                                        <path d="M70,20 L50,40 L90,60 Z" fill="rgba(0,0,0,0.1)" />
-                                        <path d="M50,40 L30,20 L10,60 L50,80 Z" fill="rgba(0,0,0,0.15)" />
-                                        <path d="M50,40 L50,80 L90,60 Z" fill="rgba(0,0,0,0.05)" />
-                                        <path d="M50,80 L10,60 L20,120 L50,120 Z" fill="rgba(0,0,0,0.25)" />
-                                        <path d="M50,80 L50,120 L80,120 L90,60 Z" fill="rgba(0,0,0,0.1)" />
-                                    </svg>
-                                    <div className="absolute inset-x-0 top-0 h-1 bg-white/60 blur-[1px]" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* X/Y Gantry (moves around, fixed height) */}
-                        {/* The horizontal rail */}
-                        <div className="absolute top-[80px] w-full h-3 bg-neutral-400 dark:bg-neutral-700 shadow-md z-20">
-                            {/* The print head / toolhead */}
-                            <div className="absolute top-1/2 -translate-y-1/2 w-12 h-16 bg-neutral-800 dark:bg-black rounded-md shadow-2xl border border-neutral-600 dark:border-neutral-800 animate-print-head flex flex-col items-center">
-                                {/* Brand mark on head */}
-                                <div className="mt-2 w-4 h-1 bg-orange-500 rounded-full" />
-                                {/* Hotend cooling fan */}
-                                <div className="mt-2 w-8 h-8 rounded-full border border-neutral-700 flex items-center justify-center animate-spin-slow">
-                                    <div className="w-6 h-6 bg-neutral-700 rounded-full" style={{ background: 'conic-gradient(from 0deg, transparent 0 45deg, #404040 45deg 90deg, transparent 90deg 135deg, #404040 135deg 180deg, transparent 180deg 225deg, #404040 225deg 270deg, transparent 270deg 315deg, #404040 315deg 360deg)' }} />
-                                </div>
-                                {/* Nozzle */}
-                                <div className="absolute -bottom-2 w-2 h-3 bg-zinc-300 dark:bg-zinc-500 clip-nozzle" />
-                                <div className="absolute -bottom-6 w-1 h-6 bg-orange-400/80 animate-pulse shadow-[0_0_8px_#f97316]" />
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-
-            <style>{`
-                .clip-nozzle { clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); }
-                .animate-spin-slow { animation: spin 0.8s linear infinite; }
-                
-                @keyframes head-move {
-                    0%, 5% { transform: translate(140px, -50%); }
-                    10% { transform: translate(220px, -50%); }
-                    20% { transform: translate(100px, -50%); }
-                    30% { transform: translate(240px, -50%); }
-                    40% { transform: translate(80px, -50%); }
-                    50% { transform: translate(190px, -50%); }
-                    60% { transform: translate(130px, -50%); }
-                    /* Ejection phase (65% to 95%) - Move carriage far right out of the way */
-                    65%, 95% { transform: translate(260px, -50%); }
-                    100% { transform: translate(140px, -50%); }
-                }
-                .animate-print-head { animation: head-move 8s ease-in-out infinite; }
-
-                @keyframes bed-drop {
-                    0%, 5% { transform: translateY(-200px); }
-                    65%, 85% { transform: translateY(0); }
-                    100% { transform: translateY(-200px); }
-                }
-                .animate-bed-drop { animation: bed-drop 8s ease-in-out infinite; }
-
-                @keyframes model-grow {
-                    0%, 5% { clip-path: inset(100% 0 0 0); }
-                    65%, 85% { clip-path: inset(0% 0 0 0); }
-                    100% { clip-path: inset(100% 0 0 0); }
-                }
-                .animate-model-grow { animation: model-grow 8s ease-in-out infinite; }
-
-                @keyframes filament-glow {
-                    0%, 4% { opacity: 0; }
-                    5%, 63% { opacity: 1; height: 24px; }
-                    64%, 100% { opacity: 0; }
-                }
-                .animate-filament-glow { animation: filament-glow 8s ease-in-out infinite; }
-
-                @keyframes model-eject {
-                    0%, 65% { 
-                        transform: translateZ(0) translateY(0) scale(1) rotateY(0) rotateX(0); 
-                        opacity: 1; 
-                    }
-                    /* Allow brief rest to display finished state */
-                    70% { 
-                        transform: translateZ(0) translateY(0) scale(1) rotateY(0) rotateX(0); 
-                        opacity: 1; 
-                    }
-                    /* Launch model dramatically out of the printer towards user */
-                    85% { 
-                        transform: translateZ(350px) translateY(-20px) translateX(60px) scale(1.6) rotateY(-15deg) rotateX(10deg); 
-                        opacity: 0; 
-                    }
-                    100% { 
-                        transform: translateZ(0) translateY(0) scale(1); 
-                        opacity: 0; 
-                    }
-                }
-                .animate-model-eject { animation: model-eject 8s ease-in-out infinite; }
-
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
-        </div>
-    )
-}
+// Lazy-load animation — ssr:false so heavy CSS keyframes only run on client
+// Hero itself remains a Server Component for fast initial paint
+const PrinterAnimation = dynamic(() => import('./PrinterAnimation'), { ssr: false })
 
 export default function Hero() {
     return (
@@ -178,7 +34,7 @@ export default function Hero() {
                 </span>
 
                 {/* Headline */}
-                <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.05] text-foreground">
+                <h1 className="text-4xl md:text-5xl xl:text-[3.4rem] font-black tracking-tighter leading-[1.0] text-foreground">
                     Fikrine Şekil Ver,
                     <br />
                     <span className="bg-gradient-to-r from-orange-500 via-amber-400 to-orange-600 dark:from-orange-400 dark:via-amber-300 dark:to-orange-500 bg-clip-text text-transparent">

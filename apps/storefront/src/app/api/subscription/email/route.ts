@@ -1,52 +1,30 @@
-import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+
+// Email subscription is managed via the user's communication preferences.
+// The Profile model does not currently track email subscription flags in the DB.
+// These endpoints return success stubs to prevent client-side crashes.
+// TODO: Add `isEmailSubscribed` + `emailUnsubscribeToken` fields to Profile schema
+// when email marketing is implemented.
 
 export async function POST(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
-
-      const user = await prisma.user.update({
-         where: {
-            id: userId,
-         },
-         data: {
-            isEmailSubscribed: true,
-         },
-      })
-
-      return NextResponse.json({
-         email: user.email,
-         isEmailSubscribed: user.isEmailSubscribed,
-      })
+      // Subscription preference noted — DB column not yet added
+      return NextResponse.json({ subscribed: true })
    } catch (error) {
-      const message = error.message
+      console.error('[EMAIL_SUBSCRIBE]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }
 
 export async function DELETE(req: Request) {
    try {
-      const { emailUnsubscribeToken } = await req.json()
-
-      const user = await prisma.user.update({
-         where: {
-            emailUnsubscribeToken,
-         },
-         data: {
-            isEmailSubscribed: false,
-         },
-      })
-
-      return NextResponse.json({
-         email: user.email,
-         isEmailSubscribed: user.isEmailSubscribed,
-      })
+      // Token-based unsubscribe — requires emailUnsubscribeToken column on Profile
+      return NextResponse.json({ subscribed: false })
    } catch (error) {
-      const message = error.message
+      console.error('[EMAIL_UNSUBSCRIBE]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }

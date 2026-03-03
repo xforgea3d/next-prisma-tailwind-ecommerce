@@ -4,6 +4,7 @@ import Carousel from '@/components/native/Carousel'
 import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
+import { ProductJsonLd } from '@/app/json-ld'
 import {
    ChevronRightIcon,
    Layers3Icon,
@@ -13,6 +14,8 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import Link from 'next/link'
 
 import { DataSection } from './components/data'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xforgea3d.com'
 
 type Props = {
    params: { productId: string }
@@ -27,14 +30,35 @@ export async function generateMetadata(
       where: {
          id: params.productId,
       },
+      include: { brand: true },
    })
+
+   if (!product) return {}
+
+   const finalPrice = product.price - product.discount
 
    return {
       title: product.title,
-      description: product.description,
+      description: product.description ?? `${product.title} - xForgea3D premium 3D baski urunu`,
       keywords: product.keywords,
       openGraph: {
-         images: product.images,
+         type: 'website',
+         title: `${product.title} | xForgea3D`,
+         description: product.description ?? `${product.title} - xForgea3D`,
+         url: `${SITE_URL}/products/${product.id}`,
+         images: product.images.map(img => ({
+            url: img,
+            alt: product.title,
+         })),
+      },
+      twitter: {
+         card: 'summary_large_image',
+         title: `${product.title} | xForgea3D`,
+         description: product.description ?? `${product.title} - xForgea3D`,
+         images: product.images.length > 0 ? [product.images[0]] : undefined,
+      },
+      alternates: {
+         canonical: `${SITE_URL}/products/${product.id}`,
       },
    }
 }
@@ -85,6 +109,9 @@ export default async function Product({
 
    return (
       <div className="space-y-10">
+
+         {/* JSON-LD Product Schema */}
+         <ProductJsonLd product={product} />
 
          {/* Breadcrumbs */}
          <Breadcrumbs product={product} />

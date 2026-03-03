@@ -1,5 +1,7 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
+import { revalidateStorefront } from '@/lib/revalidate-storefront'
 
 export async function GET(
    req: Request,
@@ -7,24 +9,18 @@ export async function GET(
 ) {
    try {
       const userId = req.headers.get('X-USER-ID')
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
+      if (!params.brandId) return new NextResponse('Brand id is required', { status: 400 })
 
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
-
-      if (!params.brandId) {
-         return new NextResponse('Brand id is required', { status: 400 })
-      }
-
-      const category = await prisma.category.findUnique({
-         where: {
-            id: params.brandId,
-         },
+      const brand = await prisma.brand.findUnique({
+         where: { id: params.brandId },
+         include: { products: true },
       })
+      if (!brand) return new NextResponse('Brand not found', { status: 404 })
 
-      return NextResponse.json(category)
+      return NextResponse.json(brand)
    } catch (error) {
-      console.error('[CATEGORY_GET]', error)
+      console.error('[BRAND_GET]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }
@@ -35,24 +31,19 @@ export async function DELETE(
 ) {
    try {
       const userId = req.headers.get('X-USER-ID')
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
+      if (!params.brandId) return new NextResponse('Brand id is required', { status: 400 })
 
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
-
-      if (!params.brandId) {
-         return new NextResponse('Brand id is required', { status: 400 })
-      }
-
-      const category = await prisma.category.delete({
-         where: {
-            id: params.brandId,
-         },
+      const brand = await prisma.brand.delete({
+         where: { id: params.brandId },
       })
 
-      return NextResponse.json(category)
+      revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products'])
+
+      return NextResponse.json(brand)
    } catch (error) {
-      console.error('[CATEGORY_DELETE]', error)
+      console.error('[BRAND_DELETE]', error)
       return new NextResponse('Internal error', { status: 500 })
    }
 }
@@ -63,36 +54,27 @@ export async function PATCH(
 ) {
    try {
       const userId = req.headers.get('X-USER-ID')
-
-      if (!userId) {
-         return new NextResponse('Unauthorized', { status: 401 })
-      }
+      if (!userId) return new NextResponse('Unauthorized', { status: 401 })
+      if (!params.brandId) return new NextResponse('Brand id is required', { status: 400 })
 
       const body = await req.json()
+      const { title, description, logo } = body
 
-      const { title, description } = body
-      console.log('PATCH', body)
-
-      if (!title && !description) {
-         return new NextResponse(
-            'At least one field (title or description) is required',
-            { status: 400 }
-         )
-      }
-
-      if (!params.brandId) {
-         return new NextResponse('Brand id is required', { status: 400 })
+      if (!title && !description && !logo) {
+         return new NextResponse('At least one field is required', { status: 400 })
       }
 
       const updatedBrand = await prisma.brand.update({
-         where: {
-            id: params.brandId,
-         },
+         where: { id: params.brandId },
          data: {
-            ...(title && { title }),
-            ...(description && { description }),
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(logo !== undefined && { logo }),
          },
       })
+
+      revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products'])
 
       return NextResponse.json(updatedBrand)
    } catch (error) {

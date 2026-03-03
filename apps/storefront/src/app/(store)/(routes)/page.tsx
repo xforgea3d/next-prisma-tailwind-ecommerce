@@ -1,4 +1,4 @@
-export const revalidate = 60
+export const revalidate = 30; // ISR cache for fast loading; webhook bust for instant updates
 
 import {
    BlogPostGrid,

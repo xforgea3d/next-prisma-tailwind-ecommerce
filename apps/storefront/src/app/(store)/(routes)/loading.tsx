@@ -4,7 +4,7 @@ import { Separator } from '@/components/native/separator'
 
 export default function Loading() {
     return (
-        <div className="flex flex-col gap-0 border-neutral-200 dark:border-neutral-700 w-full animate-in fade-in duration-300">
+        <div className="flex flex-col gap-0 border-neutral-200 dark:border-neutral-700 w-full animate-in fade-in">
             <section className="py-6">
                 <div className="h-[400px] md:h-[500px] w-full bg-neutral-100 dark:bg-neutral-800 rounded-xl animate-pulse"></div>
             </section>

@@ -1,35 +1,37 @@
 'use client'
 
-import { CartGrid } from '@/app/(store)/(routes)/cart/components/grid'
+import { Heading } from '@/components/native/heading'
+import { ProductGrid } from '@/components/native/Product'
+import { Card, CardContent } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
-import { isVariableValid, validateBoolean } from '@/lib/utils'
+import { isVariableValid } from '@/lib/utils'
 import { useUserContext } from '@/state/User'
+import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function User({}) {
+export default function WishlistPage() {
    const { authenticated } = useAuthenticated()
-   const { user, loading } = useUserContext()
-
-   const [items, setItems] = useState(null)
+   const { user, loading: userLoading } = useUserContext()
    const router = useRouter()
 
+   const [wishlist, setWishlist] = useState(null)
+   const [loading, setLoading] = useState(true)
+
    useEffect(() => {
-      if (!loading && !isVariableValid(user)) router.push('/')
-   }, [user, loading, router])
+      if (!userLoading && !isVariableValid(user)) router.push('/login?redirect=/wishlist')
+   }, [user, userLoading, router])
 
    useEffect(() => {
       async function getWishlist() {
          try {
-            const response = await fetch(`/api/wishlist`, {
-               cache: 'no-store',
-            })
-
+            const response = await fetch('/api/wishlist')
             const json = await response.json()
-
-            setItems(json?.wishlist?.items)
+            setWishlist(json)
          } catch (error) {
             console.error({ error })
+         } finally {
+            setLoading(false)
          }
       }
 
@@ -37,8 +39,26 @@ export default function User({}) {
    }, [authenticated])
 
    return (
-      <>
-         <CartGrid />
-      </>
+      <div className="py-8">
+         <Heading
+            title="Favorilerim"
+            description="Beğendiğiniz ürünleri burada bulabilirsiniz."
+         />
+         {loading ? (
+            <div className="flex items-center justify-center py-20">
+               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+         ) : wishlist && wishlist.length > 0 ? (
+            <div className="mt-6">
+               <ProductGrid products={wishlist} />
+            </div>
+         ) : (
+            <Card className="mt-6">
+               <CardContent className="p-8 text-center text-muted-foreground">
+                  Henüz favorilere ürün eklemediniz.
+               </CardContent>
+            </Card>
+         )}
+      </div>
    )
 }

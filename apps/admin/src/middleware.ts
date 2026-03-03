@@ -1,8 +1,9 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
-   // Always allow auth API routes
+   // Always allow auth API routes and upload/generate endpoints
    if (request.nextUrl.pathname.startsWith('/api/auth')) return NextResponse.next()
 
    function isTargetingAPI() {
@@ -16,26 +17,65 @@ export async function middleware(request: NextRequest) {
       if (isTargetingAPI()) {
          return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
       }
-      // Redirect unauthenticated users to login
       return NextResponse.redirect(new URL('/login', request.url))
    }
 
-   // Set user context
-   supabaseResponse.headers.set('X-USER-ID', user.id)
+   // Verify admin role via Supabase - check profile table
+   // We use a lightweight Supabase query to check admin role
+   const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+         cookies: {
+            get(name: string) {
+               return request.cookies.get(name)?.value
+            },
+            set() {},
+            remove() {},
+         },
+      }
+   )
 
-   return supabaseResponse
+   const { data: profile } = await supabase
+      .from('Profile')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+   if (!profile || profile.role !== 'admin') {
+      if (isTargetingAPI()) {
+         return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+      }
+      return NextResponse.redirect(new URL('/login?error=not_admin', request.url))
+   }
+
+   // Pass admin user ID in headers
+   const requestHeaders = new Headers(request.headers)
+   requestHeaders.set('X-USER-ID', user.id)
+
+   const response = NextResponse.next({
+      request: { headers: requestHeaders },
+   })
+
+   supabaseResponse.cookies.getAll().forEach((cookie) => {
+      response.cookies.set(cookie.name, cookie.value, cookie as any)
+   })
+
+   return response
 }
 
 export const config = {
    matcher: [
-      /*
-       * Match all request paths except for the ones starting with:
-       * - _next/static (static files)
-       * - _next/image (image optimization files)
-       * - favicon.ico (favicon file)
-       * - login (login path doesn't need protection block)
-       * Feel free to modify this pattern to include more paths.
-       */
-      '/((?!_next/static|_next/image|favicon.ico|login|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+      '/',
+      '/products/:path*',
+      '/categories/:path*',
+      '/brands/:path*',
+      '/banners/:path*',
+      '/orders/:path*',
+      '/payments/:path*',
+      '/users/:path*',
+      '/content/:path*',
+      '/settings/:path*',
+      '/api/:path*',
    ],
 }

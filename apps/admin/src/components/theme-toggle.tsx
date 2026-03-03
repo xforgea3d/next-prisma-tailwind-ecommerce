@@ -7,6 +7,11 @@ import * as React from 'react'
 
 export function ThemeToggle() {
    const { resolvedTheme, setTheme } = useTheme()
+   const [mounted, setMounted] = React.useState(false)
+
+   React.useEffect(() => {
+      setMounted(true)
+   }, [])
 
    return (
       <Button
@@ -14,10 +19,14 @@ export function ThemeToggle() {
          size="icon"
          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
       >
-         {resolvedTheme === 'dark' ? (
-            <SunIcon className="h-4" />
+         {mounted ? (
+            resolvedTheme === 'dark' ? (
+               <SunIcon className="h-4" />
+            ) : (
+               <MoonIcon className="h-4" />
+            )
          ) : (
-            <MoonIcon className="h-4" />
+            <span className="h-4 w-4" />
          )}
       </Button>
    )

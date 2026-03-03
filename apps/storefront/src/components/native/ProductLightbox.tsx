@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { ZoomInIcon, ZoomOutIcon, RotateCcwIcon, XIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -73,6 +73,7 @@ export default function ProductLightbox({
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
             <DialogContent className="max-w-7xl w-full h-[90vh] p-0 border-none bg-transparent shadow-none [&>button]:hidden">
+                <DialogTitle className="sr-only">Ürün Görseli</DialogTitle>
                 <div className="relative w-full h-full flex flex-col bg-black/96 rounded-xl overflow-hidden">
                     {/* Top toolbar */}
                     <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 bg-gradient-to-b from-black/70 to-transparent">

@@ -71,20 +71,20 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
    })
 
    const onSubmit = async (data: OrderFormValues) => {
+      // Optimistic instant feedback
+      toast.success('Sipariş güncellendi.')
+      router.refresh()
+
       try {
-         setLoading(true)
          await fetch(`/api/orders/${params.orderId}`, {
             method: 'PATCH',
             body: JSON.stringify(data),
             cache: 'no-store',
             headers: { 'Content-Type': 'application/json' },
          })
-         router.refresh()
-         toast.success('Sipariş güncellendi.')
       } catch {
-         toast.error('Bir hata oluştu.')
-      } finally {
-         setLoading(false)
+         toast.error('Değişiklik kaydedilemedi. Geri alınıyor.')
+         router.refresh()
       }
    }
 

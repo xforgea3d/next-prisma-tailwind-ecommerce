@@ -45,15 +45,15 @@ export const Product = ({
       : 0
 
    return (
-      <div className="group block relative">
-         <Link href={`/products/${product.id}`} className="block">
+      <div className="group block relative h-full">
+         <Link href={`/products/${product.id}`} className="block h-full">
             <div className={cn(
-               "relative overflow-hidden rounded-xl border bg-card transition-all duration-300",
+               "relative flex flex-col h-full overflow-hidden rounded-xl border bg-card transition-all duration-300",
                "group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group-hover:-translate-y-1",
                "dark:group-hover:shadow-[0_8px_30px_rgb(255,255,255,0.05)]"
             )}>
                {/* Image container */}
-               <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+               <div className="relative h-56 sm:h-64 w-full flex-shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                   {product?.images?.[0] ? (
                      <Image
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -89,9 +89,9 @@ export const Product = ({
                </div>
 
                {/* Card body */}
-               <div className="p-4 space-y-2">
+               <div className="p-4 flex flex-col flex-grow space-y-2">
                   {product?.categories?.[0]?.title && (
-                     <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                     <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mt-auto">
                         {product.categories[0].title}
                      </p>
                   )}
@@ -100,7 +100,7 @@ export const Product = ({
                      {product.title}
                   </h3>
 
-                  <div className="flex items-baseline gap-2 pt-1">
+                  <div className="flex items-baseline gap-2 pt-1 mt-auto">
                      <span className="text-lg font-bold tracking-tight">
                         {displayPrice.toFixed(2)} ₺
                      </span>

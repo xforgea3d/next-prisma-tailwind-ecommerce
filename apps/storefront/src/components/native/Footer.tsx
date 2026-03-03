@@ -8,12 +8,20 @@ const data = [
       label: 'YASAL',
       links: [
          {
-            label: 'Gizlilik Politikası',
-            url: '/privacy',
+            label: 'Mesafeli Satış Sözleşmesi',
+            url: '/policies/mesafeli-satis-sozlesmesi',
          },
          {
-            label: 'Kullanım Koşulları',
-            url: '/terms',
+            label: 'İade Koşulları',
+            url: '/policies/iade-kosullari',
+         },
+         {
+            label: 'Gizlilik Politikası',
+            url: '/policies/gizlilik-ve-cerez-politikasi',
+         },
+         {
+            label: 'KVKK Aydınlatma Metni',
+            url: '/policies/kvkk-aydinlatma-metni',
          },
       ],
    },
@@ -74,6 +82,7 @@ function Links() {
                      <li key={label}>
                         <Link
                            href={url}
+                           prefetch={true}
                            className="text-sm transition duration-300 text-muted-foreground hover:text-foreground"
                         >
                            {label}

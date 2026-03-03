@@ -1,102 +1,163 @@
-![Screenshot](https://github.com/sesto-dev/next-prisma-tailwind-ecommerce/assets/45223699/00444538-a496-4f90-814f-7e57a580ad17)
+# xForgea3D - Premium 3D Printing E-Commerce Platform
 
-<div align="center"><h3>Full-Stack E-Commerce Platform</h3><p>Built using Typescript with Next.js, Prisma ORM and TailwindCSS.</p></div>
-<div align="center">
-<a href="https://pasargad.vercel.app">Storefront</a> 
-<span> · </span>
-<a href="https://pardis.vercel.app">Admin Panel</a>
-</div>
+**xForgea3D**, 3D yazici teknolojisiyle uretilen oto yedek parca, heykel, figur, aksesuar ve daha fazlasini sunan profesyonel bir e-ticaret platformudur. Next.js 14, Prisma, Supabase ve Tailwind CSS ile insa edilmistir.
 
-## 👋 Introduction
+## Ozellikler
 
-Welcome to the open-source Next.js E-Commerce Storefront with Admin Panel project! This project is built with TypeScript, Tailwind CSS, and Prisma, providing a powerful and flexible solution for building and managing your e-commerce website.
+### Magaza (Storefront)
+- **Urun Katalogu** - Kategorilere ve markalara gore filtreleme, arama, siralama
+- **3D Urun Goruntuleme** - Lightbox zoom, coklu resim galerisi
+- **Ozel Urun Siparis** - Atolye sayfasindan SVG yukleme ile kisisel urun talebi
+- **Sepet Sistemi** - Oturumsuz (localStorage) ve oturumlu sepet destegi
+- **Odeme Altyapisi** - Turk banka sanal POS entegrasyonuna hazir (iyzico/PayTR/Param uyumlu)
+- **Istek Listesi** - Kullanici begendigi urunleri kaydedebilir
+- **Blog** - Gemini AI destekli otomatik blog uretimi (gunluk 4 yazi)
+- **SEO** - JSON-LD yapisal veri, Open Graph, Twitter Cards, dinamik sitemap, robots.txt
+- **Coklu Adres** - Kullanicilar birden fazla teslimat adresi ekleyebilir
+- **Siparis Takibi** - Detayli siparis durumu ve gecmisi
+- **Yasal Sayfalar** - Mesafeli satis sozlesmesi, iade kosullari, KVKK, gizlilik politikasi
 
-## 🥂 Features
+### Admin Paneli (CMS)
+- **Dashboard** - Gelir grafikleri, satis istatistikleri, stok takibi
+- **Urun Yonetimi** - Urun ekleme, duzenleme, gorseller, fiyatlandirma, stok
+- **Siparis Yonetimi** - Siparis durumu guncelleme, odeme takibi
+- **Kategori & Marka** - Kategori ve marka CRUD islemleri
+- **Banner Yonetimi** - Ana sayfa banner'lari
+- **Kullanici Yonetimi** - Kullanici listesi, rol atama
+- **Blog & Sayfa Editoru** - Zengin metin editoruyle icerik yonetimi
+- **Gemini AI Entegrasyonu** - Kategori gorselleri icin AI imaj uretimi
+- **AI Otomatik Blog** - Cron ile gunluk 4 blog yazisi (3D baski, aksesuarlar, oto parca)
+- **Webhook Senkronizasyonu** - Admin degisiklikleri aninda storefront'a yansir (ISR revalidation)
 
--  [x] [**Next.js 14**](https://nextjs.org) App Router and React Server Components.
--  [x] Custom dynamic `Sitemap.xml` generation.
--  [x] Admin dashboard with products, orders, and payments.
--  [x] File uploads using `next-cloudinary`.
--  [x] Authentication using `middleware.ts` and `httpOnly` cookies.
--  [x] Storefront with blog, products, and categories.
--  [x] Database-Stored blogs powered by **MDX** templates.
--  [x] Email verification and invoices using [react-email-tailwind-templates](https://github.com/sesto-dev/react-email-tailwind-templates).
--  [x] [**TailwindCSS**](https://tailwindcss.com/) for utility-first CSS.
--  [x] UI built with [**Radix**](https://www.radix-ui.com/) and stunning UI components, all thanks to [**shadcn/ui**](https://ui.shadcn.com/).
--  [x] Type-Validation with **Zod**.
--  [x] [**Next Metadata API**](https://nextjs.org/docs/api-reference/metadata) for SEO handling.
--  [ ] Comprehensive implementations for i18n.
+### Guvenlik
+- Admin paneli Supabase rol dogrulamasi ile korunur
+- Middleware yalnizca korunmasi gereken rotalarda calisir
+- HMAC-SHA256 imzali odeme callback dogrulamasi
+- XSS/CSRF korumalari
+- Hassas verilerin header uzerinden guvenli iletimi
 
-## 2️⃣ Why are there 2 apps in the app folder?
+### Performans
+- ISR (Incremental Static Regeneration) ile hizli sayfa yuklemeleri
+- Prisma sorgu optimizasyonu (N+1 sorgu yok, aggregate kullanimi)
+- Akilli cache stratejisi
+- Optimize edilmis middleware matcher
 
-This project is made up of 2 separate apps ( admin and storefront ) which should be deployed separately. If you are deploying with Vercel you should create 2 different apps.
+## Teknoloji Yigini
 
-![image](https://github.com/Accretence/next-prisma-tailwind-ecommerce/assets/45223699/f5adc1ac-9dbb-46cb-bb6e-a8db15883348)
+| Katman | Teknoloji |
+|--------|-----------|
+| Framework | Next.js 14 (App Router) |
+| Dil | TypeScript |
+| Veritabani | PostgreSQL (Supabase) |
+| ORM | Prisma |
+| Kimlik Dogrulama | Supabase Auth (Email/Sifre + Google OAuth) |
+| Depolama | Supabase Storage |
+| Stil | Tailwind CSS |
+| UI Bilesenler | Radix UI + shadcn/ui |
+| AI | Google Gemini 2.0 Flash |
+| Ikonlar | Lucide React |
+| Deployment | Vercel |
 
-Under the general tab there is a Root Directory option, for the admin app you should put in "apps/admin" and for the storefront app you should put in "apps/storefront".
+## Proje Yapisi
 
-## 🔐 Authentication
-
-The authentication is handled using JWT tokens stored in cookies and verified inside the `middleware.ts` file. The middleware function takes in the HTTP request, reads the `token` cookie and if the JWT is successfully verified, it sets the `X-USER-ID` header with the userId as the value, otherwise the request is sent back with 401 status.
-
-## 👁‍🗨 Environment variables
-
-Environment variables are stored in `.env` files. By default the `.env.example` file is included in source control and contains
-settings and defaults to get the app running. Any secrets or local overrides of these values should be placed in a
-`.env` file, which is ignored from source control.
-
-Remember, never commit and store `.env` in the source control, just only `.env.example` without any data specified.
-
-You can [read more about environment variables here](https://nextjs.org/docs/basic-features/environment-variables).
-
-## 🏃‍♂️ Getting Started Locally
-
-Clone the repository.
-
-```bash
-git clone https://github.com/sesto-dev/next-prisma-tailwind-ecommerce
+```
+xforgea/
+├── apps/
+│   ├── storefront/          # Musteri magaza uygulamasi (port 7777)
+│   │   ├── prisma/          # Prisma sema ve migration
+│   │   └── src/
+│   │       ├── app/         # Next.js App Router sayfalari
+│   │       ├── components/  # UI bilesenleri
+│   │       ├── hooks/       # React hook'lari
+│   │       ├── lib/         # Yardimci fonksiyonlar
+│   │       └── state/       # Durum yonetimi
+│   └── admin/               # Admin panel uygulamasi (port 8888)
+│       ├── prisma/          # Prisma sema ve migration
+│       └── src/
+│           ├── app/         # Admin sayfalari ve API'ler
+│           ├── components/  # Admin UI bilesenleri
+│           └── lib/         # Yardimci fonksiyonlar
+└── packages/                # Paylasilan paketler
 ```
 
-Navigate to each folder in the `apps` folder and and set the variables.
+## Kurulum
 
-```sh
-cp .env.example .env
-```
+### Gereksinimler
+- Node.js v18+
+- Supabase hesabi (veritabani + auth + storage)
 
-Get all dependencies sorted.
+### Adimlar
 
-```sh
-bun install
-```
+1. **Projeyi klonlayin ve bagimliliklari yukleyin**
+   ```bash
+   git clone https://github.com/xforgea3d/xforgea3d.git
+   cd xforgea3d
+   npm install --legacy-peer-deps
+   ```
 
-Bring your database to life with pushing the database schema.
+2. **Ortam degiskenlerini ayarlayin**
 
-```bash
-bun run db:push
-```
+   `apps/storefront/.env` ve `apps/admin/.env` dosyalari olusturun:
 
-```sh
-bun run dev
-```
+   ```env
+   # Veritabani (Supabase PostgreSQL)
+   DATABASE_URL="postgresql://[USER]:[PASSWORD]@[HOST]:6543/postgres?pgbouncer=true&connection_limit=10&pool_timeout=20&sslmode=require"
+   DIRECT_URL="postgresql://[USER]:[PASSWORD]@[HOST]:5432/postgres?sslmode=require"
 
-## 🔑 Database
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL="https://[INSTANCE].supabase.co"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
 
-Prisma ORM can use any PostgreSQL database. [Supabase is the easiest to work with.](https://www.prisma.io/docs/guides/database/supabase) Simply set `DATABASE_URL` in your `.env` file to work.
+   # Uygulama
+   STOREFRONT_URL="http://localhost:7777"
+   REVALIDATION_SECRET="guclu-rastgele-token"
 
-### `bun run db`
+   # AI (opsiyonel)
+   GEMINI_API_KEY="google-ai-studio-api-key"
 
-This project exposes a package.json script for accessing prisma via `bun run db:<command>`. You should always try to use this script when interacting with prisma locally.
+   # Odeme (banka entegrasyonu sonrasi)
+   PAYMENT_API_KEY=""
+   PAYMENT_SECRET_KEY=""
+   PAYMENT_MERCHANT_ID=""
+   NEXT_PUBLIC_BASE_URL="https://xforgea3d.com"
+   ```
 
-### Making changes to the database schema
+3. **Veritabanini hazirlayin**
+   ```bash
+   cd apps/storefront
+   npx prisma generate
+   npx prisma db push
+   ```
 
-Make changes to your database by modifying `prisma/schema.prisma`.
+4. **Uygulamalari baslatin**
+   ```bash
+   # Terminal 1 - Magaza
+   cd apps/storefront && npm run dev
 
-## 🛸 How to Deploy the Project
+   # Terminal 2 - Admin
+   cd apps/admin && npm run dev
+   ```
 
-Follow the deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+   - Magaza: http://localhost:7777
+   - Admin: http://localhost:8888
 
-## 📄 License
+## Odeme Entegrasyonu
 
-This project is MIT-licensed and is free to use and modify for your own projects. Check the [LICENSE](./LICENSE) file for details.
+Platform, Turk banka sanal POS sistemleriyle (iyzico, PayTR, Param, vs.) entegrasyona hazirdir. Entegrasyon icin:
 
-Created by [Amirhossein Mohammadi](https://github.com/sesto-dev).
+1. Bankanizdan sanal POS bilgilerini alin
+2. `.env` dosyasina `PAYMENT_API_KEY`, `PAYMENT_SECRET_KEY`, `PAYMENT_MERCHANT_ID` ekleyin
+3. `apps/storefront/src/app/api/payment/` altindaki dosyalari bankanizin API'sine gore guncelleyin
+
+## AI Blog Otomasyonu
+
+Gemini 2.0 Flash ile gunluk 4 blog yazisi otomatik uretilir:
+- 2x 3D baski teknolojisi
+- 1x 3D aksesuarlar
+- 1x Oto yedek parca
+
+Vercel Cron uzerinden calisir. `GEMINI_API_KEY` ve `AUTO_BLOG_SECRET` ortam degiskenlerini ayarlayin.
+
+## Lisans
+
+Tum haklari saklidir. Bu yazilim xForgea3D'ye aittir.

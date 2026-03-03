@@ -1,6 +1,6 @@
 export default function AtolyeLoading() {
     return (
-        <div className="max-w-2xl mx-auto py-10 px-4 animate-in fade-in duration-300">
+        <div className="max-w-2xl mx-auto py-10 px-4 animate-in fade-in">
             {/* Header skeleton */}
             <div className="mb-8 text-center space-y-3">
                 <div className="h-5 w-40 rounded-full bg-orange-500/10 mx-auto animate-pulse" />

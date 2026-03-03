@@ -3,33 +3,75 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from '@/lib/utils'
 import { isEmailValid } from '@persepolis/regex'
-import { Loader, MailIcon } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { Loader } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/client'
+
+// Use a simple colored Google G icon SVG instead of lucide mail
+function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
+   return (
+      <svg viewBox="0 0 24 24" {...props}>
+         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.16v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.16C1.43 8.55 1 10.22 1 12s.43 3.45 1.16 4.93l3.68-2.84z" fill="#FBBC05" />
+         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.16 7.07l3.68 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+      </svg>
+   )
+}
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
    const [isLoading, setIsLoading] = React.useState<boolean>(false)
-   const [fetchedOTP, setFetchedOTP] = React.useState<boolean>(false)
+   const [isGoogleLoading, setIsGoogleLoading] = React.useState<boolean>(false)
+   const supabase = createClient()
+   const searchParams = useSearchParams()
+
+   async function handleGoogleOAuth() {
+      try {
+         setIsGoogleLoading(true)
+         const redirectParams = searchParams.get('redirect')
+         const redirectTo = redirectParams ? `${window.location.origin}${redirectParams}` : `${window.location.origin}/`
+
+         const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+               redirectTo,
+            }
+         })
+
+         if (error) {
+            console.error('Google OAuth Error:', error.message)
+         }
+      } catch (error) {
+         console.error({ error })
+      } finally {
+         setIsGoogleLoading(false)
+      }
+   }
 
    return (
       <div className={cn('grid gap-6', className)} {...props}>
-         {fetchedOTP ? (
-            <VerifyComponents
-               isLoading={isLoading}
-               setIsLoading={setIsLoading}
-            />
-         ) : (
-            <TryComponents
-               isLoading={isLoading}
-               setIsLoading={setIsLoading}
-               setFetchedOTP={setFetchedOTP}
-            />
-         )}
+
+         <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+               <TabsTrigger value="login">Giriş Yap</TabsTrigger>
+               <TabsTrigger value="register">Kayıt Ol</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login">
+               <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} supabase={supabase} />
+            </TabsContent>
+
+            <TabsContent value="register">
+               <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} supabase={supabase} />
+            </TabsContent>
+         </Tabs>
+
          <div className="relative">
             <div className="absolute inset-0 flex items-center">
                <span className="w-full border-t" />
@@ -40,161 +82,217 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                </span>
             </div>
          </div>
-         <Button disabled={true} type="button">
-            <MailIcon className="mr-2 h-4" />
-            Sadece E-posta (Supabase)
+
+         <Button
+            variant="outline"
+            type="button"
+            disabled={isLoading || isGoogleLoading}
+            onClick={handleGoogleOAuth}
+         >
+            {isGoogleLoading ? (
+               <Loader className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+               <GoogleIcon className="mr-2 h-4 w-4" />
+            )}
+            Google ile Devam Et
          </Button>
       </div>
    )
 }
 
-function TryComponents({ isLoading, setIsLoading, setFetchedOTP }) {
+function SignInForm({ isLoading, setIsLoading, supabase }) {
    const router = useRouter()
-   const pathname = usePathname()
    const searchParams = useSearchParams()
-   const email = searchParams.get('email')
-   const supabase = createClient()
+   const redirectParams = searchParams.get('redirect')
 
-   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const params = new URLSearchParams(Array.from(searchParams.entries()))
+   const [email, setEmail] = React.useState('')
+   const [password, setPassword] = React.useState('')
+   const [errorMsg, setErrorMsg] = React.useState('')
 
-      params.set('email', event.target.value)
-      const search = params.toString()
-      const query = search ? `?${search}` : ''
-
-      router.replace(`${pathname}${query}`, {
-         scroll: false,
-      })
-   }
-
-   async function onSubmitEmail() {
-      if (!email) return;
+   async function onSubmit(e: React.FormEvent) {
+      e.preventDefault()
+      if (!email || !password) return
+      setErrorMsg('')
 
       try {
          setIsLoading(true)
-
-         const { error } = await supabase.auth.signInWithOtp({
-            email: email,
-            options: {
-               // Optionally redirect to a specific URL after magic link click
-               emailRedirectTo: `${window.location.origin}/auth/callback`,
-            },
+         const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
          })
 
          if (error) {
-            console.error('Supabase OTP Error:', error.message)
-            // Handle error logic (toast, etc)
-         } else {
-            setFetchedOTP(true)
+            setErrorMsg('E-posta veya şifre hatalı.')
+            console.error('SignIn Error:', error.message)
+         } else if (data.session) {
+            window.location.assign(redirectParams ? redirectParams : `/`)
          }
-
       } catch (error) {
-         console.error({ error })
+         setErrorMsg('Beklenmeyen bir hata oluştu.')
       } finally {
          setIsLoading(false)
       }
    }
 
    return (
-      <>
+      <form onSubmit={onSubmit} className="grid gap-3">
          <div className="grid gap-1">
-            <Label
-               className="text-sm font-light text-foreground/60"
-               htmlFor="email"
-            >
+            <Label className="text-sm font-light text-foreground/60" htmlFor="email-login">
                E-posta
             </Label>
             <Input
-               id="email"
+               id="email-login"
                placeholder="name@example.com"
                type="email"
                autoCapitalize="none"
                autoComplete="email"
                autoCorrect="off"
                disabled={isLoading}
-               onChange={handleEmailChange}
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
                required
             />
          </div>
+         <div className="grid gap-1 mb-2">
+            <Label className="text-sm font-light text-foreground/60" htmlFor="password-login">
+               Şifre
+            </Label>
+            <Input
+               id="password-login"
+               placeholder="••••••••"
+               type="password"
+               disabled={isLoading}
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               required
+            />
+         </div>
+         {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
          <Button
-            onClick={onSubmitEmail}
-            disabled={isLoading || !isEmailValid(email)}
+            type="submit"
+            disabled={isLoading || !isEmailValid(email) || password.length < 6}
          >
-            {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
-            Doğrulama Kodu Gönder
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+            Giriş Yap
          </Button>
-      </>
+      </form>
    )
 }
 
-function VerifyComponents({ isLoading, setIsLoading }) {
+function SignUpForm({ isLoading, setIsLoading, supabase }) {
    const router = useRouter()
-   const pathname = usePathname()
    const searchParams = useSearchParams()
-   const email = searchParams.get('email')
-   const OTP = searchParams.get('OTP')
-   const supabase = createClient()
+   const redirectParams = searchParams.get('redirect')
 
-   const handleOTPChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const params = new URLSearchParams(Array.from(searchParams.entries()))
+   const [email, setEmail] = React.useState('')
+   const [password, setPassword] = React.useState('')
+   const [name, setName] = React.useState('')
+   const [errorMsg, setErrorMsg] = React.useState('')
+   const [successMsg, setSuccessMsg] = React.useState('')
 
-      params.set('OTP', event.target.value)
-      const search = params.toString()
-      const query = search ? `?${search}` : ''
-
-      router.replace(`${pathname}${query}`, {
-         scroll: false,
-      })
-   }
-
-   async function onVerifyOTP() {
-      if (!email || !OTP) return;
+   async function onSubmit(e: React.FormEvent) {
+      e.preventDefault()
+      if (!email || !password || !name) return
+      setErrorMsg('')
+      setSuccessMsg('')
 
       try {
          setIsLoading(true)
-
-         const { data, error } = await supabase.auth.verifyOtp({
+         const { data, error } = await supabase.auth.signUp({
             email,
-            token: OTP,
-            type: 'email',
+            password,
+            options: {
+               data: {
+                  full_name: name,
+               },
+               emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirectParams || '/'}`,
+            }
          })
 
          if (error) {
-            console.error('Supabase Verify OTP Error:', error.message)
-            // Handle error logic
+            setErrorMsg(error.message)
+            console.error('SignUp Error:', error.message)
+         } else if (data?.user?.identities?.length === 0) {
+            // Identitiy length 0 means the user already exists in Supabase
+            setErrorMsg('Bu e-posta adresi zaten kullanımda.')
          } else if (data.session) {
-            // Success! Session is established automatically by SSR client wrapper setting cookies.
-            const redirectParams = searchParams.get('redirect')
+            // Auto sign in enabled without email verification
             window.location.assign(redirectParams ? redirectParams : `/`)
+         } else {
+            // Email confirmation required
+            setSuccessMsg('Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.')
          }
-
       } catch (error) {
-         console.error({ error })
+         setErrorMsg('Beklenmeyen bir hata oluştu.')
       } finally {
          setIsLoading(false)
       }
    }
 
+   if (successMsg) {
+      return (
+         <div className="rounded-md bg-emerald-500/15 border border-emerald-500/30 p-4 text-sm text-emerald-600 dark:text-emerald-400">
+            {successMsg}
+         </div>
+      )
+   }
+
    return (
-      <>
+      <form onSubmit={onSubmit} className="grid gap-3">
          <div className="grid gap-1">
-            <Label
-               className="text-sm font-light text-foreground/60"
-               htmlFor="OTP"
-            >
-               Tek Kullanımlık Şifre
+            <Label className="text-sm font-light text-foreground/60" htmlFor="name-register">
+               Ad Soyad
             </Label>
             <Input
-               placeholder="123456"
+               id="name-register"
+               placeholder="Mert Yılmaz"
+               type="text"
                disabled={isLoading}
-               onChange={handleOTPChange}
+               value={name}
+               onChange={(e) => setName(e.target.value)}
                required
             />
          </div>
-         <Button onClick={onVerifyOTP} disabled={isLoading}>
-            {isLoading && <Loader className="mr-2 h-4 animate-spin" />}
-            Doğrula
+         <div className="grid gap-1">
+            <Label className="text-sm font-light text-foreground/60" htmlFor="email-register">
+               E-posta
+            </Label>
+            <Input
+               id="email-register"
+               placeholder="name@example.com"
+               type="email"
+               autoCapitalize="none"
+               autoComplete="email"
+               autoCorrect="off"
+               disabled={isLoading}
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
+               required
+            />
+         </div>
+         <div className="grid gap-1 mb-2">
+            <Label className="text-sm font-light text-foreground/60" htmlFor="password-register">
+               Şifre (Min. 6 Karakter)
+            </Label>
+            <Input
+               id="password-register"
+               placeholder="••••••••"
+               type="password"
+               disabled={isLoading}
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               required
+               minLength={6}
+            />
+         </div>
+         {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
+         <Button
+            type="submit"
+            disabled={isLoading || !isEmailValid(email) || password.length < 6 || !name}
+         >
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+            Hesap Oluştur
          </Button>
-      </>
+      </form>
    )
 }

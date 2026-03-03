@@ -73,6 +73,7 @@ model CartItem {
   isCustom       Boolean @default(false)
   customSnapshot Json?
 
+  @@unique([cartId, productId], name: "UniqueCartItem")
   @@index([cartId])
   @@index([productId])
 }
@@ -138,6 +139,8 @@ model Product {
   updatedAt DateTime @updatedAt
 
   @@index([brandId])
+  @@index([isAvailable, isFeatured])  // homepage featured products query
+  @@index([isAvailable, createdAt])   // newest available products listing
 }
 
 model Category {
@@ -202,6 +205,7 @@ model Order {
   @@index([userId])
   @@index([addressId])
   @@index([discountCodeId])
+  @@index([userId, status])           // admin order tracking filter
 }
 
 model OrderItem {
@@ -278,6 +282,8 @@ model DiscountCode {
   order Order[]
 
   createdAt DateTime @default(now())
+
+  @@index([code, endDate])            // fast discount validation query
 }
 
 model Refund {

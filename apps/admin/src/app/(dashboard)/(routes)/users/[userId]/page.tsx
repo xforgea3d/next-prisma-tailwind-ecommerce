@@ -15,7 +15,7 @@ import { OrderTable } from '../../orders/components/table'
 import { UserForm } from './components/user-form'
 
 const UserPage = async ({ params }: { params: { userId: string } }) => {
-   const user = await prisma.user.findUnique({
+   const user = await prisma.profile.findUnique({
       where: {
          id: params.userId,
       },

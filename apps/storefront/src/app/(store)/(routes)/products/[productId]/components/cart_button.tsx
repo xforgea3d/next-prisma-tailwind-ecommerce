@@ -18,9 +18,10 @@ export function ButtonComponent({ product }) {
 
    const [fetchingCart, setFetchingCart] = useState(false)
 
-   function findLocalCartIndexById(array, productId) {
-      for (let i = 0; i < array.length; i++) {
-         if (array?.items[i]?.productId === productId) {
+   function findLocalCartIndexById(localCart, productId) {
+      if (!localCart?.items) return -1
+      for (let i = 0; i < localCart.items.length; i++) {
+         if (localCart.items[i]?.productId === productId) {
             return i
          }
       }
@@ -49,7 +50,7 @@ export function ButtonComponent({ product }) {
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
 
@@ -112,7 +113,7 @@ export function ButtonComponent({ product }) {
                }),
                cache: 'no-store',
                headers: {
-                  'Content-Type': 'application/json-string',
+                  'Content-Type': 'application/json',
                },
             })
 
@@ -186,4 +187,11 @@ export function ButtonComponent({ product }) {
          </>
       )
    }
+
+   // Fallback return ensures the button never disappears completely
+   return (
+      <Button className="flex gap-2" onClick={onAddToCart}>
+         <ShoppingBasketIcon className="h-4" /> Sepete Ekle
+      </Button>
+   )
 }

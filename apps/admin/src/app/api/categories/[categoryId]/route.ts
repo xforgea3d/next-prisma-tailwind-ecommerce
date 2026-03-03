@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
+import { revalidateStorefront } from '@/lib/revalidate-storefront'
 
 export async function GET(
    req: Request,
@@ -51,7 +52,10 @@ export async function DELETE(
          },
       })
 
+      // Bust admin cache and storefront
       revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products'])
+
       return NextResponse.json(category)
    } catch (error) {
       console.error('[CATEGORY_DELETE]', error)
@@ -94,7 +98,10 @@ export async function PATCH(
          },
       })
 
+      // Bust admin cache and storefront
       revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products'])
+
       return NextResponse.json(updatedCategory)
    } catch (error) {
       console.error('[CATEGORY_PATCH]', error)
