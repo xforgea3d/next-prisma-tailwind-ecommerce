@@ -109,7 +109,7 @@ export default async function Index() {
                            Aracınıza özel 3D baskı yedek parça ve aksesuarlar.
                         </p>
                      </div>
-                     <Link href="/products?category=Aksesuarlar">
+                     <Link href="/products?category=Araç Aksesuarları">
                         <Button variant="outline" className="rounded-full gap-2">
                            Tümünü Gör <ArrowRight className="h-4 w-4" />
                         </Button>
@@ -120,7 +120,7 @@ export default async function Index() {
                      {carBrands.map((brand: any) => (
                         <Link
                            key={brand.id}
-                           href={`/products?brand=${encodeURIComponent(brand.name)}`}
+                           href={`/products?carBrand=${brand.slug}`}
                            className="group relative flex flex-col items-center rounded-xl border bg-background p-4 hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
                         >
                            {brand.logoUrl ? (

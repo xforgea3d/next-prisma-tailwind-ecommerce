@@ -14,11 +14,12 @@ import {
 } from './components/options'
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, carModel, page = 1 } = searchParams ?? {}
+   const { sort, isAvailable, brand, category, carModel, carBrand, page = 1 } = searchParams ?? {}
 
    const orderBy = getOrderBy(sort)
 
    const whereClause = {
+      id: { not: 'quote-request-product' },
       isAvailable: isAvailable === 'true' || sort ? true : undefined,
       brand: brand
          ? { title: { contains: brand, mode: 'insensitive' as const } }
@@ -28,7 +29,9 @@ export default async function Products({ searchParams }) {
          : undefined,
       carModels: carModel
          ? { some: { slug: carModel } }
-         : undefined,
+         : carBrand
+            ? { some: { brand: { slug: carBrand } } }
+            : undefined,
    }
 
    let brands: any[] = [], categories: any[] = [], products: any[] = []

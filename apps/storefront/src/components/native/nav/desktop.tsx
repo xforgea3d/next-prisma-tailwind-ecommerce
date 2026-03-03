@@ -23,28 +23,35 @@ const categories = [
       href: '/products?category=Figürler',
       description: 'Oyun, anime ve fantezi karakterlerinin detaylı 3D baskı figürleri.',
       emoji: '🎮',
-      image: '/bg-figurler.png',
+      image: 'https://images.unsplash.com/photo-1608889825205-eebdb9fc5806?auto=format&fit=crop&q=80&w=400&h=500',
    },
    {
       title: 'Heykeller',
       href: '/products?category=Heykeller',
       description: 'Antik ve modern sanat eserlerinin 3D baskı replikalları.',
       emoji: '🏛️',
-      image: '/bg-heykeller.png',
+      image: 'https://images.unsplash.com/photo-1544413660-299165566b1d?auto=format&fit=crop&q=80&w=400&h=500',
    },
    {
       title: 'Dekoratif',
       href: '/products?category=Dekoratif',
       description: 'Ev ve ofis için şık 3D baskı dekoratif parçalar.',
       emoji: '🎨',
-      image: '/bg-dekoratif.png',
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=400&h=500',
    },
    {
       title: 'Aksesuarlar',
       href: '/products?category=Aksesuarlar',
       description: 'Telefon tutucular, organizerlar ve kişisel aksesuarlar.',
       emoji: '⚙️',
-      image: '/bg-aksesuarlar.png',
+      image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&q=80&w=400&h=500',
+   },
+   {
+      title: 'Araç Aksesuarları',
+      href: '/products?category=Araç Aksesuarları',
+      description: '3D baskı özel araç aksesuarları ve iç mekan parçaları.',
+      emoji: '🚗',
+      image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=400&h=500',
    },
 ]
 
@@ -72,6 +79,12 @@ const collections = [
       href: '/products?category=Aksesuarlar',
       description: 'Masaüstü organizerlar, telefon tutucular ve daha fazlası.',
       badge: null,
+   },
+   {
+      title: 'Araç Aksesuarları',
+      href: '/products?category=Araç Aksesuarları',
+      description: '3D baskı araç telefon tutucu, vites topuzu, amblem ve daha fazlası.',
+      badge: 'Yeni',
    },
 ]
 
@@ -105,7 +118,7 @@ export function MainNav() {
                priority
             />
             <span className="font-bold text-lg tracking-tight hover:opacity-80 transition-opacity hidden lg:block">
-               {config.name}
+               xForgea<span className="text-orange-500">3D</span>
             </span>
          </Link>
          <NavMenu />
@@ -153,9 +166,9 @@ export function NavMenu() {
                   <span className="font-normal text-foreground/70">Kategoriler</span>
                </NavigationMenuTrigger>
                <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[420px] lg:w-[520px] lg:grid-cols-[.72fr_1fr]">
+                  <ul className="grid gap-3 p-4 md:w-[420px] lg:w-[560px] lg:grid-cols-[.72fr_1fr]">
                      {/* Left: visual hero card */}
-                     <li className="row-span-4">
+                     <li className="row-span-5">
                         <NavigationMenuLink asChild>
                            <Link
                               className="group relative flex h-full w-full select-none flex-col justify-end rounded-xl overflow-hidden no-underline outline-none focus:shadow-md"

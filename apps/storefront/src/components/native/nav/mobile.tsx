@@ -45,7 +45,7 @@ export function MobileNav() {
                   >
                      <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
                   </svg>
-                  {Config.name}
+                  xForgea<span className="text-orange-500">3D</span>
                </div>
             </MobileLink>
             <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
