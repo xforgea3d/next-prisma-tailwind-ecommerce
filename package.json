@@ -6,7 +6,7 @@
       "apps/*"
    ],
    "scripts": {
-      "prepare": "husky install",
+      "prepare": "husky install || true",
       "update": "npx npm-check-updates -u",
       "dev:storefront": "npm run dev --workspace=apps/storefront",
       "dev:admin": "npm run dev --workspace=apps/admin",
