@@ -124,8 +124,9 @@ export function NavMenu() {
 
    useEffect(() => {
       fetch('/api/car-brands')
-         .then(r => r.json())
-         .then((data: CarBrand[]) => {
+         .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json() })
+         .then((data) => {
+            if (!Array.isArray(data)) return
             setCarBrands(data)
             if (data.length > 0) setActiveBrand(data[0])
          })

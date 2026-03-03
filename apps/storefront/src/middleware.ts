@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
    if (pathname.startsWith('/api/products')) return NextResponse.next()
    if (pathname.startsWith('/api/revalidate')) return NextResponse.next()
    if (pathname.startsWith('/api/search')) return NextResponse.next()
+   if (pathname.startsWith('/api/car-brands')) return NextResponse.next()
 
    // ── Session check (only for protected paths) ───────────────────────────
    const { supabaseResponse, user } = await updateSession(request)
