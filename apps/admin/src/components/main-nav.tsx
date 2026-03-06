@@ -67,6 +67,16 @@ export function MainNav({
          label: 'Blog',
          active: pathname.startsWith(`/content/blog`),
       },
+      {
+         href: `/content/pages`,
+         label: 'Sayfalar',
+         active: pathname.startsWith(`/content/pages`),
+      },
+      {
+         href: `/settings/site`,
+         label: 'Ayarlar',
+         active: pathname.startsWith(`/settings`),
+      },
    ]
 
    return (

@@ -58,24 +58,19 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
    const onSubmit = async (data: BrandFormValues) => {
       try {
          setLoading(true)
-         if (initialData) {
-            await fetch(`/api/brands/${params.brandId}`, {
-               method: 'PATCH',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         } else {
-            await fetch(`/api/brands`, {
-               method: 'POST',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         }
+         const url = initialData ? `/api/brands/${params.brandId}` : `/api/brands`
+         const method = initialData ? 'PATCH' : 'POST'
+         const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+         })
+         if (!res.ok) throw new Error(await res.text())
          router.refresh()
          router.push(`/brands`)
          toast.success(toastMessage)
       } catch (error: any) {
-         toast.error('Something went wrong.')
+         toast.error('Bir hata oluştu: ' + (error?.message || ''))
       } finally {
          setLoading(false)
       }

@@ -58,24 +58,19 @@ export const BannerForm: React.FC<BannerFormProps> = ({ initialData }) => {
    const onSubmit = async (data: BannerFormValues) => {
       try {
          setLoading(true)
-         if (initialData) {
-            await fetch(`/api/banners/${params.bannerId}`, {
-               method: 'PATCH',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         } else {
-            await fetch(`/api/banners`, {
-               method: 'POST',
-               body: JSON.stringify(data),
-               cache: 'no-store',
-            })
-         }
+         const url = initialData ? `/api/banners/${params.bannerId}` : `/api/banners`
+         const method = initialData ? 'PATCH' : 'POST'
+         const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+         })
+         if (!res.ok) throw new Error(await res.text())
          router.refresh()
          router.push(`/banners`)
          toast.success(toastMessage)
       } catch (error: any) {
-         toast.error('Something went wrong.')
+         toast.error('Bir hata oluştu: ' + (error?.message || ''))
       } finally {
          setLoading(false)
       }

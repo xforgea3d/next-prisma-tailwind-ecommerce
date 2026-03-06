@@ -74,9 +74,7 @@ export async function PATCH(
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const {
-         data: { title, description, price, discount, stock, isFeatured, isAvailable, images, keywords, categoryIds, carModelIds },
-      } = await req.json()
+      const { title, description, price, discount, stock, isFeatured, isAvailable, images, keywords, categoryIds, carModelIds, brandId, productType, customOptions } = await req.json()
 
       const product = await prisma.product.update({
          where: { id: params.productId },
@@ -90,6 +88,9 @@ export async function PATCH(
             ...(isAvailable !== undefined && { isAvailable }),
             ...(images !== undefined && { images }),
             ...(keywords !== undefined && { keywords }),
+            ...(brandId !== undefined && { brand: { connect: { id: brandId } } }),
+            ...(productType !== undefined && { productType }),
+            ...(customOptions !== undefined && { customOptions }),
             ...(categoryIds !== undefined && {
                categories: { set: categoryIds.map((id: string) => ({ id })) },
             }),

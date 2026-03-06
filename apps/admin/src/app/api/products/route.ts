@@ -1,38 +1,37 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
-// FIX: Was only doing findMany (a GET in disguise) — now properly creates products
 export async function POST(req: Request) {
    try {
       const userId = req.headers.get('X-USER-ID')
       if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-      const { data } = await req.json()
+      const body = await req.json()
 
-      if (!data?.title) return new NextResponse('Title is required', { status: 400 })
-      if (!data?.brandId) return new NextResponse('Brand is required', { status: 400 })
+      if (!body.title) return new NextResponse('Title is required', { status: 400 })
+      if (!body.brandId) return new NextResponse('Brand is required', { status: 400 })
 
       const product = await prisma.product.create({
          data: {
-            title: data.title,
-            description: data.description,
-            price: Number(data.price ?? 0),
-            discount: Number(data.discount ?? 0),
-            stock: Number(data.stock ?? 0),
-            images: data.images ?? [],
-            keywords: data.keywords ?? [],
-            isFeatured: data.isFeatured ?? false,
-            isAvailable: data.isAvailable ?? false,
-            isPhysical: data.isPhysical ?? true,
-            productType: data.productType ?? 'READY',
-            metadata: data.metadata,
-            customOptions: data.customOptions,
-            brand: { connect: { id: data.brandId } },
-            ...(data.categoryIds?.length && {
-               categories: { connect: data.categoryIds.map((id: string) => ({ id })) },
+            title: body.title,
+            description: body.description,
+            price: Number(body.price ?? 0),
+            discount: Number(body.discount ?? 0),
+            stock: Number(body.stock ?? 0),
+            images: body.images ?? [],
+            keywords: body.keywords ?? [],
+            isFeatured: body.isFeatured ?? false,
+            isAvailable: body.isAvailable ?? false,
+            isPhysical: body.isPhysical ?? true,
+            productType: body.productType ?? 'READY',
+            metadata: body.metadata,
+            customOptions: body.customOptions,
+            brand: { connect: { id: body.brandId } },
+            ...(body.categoryIds?.length && {
+               categories: { connect: body.categoryIds.map((id: string) => ({ id })) },
             }),
-            ...(data.carModelIds?.length && {
-               carModels: { connect: data.carModelIds.map((id: string) => ({ id })) },
+            ...(body.carModelIds?.length && {
+               carModels: { connect: body.carModelIds.map((id: string) => ({ id })) },
             }),
          },
          include: { brand: true, categories: true },

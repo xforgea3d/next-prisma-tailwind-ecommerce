@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button'
 import { ImagePlus, Trash, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
-import { v4 as uuidv4 } from 'uuid'
 
 interface ImageUploadProps {
    disabled?: boolean

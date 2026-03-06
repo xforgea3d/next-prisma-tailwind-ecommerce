@@ -41,6 +41,7 @@ const formSchema = z.object({
    price: z.coerce.number().min(1),
    discount: z.coerce.number().min(0),
    stock: z.coerce.number().min(0),
+   brandId: z.string().min(1),
    categoryId: z.string().min(1),
    productType: z.string().default('READY'),
    customOptions: z.string().optional(),
@@ -56,12 +57,14 @@ type CarModelWithBrand = CarModel & { brand: { name: string } }
 interface ProductFormProps {
    initialData: ProductWithIncludes | null
    categories: Category[]
+   brands: { id: string; title: string }[]
    carModels?: CarModelWithBrand[]
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
    initialData,
    categories,
+   brands,
    carModels = [],
 }) => {
    const params = useParams()
@@ -80,6 +83,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          ...initialData,
          price: parseFloat(String(initialData?.price.toFixed(2))),
          discount: parseFloat(String(initialData?.discount.toFixed(2))),
+         brandId: (initialData as any)?.brandId ?? '',
+         categoryId: (initialData as any)?.categories?.[0]?.id ?? '',
          productType: (initialData as any)?.productType ?? 'READY',
          customOptions: (initialData as any)?.customOptions
             ? JSON.stringify((initialData as any).customOptions, null, 2)
@@ -87,13 +92,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
          carModelIds: (initialData as any)?.carModels?.map((m: any) => m.id) ?? [],
       }
       : {
-         title: '---',
-         description: '---',
+         title: '',
          images: [],
          price: 0,
          discount: 0,
          stock: 0,
-         categoryId: '---',
+         brandId: '',
+         categoryId: '',
          productType: 'READY',
          customOptions: '',
          carModelIds: [],
@@ -106,34 +111,36 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       defaultValues,
    })
 
-   const onSubmit = async (data: ProductFormValues) => {
+   const onSubmit = async (formData: ProductFormValues) => {
       try {
          setLoading(true)
-         // Parse customOptions JSON string back to object before sending
          const payload = {
-            ...data,
-            customOptions: data.customOptions
-               ? JSON.parse(data.customOptions)
+            ...formData,
+            categoryIds: [formData.categoryId],
+            customOptions: formData.customOptions
+               ? JSON.parse(formData.customOptions)
                : null,
          }
          if (initialData) {
-            await fetch(`/api/products/${params.productId}`, {
+            const res = await fetch(`/api/products/${params.productId}`, {
                method: 'PATCH',
+               headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(payload),
-               cache: 'no-store',
             })
+            if (!res.ok) throw new Error(await res.text())
          } else {
-            await fetch(`/api/products`, {
+            const res = await fetch(`/api/products`, {
                method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(payload),
-               cache: 'no-store',
             })
+            if (!res.ok) throw new Error(await res.text())
          }
          router.refresh()
          router.push(`/products`)
          toast.success(toastMessage)
       } catch (error: any) {
-         toast.error('Bir hata oluştu.')
+         toast.error('Bir hata oluştu: ' + (error?.message || ''))
       } finally {
          setLoading(false)
       }
@@ -194,17 +201,17 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         <FormLabel>Images</FormLabel>
                         <FormControl>
                            <ImageUpload
-                              value={field.value.map((image) => image)}
+                              value={field.value}
                               disabled={loading}
                               onChange={(url) =>
-                                 field.onChange([...field.value, { url }])
+                                 field.onChange([...field.value, url])
                               }
                               onRemove={(url) =>
-                                 field.onChange([
-                                    ...field.value.filter(
+                                 field.onChange(
+                                    field.value.filter(
                                        (current) => current !== url
-                                    ),
-                                 ])
+                                    )
+                                 )
                               }
                            />
                         </FormControl>
@@ -328,6 +335,32 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                         />
                      </div>
                   )}
+
+                  {/* Brand */}
+                  <FormField
+                     control={form.control}
+                     name="brandId"
+                     render={({ field }) => (
+                        <FormItem>
+                           <FormLabel>Marka (Brand)</FormLabel>
+                           <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                              <FormControl>
+                                 <SelectTrigger>
+                                    <SelectValue placeholder="Marka seçin" />
+                                 </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                 {brands.map((brand) => (
+                                    <SelectItem key={brand.id} value={brand.id}>
+                                       {brand.title}
+                                    </SelectItem>
+                                 ))}
+                              </SelectContent>
+                           </Select>
+                           <FormMessage />
+                        </FormItem>
+                     )}
+                  />
 
                   {/* Category */}
                   <FormField
