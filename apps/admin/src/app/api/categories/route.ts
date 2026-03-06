@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
    try {
       // Find all categories
-      const categories = await prisma.category.findMany()
+      const categories = await prisma.category.findMany({ take: 200, orderBy: { title: 'asc' } })
 
       return NextResponse.json(categories)
    } catch (error) {

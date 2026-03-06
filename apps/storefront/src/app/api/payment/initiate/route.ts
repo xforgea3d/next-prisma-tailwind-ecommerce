@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       const hasPaymentKeys = apiKey && secretKey && merchantId
 
       // Generate a unique reference ID for this payment
-      const refId = `XF-${order.number}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`
+      const refId = `XF-${order.number}-${Date.now()}-${crypto.randomBytes(16).toString('hex')}`
 
       // Find or create a payment provider
       let provider = await prisma.paymentProvider.findFirst({

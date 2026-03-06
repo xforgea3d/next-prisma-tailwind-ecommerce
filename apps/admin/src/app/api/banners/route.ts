@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     try {
-        const banners = await prisma.banner.findMany({})
+        const banners = await prisma.banner.findMany({ take: 200, orderBy: { createdAt: 'desc' } })
 
         return NextResponse.json(banners)
     } catch (error) {

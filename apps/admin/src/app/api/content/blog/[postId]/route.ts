@@ -15,7 +15,16 @@ export async function GET(_: Request, { params }: { params: { postId: string } }
 
 export async function PATCH(req: Request, { params }: { params: { postId: string } }) {
     try {
-        const data = await req.json()
+        const body = await req.json()
+        const allowedFields = [
+            'title', 'slug', 'excerpt_tr', 'body_html_tr', 'cover_image',
+            'tags', 'is_published', 'seo_title_tr', 'seo_description_tr',
+            'published_at',
+        ] as const
+        const data: Record<string, unknown> = {}
+        for (const key of allowedFields) {
+            if (body[key] !== undefined) data[key] = body[key]
+        }
         const post = await prisma.blogPost.update({ where: { id: params.postId }, data })
         await revalidateStorefront(['/blog', `/blog/${post.slug ?? params.postId}`, '/'])
         return NextResponse.json(post)

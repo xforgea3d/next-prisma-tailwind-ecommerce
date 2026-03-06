@@ -1,14 +1,20 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
+const VALID_QUOTE_STATUSES = ['Pending', 'Priced', 'Accepted', 'Rejected', 'Completed'] as const
+
 export async function GET(req: Request) {
    try {
       const { searchParams } = new URL(req.url)
       const status = searchParams.get('status')
 
+      if (status && !VALID_QUOTE_STATUSES.includes(status as any)) {
+         return new NextResponse('Invalid status value', { status: 400 })
+      }
+
       const requests = await prisma.quoteRequest.findMany({
          where: {
-            ...(status && { status: status as any }),
+            ...(status && { status: status as (typeof VALID_QUOTE_STATUSES)[number] }),
          },
          include: {
             user: { select: { name: true, email: true } },
@@ -16,6 +22,7 @@ export async function GET(req: Request) {
             carModel: { select: { name: true } },
          },
          orderBy: { createdAt: 'desc' },
+         take: 500,
       })
 
       return NextResponse.json(requests)

@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
    try {
-      const brands = await prisma.brand.findMany({})
+      const brands = await prisma.brand.findMany({ take: 200, orderBy: { title: 'asc' } })
 
       return NextResponse.json(brands)
    } catch (error) {

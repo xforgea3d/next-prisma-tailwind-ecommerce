@@ -71,7 +71,7 @@ export async function PATCH(
             ...(images !== undefined && { images }),
             ...(keywords !== undefined && { keywords }),
             ...(brandId !== undefined && { brand: { connect: { id: brandId } } }),
-            ...(productType !== undefined && { productType }),
+            ...(productType !== undefined && ['READY', 'CUSTOM'].includes(productType) && { productType }),
             ...(customOptions !== undefined && { customOptions }),
             ...(categoryIds !== undefined && {
                categories: { set: categoryIds.map((id: string) => ({ id })) },

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             isFeatured: body.isFeatured ?? false,
             isAvailable: body.isAvailable ?? true,
             isPhysical: body.isPhysical ?? true,
-            productType: body.productType ?? 'READY',
+            productType: ['READY', 'CUSTOM'].includes(body.productType) ? body.productType : 'READY',
             metadata: body.metadata,
             customOptions: body.customOptions,
             brand: { connect: { id: body.brandId } },

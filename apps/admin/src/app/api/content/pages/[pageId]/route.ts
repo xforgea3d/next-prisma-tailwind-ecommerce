@@ -15,7 +15,15 @@ export async function GET(_: Request, { params }: { params: { pageId: string } }
 
 export async function PATCH(req: Request, { params }: { params: { pageId: string } }) {
     try {
-        const data = await req.json()
+        const body = await req.json()
+        const allowedFields = [
+            'title_tr', 'body_html_tr', 'is_published',
+            'seo_title_tr', 'seo_description_tr',
+        ] as const
+        const data: Record<string, unknown> = {}
+        for (const key of allowedFields) {
+            if (body[key] !== undefined) data[key] = body[key]
+        }
         const page = await prisma.contentPage.update({ where: { id: params.pageId }, data })
         await revalidateStorefront([`/page/${page.slug}`, '/'])
         return NextResponse.json(page)

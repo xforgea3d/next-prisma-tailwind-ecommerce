@@ -5,6 +5,7 @@ import { revalidateStorefront } from '@/lib/revalidate-storefront'
 export async function GET() {
    try {
       const items = await prisma.navMenuItem.findMany({
+         take: 100,
          orderBy: [{ section: 'asc' }, { sortOrder: 'asc' }],
       })
       return NextResponse.json(items)
