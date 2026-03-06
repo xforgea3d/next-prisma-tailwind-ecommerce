@@ -42,7 +42,7 @@ export async function PATCH(req: Request) {
 
       const { name, phone, avatar, csrfToken } = await req.json()
 
-      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
       }
 

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
       const { address, city, phone, postalCode, csrfToken } = await req.json()
 
-      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
       }
 

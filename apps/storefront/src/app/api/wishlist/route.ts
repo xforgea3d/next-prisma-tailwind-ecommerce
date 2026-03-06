@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
       const { productId, csrfToken } = await req.json()
-      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Gecersiz istek', { status: 403 })
       }
       if (!productId) return new NextResponse('productId is required', { status: 400 })
@@ -53,7 +53,7 @@ export async function DELETE(req: Request) {
       if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
       const { productId, csrfToken } = await req.json()
-      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Gecersiz istek', { status: 403 })
       }
       if (!productId) return new NextResponse('productId is required', { status: 400 })

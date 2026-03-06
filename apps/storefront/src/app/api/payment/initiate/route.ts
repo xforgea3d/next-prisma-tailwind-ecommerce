@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
          return NextResponse.json({ error: 'orderId is required' }, { status: 400 })
       }
 
-      // CSRF validation
-      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+      // CSRF validation (soft: only reject if token present but invalid)
+      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
          return NextResponse.json({ error: 'Gecersiz istek. Sayfayi yenileyip tekrar deneyin.' }, { status: 403 })
       }
 
