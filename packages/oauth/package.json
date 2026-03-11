@@ -2,7 +2,7 @@
    "name": "@persepolis/oauth",
    "version": "0.0.1",
    "description": "OAuth service for the Persepolis e-commerce platform.",
-   "main": "dist/index.js",
+   "main": "src/index.ts",
    "scripts": {
       "publish": "npm publish --access public",
       "build": "tsc",

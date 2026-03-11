@@ -3,6 +3,13 @@
 module.exports = {
    compress: true,
    poweredByHeader: false,
+   transpilePackages: [
+      '@persepolis/mail',
+      '@persepolis/regex',
+      '@persepolis/rng',
+      '@persepolis/slugify',
+      '@persepolis/sms',
+   ],
    experimental: {
       optimizePackageImports: [
          'lucide-react',

@@ -2,7 +2,7 @@
    "name": "@persepolis/mail",
    "version": "1.0.9",
    "description": "Mail service for the Persepolis e-commerce platform.",
-   "main": "dist/index.js",
+   "main": "src/index.ts",
    "scripts": {
       "publish": "npm publish --access public",
       "build": "tsc",
