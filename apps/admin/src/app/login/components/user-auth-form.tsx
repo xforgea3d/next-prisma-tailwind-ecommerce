@@ -38,6 +38,8 @@ export function UserAuthForm({ className }: { className?: string }) {
             setErrorMsg('Kullanıcı adı veya şifre hatalı.')
          } else if (data.session) {
             setSuccess(true)
+            // Force cookie refresh before redirect
+            await fetch('/api/auth/session', { method: 'POST' }).catch(() => {})
             setTimeout(() => {
                window.location.href = '/'
             }, 800)

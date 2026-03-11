@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 export async function GET() {
    try {
       const brands = await prisma.brand.findMany({
+         where: { products: { some: {} } },
          orderBy: { title: 'asc' },
          select: {
             id: true,

@@ -34,8 +34,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
    async function handleGoogleOAuth() {
       try {
          setIsGoogleLoading(true)
-         const redirectParams = searchParams.get('redirect')
-         const redirectTo = redirectParams ? `${window.location.origin}${redirectParams}` : `${window.location.origin}/`
+         const redirectParams = searchParams.get('redirect') || '/'
+         const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectParams)}`
 
          const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -79,7 +79,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
                <span className="bg-background px-2 text-muted-foreground">
-                  Veya şunununla devam et
+                  Veya şununla devam et
                </span>
             </div>
          </div>
@@ -215,21 +215,51 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
             setErrorMsg(error.message)
             console.error('SignUp Error:', error.message)
          } else if (data?.user?.identities?.length === 0) {
-            // Identitiy length 0 means the user already exists in Supabase
             setErrorMsg('Bu e-posta adresi zaten kullanımda.')
          } else if (data.session) {
-            // Auto sign in enabled without email verification
-            const target = redirectParams && redirectParams.startsWith('/') && !redirectParams.startsWith('//') ? redirectParams : '/'
-            window.location.assign(target)
+            // Auto sign in — show welcome then redirect
+            setSuccessMsg('welcome')
+            setTimeout(() => {
+               const target = redirectParams && redirectParams.startsWith('/') && !redirectParams.startsWith('//') ? redirectParams : '/'
+               window.location.assign(target)
+            }, 2000)
          } else {
-            // Email confirmation required
-            setSuccessMsg('Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.')
+            // Session yok ama kayıt başarılı — otomatik giriş dene
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+            if (signInData?.session) {
+               setSuccessMsg('welcome')
+               setTimeout(() => {
+                  const target = redirectParams && redirectParams.startsWith('/') && !redirectParams.startsWith('//') ? redirectParams : '/'
+                  window.location.assign(target)
+               }, 2000)
+            } else {
+               setSuccessMsg('Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.')
+            }
          }
       } catch (error) {
          setErrorMsg('Beklenmeyen bir hata oluştu.')
       } finally {
          setIsLoading(false)
       }
+   }
+
+   if (successMsg === 'welcome') {
+      return (
+         <div className="flex flex-col items-center justify-center py-8 space-y-4 animate-in fade-in duration-500">
+            <div className="relative">
+               <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
+               <div className="relative w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                  <svg className="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+               </div>
+            </div>
+            <div className="text-center space-y-1">
+               <h3 className="text-lg font-semibold">Hosgeldiniz! 🎉</h3>
+               <p className="text-sm text-muted-foreground">Hesabiniz olusturuldu, yonlendiriliyorsunuz...</p>
+            </div>
+         </div>
+      )
    }
 
    if (successMsg) {

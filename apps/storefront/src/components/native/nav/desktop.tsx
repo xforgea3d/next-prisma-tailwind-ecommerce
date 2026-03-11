@@ -512,7 +512,7 @@ function VehiclePartsDropdown({
                                     className="group flex flex-col rounded-lg border border-transparent p-2.5 transition-all hover:border-border hover:bg-accent"
                                  >
                                     {model.imageUrl ? (
-                                       <div className="relative w-full h-20 rounded-md overflow-hidden mb-2 bg-neutral-100 dark:bg-neutral-800">
+                                       <div className="relative w-full h-20 rounded-md overflow-hidden mb-2 bg-black">
                                           <Image
                                              src={model.imageUrl}
                                              alt={model.name}
@@ -522,7 +522,7 @@ function VehiclePartsDropdown({
                                           />
                                        </div>
                                     ) : (
-                                       <div className="w-full h-20 rounded-md bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center mb-2">
+                                       <div className="w-full h-20 rounded-md bg-black flex items-center justify-center mb-2">
                                           <CarIcon className="h-6 w-6 text-muted-foreground/40" />
                                        </div>
                                     )}
