@@ -49,11 +49,17 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
 
    const form = useForm<BrandFormValues>({
       resolver: zodResolver(formSchema),
-      defaultValues: initialData || {
-         title: '',
-         description: '',
-         logo: '',
-      },
+      defaultValues: initialData
+         ? {
+              title: initialData.title,
+              description: initialData.description ?? '',
+              logo: initialData.logo ?? '',
+           }
+         : {
+              title: '',
+              description: '',
+              logo: '',
+           },
    })
 
    const onSubmit = async (data: BrandFormValues) => {
