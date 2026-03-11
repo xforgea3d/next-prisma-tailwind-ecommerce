@@ -1,0 +1,42 @@
+{
+   "name": "next-prisma-tailwind-ecommerce",
+   "version": "1.0.0",
+   "private": true,
+   "workspaces": [
+      "apps/*",
+      "packages/*"
+   ],
+   "scripts": {
+      "prepare": "husky install || true",
+      "update": "npx npm-check-updates -u",
+      "dev:storefront": "npm run dev --workspace=apps/storefront",
+      "dev:admin": "npm run dev --workspace=apps/admin",
+      "build:storefront": "npm run build --workspace=apps/storefront",
+      "build:admin": "npm run build --workspace=apps/admin"
+   },
+   "author": {
+      "name": "Sesto",
+      "url": "https://github.com/sesto-dev"
+   },
+   "license": "MIT",
+   "devDependencies": {
+      "@commitlint/cli": "^19.5.0",
+      "@commitlint/config-conventional": "^19.5.0",
+      "@testing-library/jest-dom": "^6.9.1",
+      "@testing-library/react": "^16.3.2",
+      "@testing-library/user-event": "^14.6.1",
+      "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+      "@types/node": "^25.3.5",
+      "@typescript-eslint/eslint-plugin": "^8.8.1",
+      "@typescript-eslint/parser": "^8.8.1",
+      "eslint": "^8.57.0",
+      "eslint-config-next": "^14.2.15",
+      "eslint-plugin-react": "^7.37.1",
+      "husky": "^9.1.6",
+      "jsdom": "^28.1.0",
+      "lint-staged": "^15.2.10",
+      "prettier": "^3.3.3",
+      "prettier-plugin-tailwindcss": "^0.6.8",
+      "vitest": "^4.0.18"
+   }
+}

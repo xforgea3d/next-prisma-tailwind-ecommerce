@@ -1,0 +1,342 @@
+export const revalidate = 30
+
+import {
+   BlogPostGrid,
+   BlogPostSkeletonGrid,
+} from '@/components/native/BlogCard'
+import Carousel from '@/components/native/Carousel'
+import Hero from '@/components/native/Hero'
+import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
+import prisma from '@/lib/prisma'
+import { isVariableValid } from '@/lib/utils'
+import {
+   Layers3,
+   Star,
+   Truck,
+   Wrench,
+   Printer,
+   Package,
+   MapPin,
+   Car,
+   ArrowRight,
+} from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import dynamic from 'next/dynamic'
+
+const ScrollReveal = dynamic(
+   () => import('@/components/native/ScrollReveal').then(m => ({ default: m.ScrollReveal })),
+   { ssr: false }
+)
+const AnimatedCounter = dynamic(
+   () => import('@/components/native/AnimatedCounter').then(m => ({ default: m.AnimatedCounter })),
+   { ssr: false }
+)
+
+export default async function Index() {
+   let featuredProducts: any[] = [], blogs: any[] = [], banners: any[] = [], carBrands: any[] = []
+   try {
+      ;[featuredProducts, blogs, banners, carBrands] = await Promise.all([
+         prisma.product.findMany({
+            where: { isAvailable: true, isFeatured: true },
+            select: {
+               id: true, title: true, price: true, discount: true,
+               images: true, isAvailable: true, stock: true, isFeatured: true,
+               brand: { select: { id: true, title: true } },
+               categories: { select: { id: true, title: true } },
+            },
+            take: 8,
+            orderBy: { createdAt: 'desc' },
+         }),
+         prisma.blog.findMany({
+            include: { author: true },
+            take: 3,
+            orderBy: { createdAt: 'desc' },
+         }),
+         prisma.banner.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 6,
+         }),
+         prisma.carBrand.findMany({
+            orderBy: { sortOrder: 'asc' },
+            take: 10,
+            include: {
+               _count: { select: { models: true } },
+               models: { take: 1, select: { imageUrl: true } },
+            },
+         }),
+      ])
+   } catch (e) {
+      console.warn('[home] DB unavailable during build, rendering empty state')
+   }
+
+   return (
+      <div className="flex flex-col gap-0 -mx-[1.4rem] md:-mx-[4rem] lg:-mx-[6rem] xl:-mx-[8rem] 2xl:-mx-[12rem]">
+
+         {/* ── 1. HERO ──────────────────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] pt-2 pb-6">
+            <Hero />
+         </section>
+
+         {/* ── 2. ÖNE ÇIKAN ÜRÜNLER ─────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-background">
+            <div className="mb-6">
+               <h2 className="text-3xl font-bold tracking-tight">Öne Çıkan Ürünler</h2>
+               <p className="text-sm text-muted-foreground mt-1">
+                  En çok tercih edilen 3D baskı ürünlerimiz.
+               </p>
+            </div>
+            {isVariableValid(featuredProducts) ? (
+               <ProductGrid products={featuredProducts} />
+            ) : (
+               <ProductSkeletonGrid />
+            )}
+         </section>
+
+         {/* ── 3. ARAÇ PARÇALARI VİTRİN ─────────────────────────── */}
+         {carBrands.length > 0 && (
+            <section className="py-12 bg-neutral-50/50 dark:bg-neutral-900/50">
+               <div className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
+                  <div className="flex items-center justify-between mb-8">
+                     <div>
+                        <div className="flex items-center gap-2 mb-1">
+                           <Car className="h-5 w-5 text-orange-500" />
+                           <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">Oto Yedek Parça</span>
+                        </div>
+                        <h2 className="text-3xl font-bold tracking-tight">Araç Parçaları</h2>
+                        <p className="text-sm text-muted-foreground mt-1">
+                           Aracınıza özel 3D baskı yedek parça ve aksesuarlar.
+                        </p>
+                     </div>
+                     <Link href="/products?category=Araç Aksesuarları">
+                        <Button variant="outline" className="rounded-full gap-2">
+                           Tümünü Gör <ArrowRight className="h-4 w-4" />
+                        </Button>
+                     </Link>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                     {carBrands.map((brand: any) => (
+                        <Link
+                           key={brand.id}
+                           href={`/products?carBrand=${brand.slug}`}
+                           className="group relative flex flex-col items-center rounded-xl border bg-background p-4 hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
+                        >
+                           {brand.logoUrl ? (
+                              <div className="w-14 h-14 flex items-center justify-center bg-white rounded-lg mb-2 group-hover:scale-110 transition-transform">
+                                 <Image
+                                    src={brand.logoUrl}
+                                    alt={brand.name}
+                                    width={40}
+                                    height={40}
+                                    className="object-contain"
+                                 />
+                              </div>
+                           ) : (
+                              <div className="w-14 h-14 rounded-lg bg-foreground/5 flex items-center justify-center mb-2 group-hover:bg-orange-500/10 transition-colors">
+                                 <span className="text-lg font-bold text-muted-foreground">{brand.name.charAt(0)}</span>
+                              </div>
+                           )}
+                           <span className="text-sm font-semibold text-center">{brand.name}</span>
+                           <span className="text-[10px] text-muted-foreground">
+                              {brand._count.models} model
+                           </span>
+                        </Link>
+                     ))}
+                  </div>
+               </div>
+            </section>
+         )}
+
+         {/* ── 4. YENİ KOLEKSİYON ──────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-background">
+            <div className="mb-6">
+               <h2 className="text-3xl font-bold tracking-tight">Yeni Koleksiyon</h2>
+               <p className="text-sm text-muted-foreground mt-1">
+                  En yeni tasarımlarımızı keşfedin.
+               </p>
+            </div>
+            <Carousel images={banners.map((obj) => obj.image)} />
+         </section>
+
+         {/* ── 5. KİŞİYE ÖZEL CTA ─────────────────────────────── */}
+         <section className="py-12 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-orange-600/5 dark:from-orange-500/10 dark:via-amber-500/5 dark:to-orange-600/10">
+            <div className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
+               <div className="rounded-2xl border bg-background/80 backdrop-blur-sm p-8 md:p-12 flex flex-col md:flex-row items-center gap-6 md:gap-12 shadow-xl shadow-orange-500/5">
+                  <div className="flex-1">
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                        Sınırsız Yaratıcılık
+                     </span>
+                     <h2 className="mt-2 text-3xl font-bold tracking-tight">
+                        Kişiye Özel Ürünler
+                     </h2>
+                     <p className="mt-3 text-muted-foreground max-w-md">
+                        Kendi tasarımınızı bize gönderin ya da hayal ettiğinizi anlatın — biz üretelim.
+                        Hediyeye, koleksiyona veya özel bir anıya özel 3D baskı ürünler.
+                     </p>
+                     <div className="mt-6">
+                        <Link href="/products?custom=true">
+                           <Button size="lg" className="rounded-full px-8 font-semibold bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_20px_rgba(249,115,22,0.3)]">
+                              Kişiselleştirmeye Başla
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                           </Button>
+                        </Link>
+                     </div>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/20">
+                     <Wrench className="h-12 w-12 md:h-16 md:w-16 text-orange-500/60" />
+                  </div>
+               </div>
+            </div>
+         </section>
+
+         {/* ── 6. NEDEN xFORGEA3D? ──────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-background">
+            <div className="mb-8 text-center">
+               <h2 className="text-3xl font-bold tracking-tight">Neden xForgea3D?</h2>
+               <p className="mt-2 text-sm text-muted-foreground">
+                  Her üründe aynı kalite, her teslimatda aynı özen.
+               </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+               {[
+                  {
+                     icon: <Star className="h-8 w-8 text-orange-500" />,
+                     title: 'Premium Kalite',
+                     desc: 'Endüstriyel sınıf filament ve hassas yazıcılarla üretim.',
+                     stat: { end: 99, suffix: '%', label: 'Müşteri Memnuniyeti' },
+                  },
+                  {
+                     icon: <Layers3 className="h-8 w-8 text-orange-500" />,
+                     title: 'Detay Hassasiyeti',
+                     desc: '0.1mm katman çözünürlüğüyle mükemmel yüzey kalitesi.',
+                     stat: { end: 100, suffix: 'μm', label: 'Katman Hassasiyeti' },
+                  },
+                  {
+                     icon: <Wrench className="h-8 w-8 text-orange-500" />,
+                     title: 'Özelleştirme',
+                     desc: 'Renk, boyut ve tasarım seçenekleriyle tamamen size özel.',
+                     stat: { end: 50, suffix: '+', label: 'Renk Seçeneği' },
+                  },
+                  {
+                     icon: <Truck className="h-8 w-8 text-orange-500" />,
+                     title: 'Türkiye\'ye Kargo',
+                     desc: 'Türkiye\'nin her iline hızlı ve güvenli teslimat.',
+                     stat: { end: 81, suffix: '', label: 'İl Teslimat' },
+                  },
+               ].map(({ icon, title, desc, stat }, i) => (
+                  <div
+                     key={title}
+                     className="flex flex-col items-start rounded-xl border p-6 gap-3 hover:bg-muted/40 hover:border-orange-500/20 transition-all group"
+                  >
+                     <div className="p-2 rounded-lg bg-orange-500/10 group-hover:bg-orange-500/15 transition-colors">{icon}</div>
+                     <h3 className="font-semibold text-lg">{title}</h3>
+                     <p className="text-sm text-muted-foreground">{desc}</p>
+                     <div className="mt-auto pt-3 border-t border-border/50 w-full">
+                        <div className="text-2xl font-black text-orange-500">
+                           <AnimatedCounter end={stat.end} suffix={stat.suffix} />
+                        </div>
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</div>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </section>
+
+         {/* ── 7. ÜRETİM SÜRECİ (Timeline) ────────────────────── */}
+         <section className="py-12 bg-neutral-50/50 dark:bg-neutral-900/50">
+            <div className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
+               <div className="mb-8 text-center">
+                  <h2 className="text-3xl font-bold tracking-tight">Üretim Süreci</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                     Siparişiniz nasıl hayata geçiyor?
+                  </p>
+               </div>
+
+               {/* Timeline stepper */}
+               <div className="relative">
+                  {/* Connection line */}
+                  <div className="hidden md:block absolute top-12 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                     {[
+                        {
+                           step: '01',
+                           icon: <Layers3 className="h-6 w-6" />,
+                           title: 'Tasarla',
+                           desc: 'Hazır modellerimizi seçin ya da kendi tasarımınızı paylaşın.',
+                        },
+                        {
+                           step: '02',
+                           icon: <Printer className="h-6 w-6" />,
+                           title: 'Üret',
+                           desc: 'Siparişiniz endüstriyel 3D yazıcılarımızda titizlikle üretilir.',
+                        },
+                        {
+                           step: '03',
+                           icon: <Package className="h-6 w-6" />,
+                           title: 'Teslim Et',
+                           desc: 'Özenle paketlenir, Türkiye\'nin her yerine hızla gönderilir.',
+                        },
+                     ].map(({ step, icon, title, desc }) => (
+                        <div key={step} className="flex flex-col items-center text-center">
+                           {/* Step circle */}
+                           <div className="relative w-24 h-24 rounded-full bg-background border-2 border-orange-500/40 flex items-center justify-center mb-4 shadow-lg shadow-orange-500/10">
+                              <div className="text-orange-500">{icon}</div>
+                              <span className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                                 {step}
+                              </span>
+                           </div>
+                           <h3 className="text-lg font-semibold mb-1">{title}</h3>
+                           <p className="text-sm text-muted-foreground max-w-[240px]">{desc}</p>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+         </section>
+
+         {/* ── 8. KARGO ────────────────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-background">
+            <div className="flex flex-col md:flex-row items-center gap-6 rounded-2xl border bg-gradient-to-r from-orange-500/5 to-amber-500/5 dark:from-orange-500/10 dark:to-amber-500/10 px-8 py-10">
+               <div className="flex-shrink-0 p-4 rounded-full bg-orange-500/10">
+                  <MapPin className="h-10 w-10 text-orange-500" />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-bold tracking-tight">
+                     Türkiye Geneli Kargo
+                  </h2>
+                  <p className="mt-2 text-muted-foreground max-w-lg">
+                     İstanbul&apos;dan Van&apos;a, Trabzon&apos;dan Bodrum&apos;a — Türkiye&apos;nin 81 iline hızlı ve güvenli kargo.
+                     Siparişleriniz özenle paketlenir, zamanında teslim edilir.
+                  </p>
+               </div>
+               <div className="md:ml-auto flex-shrink-0">
+                  <Link href="/products">
+                     <Button size="lg" className="rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-[0_4px_16px_rgba(249,115,22,0.3)]">
+                        Sipariş Ver
+                     </Button>
+                  </Link>
+               </div>
+            </div>
+         </section>
+
+         {/* ── 9. GÜNDEMDEN (Blog) ───────────────────────────────── */}
+         <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-neutral-50/50 dark:bg-neutral-900/50">
+            <div className="mb-6">
+               <h2 className="text-3xl font-bold tracking-tight">Gündemden</h2>
+               <p className="text-sm text-muted-foreground mt-1">
+                  3D baskı dünyasından haberler ve ilham veren içerikler.
+               </p>
+            </div>
+            {isVariableValid(blogs) ? (
+               <BlogPostGrid blogs={blogs} />
+            ) : (
+               <BlogPostSkeletonGrid />
+            )}
+         </section>
+
+      </div>
+   )
+}
