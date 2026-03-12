@@ -425,7 +425,7 @@ function VehiclePartsDropdown({
    brandsLoaded: boolean
 }) {
    return (
-      <div className="p-4 w-[560px] lg:w-[680px]">
+      <div className="p-4 w-[620px] lg:w-[760px]">
          {!brandsLoaded ? (
             <div className="flex items-center justify-center h-32 gap-2 text-sm text-muted-foreground">
                <div className="h-4 w-4 animate-spin rounded-full border-2 border-orange-400 border-t-transparent" />
@@ -446,38 +446,41 @@ function VehiclePartsDropdown({
                </NavigationMenuLink>
             </div>
          ) : (
-            <div className="grid grid-cols-[200px_1fr] gap-4">
-               {/* Left panel: Brand logos grid */}
+            <div className="grid grid-cols-[220px_1fr] gap-5">
+               {/* Left panel: Brand list */}
                <div className="space-y-2">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-orange-400 mb-2">Markalar</p>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-[320px] overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-1 max-h-[360px] overflow-y-auto pr-1">
                      {carBrands.map(brand => (
                         <button
                            key={brand.id}
-                           onMouseEnter={() => setActiveBrand(brand)}
+                           onClick={() => setActiveBrand(brand)}
                            className={cn(
-                              'flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-all cursor-pointer',
+                              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all cursor-pointer w-full',
                               activeBrand?.id === brand.id
-                                 ? 'bg-orange-500/10 border border-orange-500/30 text-foreground'
+                                 ? 'bg-orange-500/10 border border-orange-500/30 text-foreground shadow-sm'
                                  : 'hover:bg-accent border border-transparent text-muted-foreground hover:text-foreground'
                            )}
                         >
                            {brand.logoUrl ? (
-                              <div className="w-7 h-7 flex items-center justify-center bg-white rounded-md">
+                              <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-white rounded-lg border border-border/50 shadow-sm">
                                  <Image
                                     src={brand.logoUrl}
                                     alt={brand.name}
-                                    width={24}
-                                    height={24}
+                                    width={28}
+                                    height={28}
                                     className="object-contain"
                                  />
                               </div>
                            ) : (
-                              <div className="w-7 h-7 rounded-md bg-foreground/10 flex items-center justify-center text-[10px] font-bold">
+                              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-foreground/10 flex items-center justify-center text-sm font-bold">
                                  {brand.name.charAt(0)}
                               </div>
                            )}
-                           <span className="text-[10px] font-medium leading-tight">{brand.name}</span>
+                           <div className="min-w-0">
+                              <span className="text-sm font-semibold block truncate">{brand.name}</span>
+                              <span className="text-[10px] text-muted-foreground">{brand.models.length} model</span>
+                           </div>
                         </button>
                      ))}
                   </div>
@@ -485,55 +488,73 @@ function VehiclePartsDropdown({
                   <NavigationMenuLink asChild>
                      <Link
                         href="/quote-request"
-                        className="flex items-center gap-1.5 mt-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/25 text-orange-500 text-[10px] font-bold hover:bg-orange-500/20 transition-colors"
+                        className="flex items-center gap-1.5 mt-2 px-3 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/25 text-orange-500 text-[11px] font-bold hover:bg-orange-500/20 transition-colors"
                      >
-                        <MessageSquareQuoteIcon className="h-3 w-3" />
+                        <MessageSquareQuoteIcon className="h-3.5 w-3.5" />
                         Parça Talep Et / Fiyat Al
                      </Link>
                   </NavigationMenuLink>
                </div>
 
                {/* Right panel: Selected brand's models */}
-               <div className="border-l border-border pl-4">
+               <div className="border-l border-border pl-5">
                   {activeBrand && (
                      <>
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2 mb-4">
+                           {activeBrand.logoUrl && (
+                              <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-border/50">
+                                 <Image
+                                    src={activeBrand.logoUrl}
+                                    alt={activeBrand.name}
+                                    width={22}
+                                    height={22}
+                                    className="object-contain"
+                                 />
+                              </div>
+                           )}
                            <p className="text-sm font-bold">{activeBrand.name}</p>
                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500/15 text-orange-500 uppercase tracking-wider">
                               {activeBrand.models.length} Model
                            </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
-                           {activeBrand.models.map(model => (
-                              <NavigationMenuLink asChild key={model.id}>
-                                 <Link
-                                    href={`/products?carModel=${model.slug}`}
-                                    prefetch={true}
-                                    className="group flex flex-col rounded-lg border border-transparent p-2.5 transition-all hover:border-border hover:bg-accent"
-                                 >
-                                    {model.imageUrl ? (
-                                       <div className="relative w-full h-20 rounded-md overflow-hidden mb-2 bg-black">
-                                          <Image
-                                             src={model.imageUrl}
-                                             alt={model.name}
-                                             fill
-                                             className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                                             sizes="150px"
-                                          />
-                                       </div>
-                                    ) : (
-                                       <div className="w-full h-20 rounded-md bg-black flex items-center justify-center mb-2">
-                                          <CarIcon className="h-6 w-6 text-muted-foreground/40" />
-                                       </div>
-                                    )}
-                                    <span className="text-xs font-semibold">{model.name}</span>
-                                    {model.yearRange && (
-                                       <span className="text-[10px] text-muted-foreground">{model.yearRange}</span>
-                                    )}
-                                 </Link>
-                              </NavigationMenuLink>
-                           ))}
-                        </div>
+                        {activeBrand.models.length > 0 ? (
+                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-[320px] overflow-y-auto pr-1">
+                              {activeBrand.models.map(model => (
+                                 <NavigationMenuLink asChild key={model.id}>
+                                    <Link
+                                       href={`/products?carModel=${model.slug}`}
+                                       prefetch={true}
+                                       className="group flex flex-col rounded-xl border border-transparent p-2 transition-all hover:border-border hover:bg-accent"
+                                    >
+                                       {model.imageUrl ? (
+                                          <div className="relative w-full h-24 rounded-lg overflow-hidden mb-2 bg-black">
+                                             <Image
+                                                src={model.imageUrl}
+                                                alt={model.name}
+                                                fill
+                                                className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                                sizes="160px"
+                                             />
+                                          </div>
+                                       ) : (
+                                          <div className="w-full h-24 rounded-lg bg-black flex items-center justify-center mb-2">
+                                             <CarIcon className="h-6 w-6 text-white/20" />
+                                          </div>
+                                       )}
+                                       <span className="text-xs font-semibold">{model.name}</span>
+                                       {model.yearRange && (
+                                          <span className="text-[10px] text-muted-foreground">{model.yearRange}</span>
+                                       )}
+                                    </Link>
+                                 </NavigationMenuLink>
+                              ))}
+                           </div>
+                        ) : (
+                           <div className="flex flex-col items-center justify-center h-32 gap-2 text-sm text-muted-foreground">
+                              <CarIcon className="h-6 w-6 text-muted-foreground/30" />
+                              <p>Henüz model eklenmemiş</p>
+                           </div>
+                        )}
                      </>
                   )}
                </div>

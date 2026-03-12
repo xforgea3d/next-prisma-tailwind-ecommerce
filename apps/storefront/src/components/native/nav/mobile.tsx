@@ -115,11 +115,11 @@ export function MobileNav() {
                                           className="flex items-center gap-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
                                        >
                                           {brand.logoUrl ? (
-                                             <div className="w-5 h-5 flex items-center justify-center bg-white rounded">
-                                                <Image src={brand.logoUrl} alt={brand.name} width={14} height={14} className="object-contain" />
+                                             <div className="w-7 h-7 flex items-center justify-center bg-white rounded-md border border-border/40 shadow-sm">
+                                                <Image src={brand.logoUrl} alt={brand.name} width={18} height={18} className="object-contain" />
                                              </div>
                                           ) : (
-                                             <div className="w-5 h-5 rounded bg-foreground/10 flex items-center justify-center text-[8px] font-bold">
+                                             <div className="w-7 h-7 rounded-md bg-foreground/10 flex items-center justify-center text-[10px] font-bold">
                                                 {brand.name.charAt(0)}
                                              </div>
                                           )}
