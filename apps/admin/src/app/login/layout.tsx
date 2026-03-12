@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
    title: 'Giriş Yap — xForgea3D',
 }
