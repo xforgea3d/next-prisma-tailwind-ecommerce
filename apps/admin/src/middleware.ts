@@ -5,15 +5,32 @@ export async function middleware(request: NextRequest) {
    if (request.nextUrl.pathname.startsWith('/api/auth')) return NextResponse.next()
 
    const ALLOWED_ADMIN_EMAIL = process.env.ADMIN_EMAIL
-   if (!ALLOWED_ADMIN_EMAIL) {
-      return NextResponse.json({ error: 'ADMIN_EMAIL not configured' }, { status: 500 })
-   }
+
+   const isLoginPage = request.nextUrl.pathname === '/login'
 
    function isTargetingAPI() {
       return request.nextUrl.pathname.startsWith('/api')
    }
 
+   // Refresh Supabase session (reads/writes auth cookies)
    const { supabaseResponse, user } = await updateSession(request)
+
+   // If user is on /login and already authenticated as admin, redirect to dashboard
+   if (isLoginPage) {
+      if (user && ALLOWED_ADMIN_EMAIL && user.email?.toLowerCase() === ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+         const response = NextResponse.redirect(new URL('/', request.url))
+         supabaseResponse.cookies.getAll().forEach((cookie) => {
+            response.cookies.set(cookie.name, cookie.value, cookie as any)
+         })
+         return response
+      }
+      // Not authenticated or not admin — let them stay on login
+      return supabaseResponse
+   }
+
+   if (!ALLOWED_ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'ADMIN_EMAIL not configured' }, { status: 500 })
+   }
 
    if (!user) {
       if (isTargetingAPI()) {
@@ -47,6 +64,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
    matcher: [
       '/',
+      '/login',
       '/products/:path*',
       '/categories/:path*',
       '/brands/:path*',

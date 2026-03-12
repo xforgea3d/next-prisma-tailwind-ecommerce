@@ -29,11 +29,13 @@ export function UserAuthForm({ className }: { className?: string }) {
             setErrorMsg('Şifre hatalı.')
          } else if (data.session) {
             setSuccess(true)
-            // Force cookie refresh before redirect
-            await fetch('/api/auth/session', { method: 'POST' }).catch(() => {})
-            setTimeout(() => {
-               window.location.href = '/'
-            }, 800)
+            // Force server-side cookie refresh, then redirect
+            try {
+               await fetch('/api/auth/session', { method: 'POST', credentials: 'same-origin' })
+            } catch {}
+            // Small delay for success animation, then hard navigate
+            await new Promise((r) => setTimeout(r, 600))
+            window.location.replace('/')
          }
       } catch {
          setErrorMsg('Bir hata oluştu.')
