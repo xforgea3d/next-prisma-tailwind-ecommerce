@@ -40,34 +40,42 @@ export async function GET(req: NextRequest) {
       const mockSecret = req.nextUrl.searchParams.get('mockSecret')
       const isMockAllowed = isMock
          && process.env.NODE_ENV === 'development'
+         && !!process.env.MOCK_PAYMENT_SECRET
          && mockSecret === process.env.MOCK_PAYMENT_SECRET
-         && !payment.isSuccessful
+
       if (isMockAllowed) {
-         await prisma.$transaction([
-            prisma.payment.update({
+         // Atomic idempotent update inside transaction
+         const result = await prisma.$transaction(async (tx) => {
+            const current = await tx.payment.findUniqueOrThrow({ where: { id: payment.id } })
+            if (current.isSuccessful) return { alreadyProcessed: true }
+
+            await tx.payment.update({
                where: { id: payment.id },
                data: { status: 'Paid', isSuccessful: true },
-            }),
-            prisma.order.update({
+            })
+            await tx.order.update({
                where: { id: payment.orderId },
                data: { isPaid: true },
-            }),
-         ])
-
-         try {
-            const admins = await prisma.profile.findMany({
-               where: { role: 'admin' },
             })
-            if (admins.length > 0) {
-               await prisma.notification.createMany({
-                  data: admins.map((admin) => ({
-                     userId: admin.id,
-                     content: `[TEST] Siparis #${payment.order.number} icin test odemesi tamamlandi - ${payment.payable.toFixed(2)} TL`,
-                  })),
+            return { alreadyProcessed: false }
+         })
+
+         if (!result.alreadyProcessed) {
+            try {
+               const admins = await prisma.profile.findMany({
+                  where: { role: 'admin' },
                })
+               if (admins.length > 0) {
+                  await prisma.notification.createMany({
+                     data: admins.map((admin) => ({
+                        userId: admin.id,
+                        content: `[TEST] Siparis #${payment.order.number} icin test odemesi tamamlandi - ${payment.payable.toFixed(2)} TL`,
+                     })),
+                  })
+               }
+            } catch {
+               // Notification is best-effort
             }
-         } catch {
-            // Notification is best-effort
          }
       }
 

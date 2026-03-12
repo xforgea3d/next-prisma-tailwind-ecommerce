@@ -33,7 +33,12 @@ export function verifyCsrfToken(token: string, userId: string): boolean {
          .digest('hex')
          .slice(0, 16)
 
-      return hmac === expectedHmac
+      // Constant-time comparison to prevent timing attacks
+      try {
+         return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expectedHmac))
+      } catch {
+         return false
+      }
    } catch {
       return false
    }

@@ -40,3 +40,13 @@ next-env.d.ts
 # Prevent bun from being used on Vercel
 bun.lockb
 bun.lock
+
+# Internal reports & audits
+*_report.md
+*_rapor.md
+DEEPCHECK_REPORT_*.md
+
+# Duplicate files
+* 2.*
+* 2.json
+* 2.prisma

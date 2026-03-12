@@ -23,8 +23,8 @@ module.exports = {
          '@radix-ui/react-popover',
       ],
    },
-   typescript: { ignoreBuildErrors: true },
-   eslint: { ignoreDuringBuilds: true },
+   typescript: { ignoreBuildErrors: false },
+   eslint: { ignoreDuringBuilds: false },
    images: {
       remotePatterns: [
          {

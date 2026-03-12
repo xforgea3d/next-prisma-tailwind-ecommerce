@@ -115,6 +115,11 @@ export async function POST(req: Request) {
 
          const { tax, total, discount, payable } = calculateCosts({ cart, discountCodeData })
 
+         // Prevent zero-amount orders
+         if (payable <= 0) {
+            throw new Error('INVALID_PAYABLE')
+         }
+
          const created = await tx.order.create({
             data: {
                user: { connect: { id: userId } },
@@ -140,12 +145,15 @@ export async function POST(req: Request) {
             include: { orderItems: true, address: true },
          })
 
-         // Decrement discount code stock atomically
+         // Decrement discount code stock atomically (prevent negative stock)
          if (discountCode) {
-            await tx.discountCode.update({
-               where: { code: discountCode },
+            const updated = await tx.discountCode.updateMany({
+               where: { code: discountCode, stock: { gt: 0 } },
                data: { stock: { decrement: 1 } },
             })
+            if (updated.count === 0) {
+               throw new Error('INVALID_DISCOUNT')
+            }
          }
 
          // Decrement product stock
@@ -231,6 +239,9 @@ export async function POST(req: Request) {
       }
       if (error?.message?.startsWith('OUT_OF_STOCK:')) {
          return new NextResponse(`${error.message.split(':')[1]} icin yeterli stok yok`, { status: 400 })
+      }
+      if (error?.message === 'INVALID_PAYABLE') {
+         return new NextResponse('Siparis tutari gecersiz. Indirim kodunu kontrol edin.', { status: 400 })
       }
       console.error('[ORDER_POST]', error)
       logError({

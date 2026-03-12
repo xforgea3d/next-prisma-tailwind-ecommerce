@@ -3,8 +3,6 @@ import { logError, extractRequestContext } from '@/lib/error-logger'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xforgea3d.com'
-
 export async function POST(req: NextRequest) {
    try {
       const body = await req.json().catch(() => null)
@@ -29,7 +27,7 @@ export async function POST(req: NextRequest) {
 
       const payment = await prisma.payment.findUnique({
          where: { refId },
-         include: { order: true },
+         include: { order: { include: { orderItems: true } } },
       })
 
       if (!payment) {
@@ -42,7 +40,7 @@ export async function POST(req: NextRequest) {
          return NextResponse.json({ status: 'OK', message: 'Already processed' })
       }
 
-      // Signature validation - REQUIRED when secret key is configured
+      // Signature validation - REQUIRED in all non-development environments
       const secretKey = process.env.PAYMENT_SECRET_KEY
       if (secretKey) {
          if (!hash) {
@@ -50,14 +48,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
          }
 
+         // Always use stored payment amount for HMAC, never trust callback data
          const merchantId = process.env.PAYMENT_MERCHANT_ID ?? ''
-         const expectedHashStr = `${merchantId}${refId}${totalAmount ?? payment.payable.toFixed(2)}`
+         const expectedHashStr = `${merchantId}${refId}${payment.payable.toFixed(2)}`
          const expectedHash = crypto
             .createHmac('sha256', secretKey)
             .update(expectedHashStr)
             .digest('base64')
 
-         if (hash !== expectedHash) {
+         const hashBuffer = Buffer.from(hash)
+         const expectedBuffer = Buffer.from(expectedHash)
+
+         if (hashBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(hashBuffer, expectedBuffer)) {
             console.error('[PAYMENT_CALLBACK] Invalid signature for refId:', refId)
 
             await prisma.payment.update({
@@ -67,13 +69,31 @@ export async function POST(req: NextRequest) {
 
             return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
          }
-      } else if (process.env.NODE_ENV === 'production') {
-         console.error('[PAYMENT_CALLBACK] PAYMENT_SECRET_KEY not configured in production')
+
+         // Validate callback amount matches stored payable (if provided)
+         if (totalAmount) {
+            const parsedAmount = parseFloat(totalAmount)
+            if (!isNaN(parsedAmount) && Math.abs(parsedAmount - payment.payable) > 0.01) {
+               console.error('[PAYMENT_CALLBACK] Amount mismatch:', { totalAmount, expected: payment.payable })
+               await prisma.payment.update({
+                  where: { id: payment.id },
+                  data: { status: 'Denied' },
+               })
+               return NextResponse.json({ error: 'Amount mismatch' }, { status: 403 })
+            }
+         }
+      } else if (process.env.NODE_ENV !== 'development') {
+         // In non-development environments, signature validation is MANDATORY
+         console.error('[PAYMENT_CALLBACK] PAYMENT_SECRET_KEY not configured — rejecting callback')
          return NextResponse.json({ error: 'Payment validation not configured' }, { status: 500 })
       }
 
       // Process payment result
       const isSuccess = status === 'success' || status === 'completed' || status === 'paid'
+
+      // Parse fee safely (prevent NaN in database)
+      const parsedFee = totalAmount ? parseFloat(totalAmount) : undefined
+      const safeFee = parsedFee !== undefined && !isNaN(parsedFee) ? parsedFee : undefined
 
       if (isSuccess) {
          // Atomic update with idempotency check inside transaction
@@ -88,7 +108,7 @@ export async function POST(req: NextRequest) {
                   isSuccessful: true,
                   cardPan: cardPan ?? undefined,
                   cardHash: hash ?? undefined,
-                  fee: totalAmount ? parseFloat(totalAmount) : undefined,
+                  fee: safeFee,
                },
             })
             await tx.order.update({
@@ -112,7 +132,7 @@ export async function POST(req: NextRequest) {
                await prisma.notification.createMany({
                   data: admins.map((admin) => ({
                      userId: admin.id,
-                     content: `Odeme basarili! Siparis #${payment.order.number} icin ${payment.payable.toFixed(2)} TL odeme alindi. Ref: ${refId}`,
+                     content: `Odeme basarili! Siparis #${payment.order.number} icin ${payment.payable.toFixed(2)} TL odeme alindi.`,
                   })),
                })
             }
@@ -130,16 +150,33 @@ export async function POST(req: NextRequest) {
 
          return NextResponse.json({ status: 'OK', message: 'Payment confirmed' })
       } else {
-         await prisma.payment.update({
-            where: { id: payment.id },
-            data: {
-               status: 'Failed',
-               isSuccessful: false,
-               cardPan: cardPan ?? undefined,
-            },
+         // Payment failed — restore stock for order items
+         await prisma.$transaction(async (tx) => {
+            await tx.payment.update({
+               where: { id: payment.id },
+               data: {
+                  status: 'Failed',
+                  isSuccessful: false,
+                  cardPan: cardPan ?? undefined,
+               },
+            })
+
+            // Restore product stock since payment failed
+            for (const item of payment.order.orderItems) {
+               await tx.product.update({
+                  where: { id: item.productId },
+                  data: { stock: { increment: item.count } },
+               })
+            }
+
+            // Mark order as failed
+            await tx.order.update({
+               where: { id: payment.orderId },
+               data: { status: 'Cancelled' },
+            })
          })
 
-         return NextResponse.json({ status: 'OK', message: 'Payment failure recorded' })
+         return NextResponse.json({ status: 'OK', message: 'Payment failure recorded, stock restored' })
       }
    } catch (error: any) {
       console.error('[PAYMENT_CALLBACK]', error)

@@ -39,13 +39,8 @@ export const Item = ({ cartItem }) => {
 
    async function getProduct() {
       try {
-         const response = await fetch(`/api/product`, {
-            method: 'POST',
-            body: JSON.stringify({ productId }),
+         const response = await fetch(`/api/products/${productId}`, {
             cache: 'no-store',
-            headers: {
-               'Content-Type': 'application/json-string',
-            },
          })
 
          return await response.json()

@@ -22,8 +22,8 @@ module.exports = {
             '@radix-ui/react-tooltip',
         ],
     },
-    typescript: { ignoreBuildErrors: true },
-    eslint: { ignoreDuringBuilds: true },
+    typescript: { ignoreBuildErrors: false },
+    eslint: { ignoreDuringBuilds: false },
     images: {
         remotePatterns: [
             {

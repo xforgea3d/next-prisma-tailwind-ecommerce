@@ -5,17 +5,17 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Copy the rest of the application code
 COPY . .
 
 # Generate Prisma client
-RUN bun prisma generate
+RUN npx prisma generate
 
 # Build the Next.js application
-RUN bun run build
+RUN npm run build
 
 # Stage 2: Run the application
 FROM node:18-alpine AS runner
@@ -27,14 +27,14 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Install only production dependencies
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile --production
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
 # Copy built application from the builder stage
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Expose the port the app runs on
 EXPOSE 3000
@@ -44,4 +44,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Start the Next.js application
-CMD ["bun", "run", "start"]
+CMD ["npm", "run", "start"]

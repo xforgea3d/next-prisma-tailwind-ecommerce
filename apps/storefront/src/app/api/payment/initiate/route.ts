@@ -41,6 +41,17 @@ export async function POST(req: NextRequest) {
          return NextResponse.json({ error: 'Siparis zaten odenmis' }, { status: 400 })
       }
 
+      // Validate order is in a payable state
+      const payableStatuses = ['OnayBekleniyor', 'Processing']
+      if (!payableStatuses.includes(order.status)) {
+         return NextResponse.json({ error: 'Bu siparis icin odeme yapilamaz' }, { status: 400 })
+      }
+
+      // Prevent zero-amount payments
+      if (order.payable <= 0) {
+         return NextResponse.json({ error: 'Gecersiz odeme tutari' }, { status: 400 })
+      }
+
       // Check for payment provider configuration
       const apiKey = process.env.PAYMENT_API_KEY
       const secretKey = process.env.PAYMENT_SECRET_KEY
