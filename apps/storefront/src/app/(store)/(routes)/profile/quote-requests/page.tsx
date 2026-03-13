@@ -2,12 +2,8 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader } from '@/components/ui/loader'
-import { useAuthenticated } from '@/hooks/useAuthentication'
-import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-
-import { UserCombobox } from '../components/switcher'
 
 const statusLabels: Record<string, { label: string; color: string }> = {
    Pending: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-800' },
@@ -18,9 +14,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 }
 
 export default function QuoteRequestsPage() {
-   const { authenticated } = useAuthenticated()
    const [requests, setRequests] = useState<any[] | null>(null)
-   const pathname = usePathname()
 
    useEffect(() => {
       async function fetchRequests() {
@@ -34,15 +28,12 @@ export default function QuoteRequestsPage() {
          }
       }
 
-      if (authenticated) fetchRequests()
-   }, [authenticated])
+      fetchRequests()
+   }, [])
 
    return (
       <div className="flex-col">
          <div className="flex-1">
-            <div className="flex items-center justify-between">
-               <UserCombobox initialValue={pathname} />
-            </div>
             {requests === null ? (
                <Card className="my-4 bg-muted-foreground/5">
                   <CardContent>

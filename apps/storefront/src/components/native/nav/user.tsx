@@ -22,22 +22,27 @@ import {
 } from 'lucide-react'
 import { ShoppingBasketIcon } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 export function UserNav() {
    async function onLogout() {
       try {
-         const response = await fetch('/api/auth/logout', {
-            cache: 'no-store',
-         })
+         // Sign out client-side first so onAuthStateChange fires immediately
+         const supabase = createClient()
+         await supabase.auth.signOut()
 
-         if (typeof window !== 'undefined' && window.localStorage) {
-            document.cookie =
-               'logged-in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-         }
+         // Clear the cookie
+         document.cookie = 'logged-in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 
-         if (response.status === 200) window.location.reload()
+         // Also call server-side logout to clear server cookies
+         await fetch('/api/auth/logout', { cache: 'no-store' })
+
+         // Redirect to home
+         window.location.assign('/')
       } catch (error) {
          console.error({ error })
+         // Fallback: force reload
+         window.location.reload()
       }
    }
 
@@ -51,12 +56,6 @@ export function UserNav() {
          <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuGroup>
                <DropdownMenuItem className="flex gap-2" asChild>
-                  <Link href="/profile/addresses">
-                     <MapPinIcon className="h-4" />
-                     Adreslerim
-                  </Link>
-               </DropdownMenuItem>
-               <DropdownMenuItem className="flex gap-2" asChild>
                   <Link href="/profile/edit">
                      <UserIcon className="h-4" />
                      Profilim
@@ -69,15 +68,15 @@ export function UserNav() {
                   </Link>
                </DropdownMenuItem>
                <DropdownMenuItem className="flex gap-2" asChild>
-                  <Link href="/profile/quote-requests">
-                     <MessageSquareQuoteIcon className="h-4" />
-                     Taleplerim
+                  <Link href="/profile/addresses">
+                     <MapPinIcon className="h-4" />
+                     Adreslerim
                   </Link>
                </DropdownMenuItem>
                <DropdownMenuItem className="flex gap-2" asChild>
-                  <Link href="/profile/payments">
-                     <CreditCardIcon className="h-4" />
-                     Ödemelerim
+                  <Link href="/profile/quote-requests">
+                     <MessageSquareQuoteIcon className="h-4" />
+                     Taleplerim
                   </Link>
                </DropdownMenuItem>
                <DropdownMenuSeparator />
