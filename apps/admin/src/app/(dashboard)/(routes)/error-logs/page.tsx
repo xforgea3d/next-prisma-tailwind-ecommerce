@@ -46,30 +46,30 @@ export default async function ErrorLogsPage() {
       <div className="block space-y-4 my-6">
          <div className="flex items-center justify-between">
             <Heading
-               title={`Hata Loglari (${errors.length})`}
-               description="Tum frontend ve backend hatalarini izle"
+               title={`Hata Logları (${errors.length})`}
+               description="Tüm frontend ve backend hatalarını izleyin"
             />
             <div className="flex items-center gap-3 text-sm">
                {criticalCount > 0 && (
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400 font-medium">
                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                     {criticalCount} Kritik
+                     {criticalCount} kritik
                   </span>
                )}
                {highCount > 0 && (
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-400 font-medium">
                      <span className="w-2 h-2 rounded-full bg-orange-500" />
-                     {highCount} Yuksek
+                     {highCount} yüksek
                   </span>
                )}
                {mediumCount > 0 && (
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400 font-medium">
-                     {mediumCount} Orta
+                     {mediumCount} orta
                   </span>
                )}
                {lowCount > 0 && (
                   <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 font-medium">
-                     {lowCount} Dusuk
+                     {lowCount} düşük
                   </span>
                )}
             </div>
