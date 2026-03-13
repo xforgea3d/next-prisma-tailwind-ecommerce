@@ -10,10 +10,9 @@ import {
    FormLabel,
    FormMessage,
 } from '@/components/ui/form'
-import ImageUpload from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trash2, Save, Loader2 } from 'lucide-react'
+import { Trash2, Save, Loader2, ImagePlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -202,19 +201,60 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
                            )}
                         />
 
-                        {/* Logo upload inline */}
+                        {/* Logo upload - only button, no large preview */}
                         <FormField
                            control={form.control}
                            name="logoUrl"
                            render={({ field }) => (
                               <FormItem>
+                                 <FormLabel className="text-xs">Logo</FormLabel>
                                  <FormControl>
-                                    <ImageUpload
-                                       value={field.value ? [field.value] : []}
-                                       disabled={loading}
-                                       onChange={(url) => field.onChange(url)}
-                                       onRemove={() => field.onChange('')}
-                                    />
+                                    <div className="flex items-center gap-2">
+                                       <input
+                                          type="file"
+                                          accept="image/*"
+                                          className="hidden"
+                                          id="brand-logo-upload"
+                                          disabled={loading}
+                                          onChange={async (e) => {
+                                             const file = e.target.files?.[0]
+                                             if (!file) return
+                                             const formData = new FormData()
+                                             formData.append('file', file)
+                                             try {
+                                                const res = await fetch('/api/upload', { method: 'POST', body: formData })
+                                                if (!res.ok) throw new Error('Upload failed')
+                                                const data = await res.json()
+                                                if (data.url) field.onChange(data.url)
+                                             } catch {
+                                                toast.error('Görsel yüklenemedi.')
+                                             }
+                                             e.target.value = ''
+                                          }}
+                                       />
+                                       <Button
+                                          type="button"
+                                          variant="secondary"
+                                          size="sm"
+                                          className="h-9 text-xs"
+                                          disabled={loading}
+                                          onClick={() => document.getElementById('brand-logo-upload')?.click()}
+                                       >
+                                          <ImagePlus className="h-3.5 w-3.5 mr-1.5" />
+                                          Görsel Yükle
+                                       </Button>
+                                       {field.value && (
+                                          <Button
+                                             type="button"
+                                             variant="ghost"
+                                             size="sm"
+                                             className="h-9 text-xs text-destructive hover:text-destructive"
+                                             onClick={() => field.onChange('')}
+                                          >
+                                             <Trash2 className="h-3.5 w-3.5" />
+                                          </Button>
+                                       )}
+                                    </div>
                                  </FormControl>
                                  <FormMessage />
                               </FormItem>
