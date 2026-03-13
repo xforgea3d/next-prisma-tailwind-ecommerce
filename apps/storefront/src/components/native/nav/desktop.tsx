@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { forwardRef, useState, useEffect } from 'react'
 import { PackageOpenIcon, SparklesIcon, CarIcon, MessageSquareQuoteIcon } from 'lucide-react'
+import CarModelImage from '@/components/native/CarModelImage'
 
 // ── DB types for categories/collections ──────────────────────────────────────
 interface DbCategory {
@@ -523,14 +524,12 @@ function VehiclePartsDropdown({
                                        className="group flex flex-col rounded-xl border border-transparent p-2 transition-all hover:border-border hover:bg-accent"
                                     >
                                        {model.imageUrl ? (
-                                          <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden mb-2 bg-black">
-                                             <img
-                                                src={model.imageUrl}
-                                                alt={model.name}
-                                                className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                                                loading="lazy"
-                                             />
-                                          </div>
+                                          <CarModelImage
+                                             src={model.imageUrl}
+                                             alt={model.name}
+                                             className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                             containerClassName="relative w-full aspect-[16/10] rounded-lg overflow-hidden mb-2"
+                                          />
                                        ) : (
                                           <div className="w-full aspect-[16/10] rounded-lg bg-black flex items-center justify-center mb-2">
                                              <CarIcon className="h-6 w-6 text-white/20" />

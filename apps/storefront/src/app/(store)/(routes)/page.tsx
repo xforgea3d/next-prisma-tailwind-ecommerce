@@ -24,6 +24,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import dynamic from 'next/dynamic'
 
+const CarModelImage = dynamic(
+   () => import('@/components/native/CarModelImage'),
+   { ssr: false }
+)
+
 const ScrollReveal = dynamic(
    () => import('@/components/native/ScrollReveal').then(m => ({ default: m.ScrollReveal })),
    { ssr: false }
@@ -126,14 +131,12 @@ export default async function Index() {
                            >
                               {/* Model image preview */}
                               {firstModelImage ? (
-                                 <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden mb-3 bg-black">
-                                    <img
-                                       src={firstModelImage}
-                                       alt={`${brand.name} model`}
-                                       className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                                       loading="lazy"
-                                    />
-                                 </div>
+                                 <CarModelImage
+                                    src={firstModelImage}
+                                    alt={`${brand.name} model`}
+                                    className="absolute inset-0 h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                    containerClassName="relative w-full aspect-[16/10] rounded-lg overflow-hidden mb-3"
+                                 />
                               ) : (
                                  <div className="w-full aspect-[16/10] rounded-lg bg-black flex items-center justify-center mb-3">
                                     <Car className="h-8 w-8 text-white/20" />
