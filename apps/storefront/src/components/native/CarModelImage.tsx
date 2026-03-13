@@ -14,6 +14,7 @@ export default function CarModelImage({ src, alt, className, containerClassName 
             src={src}
             alt={alt || ''}
             className={className || 'absolute inset-0 w-full h-full object-contain p-3'}
+            style={{ backgroundColor: 'white' }}
             loading="lazy"
          />
       </div>

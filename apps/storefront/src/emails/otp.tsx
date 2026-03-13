@@ -12,16 +12,26 @@ import {
 } from '@react-email/components'
 import React from 'react'
 
-interface VerificationEmailProps {
-    name?: string
+interface OtpEmailProps {
     code?: string
+    name?: string
+    type?: 'verify' | 'reset'
 }
 
-export default function Verification({
-    name = 'xForgea3D',
-    code = '',
-}: VerificationEmailProps) {
-    const previewText = `xForgea3D - Dogrulama kodunuz: ${code}`
+export default function OtpEmail({
+    code = '123456',
+    name = '',
+    type = 'verify',
+}: OtpEmailProps) {
+    const isReset = type === 'reset'
+    const previewText = isReset
+        ? `xForgea3D - Sifre sifirlama kodunuz: ${code}`
+        : `xForgea3D - Dogrulama kodunuz: ${code}`
+
+    const heading = isReset ? 'Sifre Sifirlama' : 'E-posta Dogrulama'
+    const description = isReset
+        ? 'Sifrenizi sifirlamak icin asagidaki kodu kullanin.'
+        : 'Hesabinizi dogrulamak icin asagidaki kodu girin.'
 
     return (
         <Html>
@@ -30,7 +40,7 @@ export default function Verification({
             <Tailwind>
                 <Body className="bg-[#0a0a0a] my-0 mx-auto font-sans">
                     <Container className="mx-auto max-w-[480px] py-8 px-4">
-                        {/* Header */}
+                        {/* Header with brand */}
                         <Section className="text-center mb-6">
                             <div
                                 style={{
@@ -68,11 +78,24 @@ export default function Verification({
                                     fontSize: '22px',
                                     fontWeight: '600',
                                     textAlign: 'center' as const,
-                                    margin: '0 0 16px 0',
+                                    margin: '0 0 8px 0',
                                 }}
                             >
-                                E-posta Dogrulama
+                                {heading}
                             </Heading>
+
+                            {name && (
+                                <Text
+                                    style={{
+                                        color: '#a3a3a3',
+                                        fontSize: '14px',
+                                        textAlign: 'center' as const,
+                                        margin: '0 0 4px 0',
+                                    }}
+                                >
+                                    Merhaba {name},
+                                </Text>
+                            )}
 
                             <Text
                                 style={{
@@ -82,10 +105,10 @@ export default function Verification({
                                     margin: '0 0 24px 0',
                                 }}
                             >
-                                Hesabinizi dogrulamak icin asagidaki kodu kullanin.
+                                {description}
                             </Text>
 
-                            {/* Code box */}
+                            {/* OTP Code box */}
                             <Section
                                 style={{
                                     backgroundColor: '#0a0a0a',
@@ -119,10 +142,15 @@ export default function Verification({
                                     margin: '0 0 16px 0',
                                 }}
                             >
-                                Bu islemi siz baslatmadiyseniz bu e-postayi guvenlice yok sayabilirsiniz.
+                                Bu kod 10 dakika icerisinde gecerliligini yitirecektir.
                             </Text>
 
-                            <Hr style={{ borderColor: '#262626', margin: '16px 0' }} />
+                            <Hr
+                                style={{
+                                    borderColor: '#262626',
+                                    margin: '16px 0',
+                                }}
+                            />
 
                             <Text
                                 style={{
@@ -130,9 +158,24 @@ export default function Verification({
                                     fontSize: '12px',
                                     textAlign: 'center' as const,
                                     margin: '0',
+                                    lineHeight: '18px',
                                 }}
                             >
-                                &copy; {new Date().getFullYear()} {name}. Tum haklari saklidir.
+                                Bu islemi siz baslatmadiyseniz bu e-postayi guvenlice yok sayabilirsiniz.
+                                Hesabiniz guvendedir.
+                            </Text>
+                        </Section>
+
+                        {/* Footer */}
+                        <Section className="text-center mt-6">
+                            <Text
+                                style={{
+                                    color: '#404040',
+                                    fontSize: '11px',
+                                    margin: '0',
+                                }}
+                            >
+                                &copy; {new Date().getFullYear()} xForgea3D. Tum haklari saklidir.
                             </Text>
                         </Section>
                     </Container>

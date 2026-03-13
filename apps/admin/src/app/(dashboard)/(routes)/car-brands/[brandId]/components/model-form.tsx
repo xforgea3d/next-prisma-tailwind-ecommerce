@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge'
 import {
    Plus,
    Trash2,
-   Sparkles,
    Loader2,
    Car,
    Upload,
@@ -57,7 +56,6 @@ function slugify(text: string) {
 export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models }) => {
    const router = useRouter()
    const [loading, setLoading] = useState(false)
-   const [generatingId, setGeneratingId] = useState<string | null>(null)
    const [deleteOpen, setDeleteOpen] = useState(false)
    const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
    const [uploadingId, setUploadingId] = useState<string | null>(null)
@@ -184,37 +182,6 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
          toast.error('Upload hatası: ' + (e?.message || ''))
       } finally {
          setUploadingId(null)
-      }
-   }
-
-   const handleGenerateImage = async (model: CarModel) => {
-      try {
-         setGeneratingId(model.id)
-         const res = await fetch('/api/generate-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-               prompt: `${brandName} ${model.name} ${model.yearRange || ''} otomobil, stüdyo çekimi, profesyonel araç fotoğrafı`,
-               context: 'car-model',
-            }),
-         })
-
-         if (!res.ok) throw new Error(await res.text())
-         const { url } = await res.json()
-
-         const patchRes = await fetch(`/api/car-brands/${brandId}/models/${model.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageUrl: url }),
-         })
-         if (!patchRes.ok) throw new Error('Güncelleme başarısız')
-
-         router.refresh()
-         toast.success('AI görsel oluşturuldu!')
-      } catch (err: any) {
-         toast.error(`Görsel hatası: ${err.message || 'Bilinmeyen hata'}`)
-      } finally {
-         setGeneratingId(null)
       }
    }
 
@@ -392,7 +359,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
                            <Car className="h-8 w-8 text-white/15" />
                         )}
 
-                        {/* Upload / AI overlay */}
+                        {/* Upload overlay */}
                         <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                            <label className="cursor-pointer">
                               <input
@@ -414,26 +381,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
                                  )}
                               </span>
                            </label>
-                           <button
-                              className="inline-flex items-center justify-center h-7 w-7 rounded bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50"
-                              disabled={generatingId === model.id}
-                              onClick={() => handleGenerateImage(model)}
-                           >
-                              {generatingId === model.id ? (
-                                 <Loader2 className="h-3.5 w-3.5 text-white animate-spin" />
-                              ) : (
-                                 <Sparkles className="h-3.5 w-3.5 text-white" />
-                              )}
-                           </button>
                         </div>
-
-                        {/* AI generating overlay */}
-                        {generatingId === model.id && (
-                           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-1">
-                              <Loader2 className="h-5 w-5 text-orange-500 animate-spin" />
-                              <span className="text-[10px] text-white/70">AI...</span>
-                           </div>
-                        )}
                      </div>
 
                      {/* Model info */}

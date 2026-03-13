@@ -31,11 +31,23 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
    const supabase = createClient()
    const searchParams = useSearchParams()
 
+   /**
+    * Returns the site origin for auth redirects.
+    * Uses NEXT_PUBLIC_SITE_URL if available (production),
+    * otherwise falls back to window.location.origin (dev).
+    */
+   function getSiteOrigin(): string {
+      const envUrl = process.env.NEXT_PUBLIC_SITE_URL
+      if (envUrl) return envUrl.replace(/\/$/, '')
+      return window.location.origin
+   }
+
    async function handleGoogleOAuth() {
       try {
          setIsGoogleLoading(true)
          const redirectParams = searchParams.get('redirect') || '/'
-         const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectParams)}`
+         const origin = getSiteOrigin()
+         const redirectTo = `${origin}/auth/callback?next=${encodeURIComponent(redirectParams)}`
 
          const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -46,7 +58,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
          if (error) {
             console.error('Google OAuth Error:', error.message)
-            alert('Google ile giriş şu anda aktif değil. Lütfen e-posta/şifre ile giriş yapın.')
+            alert('Google ile giris su anda aktif degil. Lutfen e-posta/sifre ile giris yapin.')
          }
       } catch (error) {
          console.error({ error })
@@ -113,6 +125,9 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
    const [email, setEmail] = React.useState('')
    const [password, setPassword] = React.useState('')
    const [errorMsg, setErrorMsg] = React.useState('')
+   const [forgotMode, setForgotMode] = React.useState(false)
+   const [forgotMsg, setForgotMsg] = React.useState('')
+   const [forgotLoading, setForgotLoading] = React.useState(false)
 
    async function onSubmit(e: React.FormEvent) {
       e.preventDefault()
@@ -127,7 +142,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
          })
 
          if (error) {
-            setErrorMsg('E-posta veya şifre hatalı.')
+            setErrorMsg('E-posta veya sifre hatali.')
             console.error('SignIn Error:', error.message)
          } else if (data.session) {
             setLoggedInCookie()
@@ -135,10 +150,78 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
             window.location.assign(target)
          }
       } catch (error) {
-         setErrorMsg('Beklenmeyen bir hata oluştu.')
+         setErrorMsg('Beklenmeyen bir hata olustu.')
       } finally {
          setIsLoading(false)
       }
+   }
+
+   async function handleForgotPassword(e: React.FormEvent) {
+      e.preventDefault()
+      if (!email) return
+      setForgotMsg('')
+      setErrorMsg('')
+
+      try {
+         setForgotLoading(true)
+         const res = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+         })
+         const data = await res.json()
+         if (data.success) {
+            setForgotMsg(data.message)
+         } else {
+            setErrorMsg(data.error || 'Bir hata olustu.')
+         }
+      } catch {
+         setErrorMsg('Beklenmeyen bir hata olustu.')
+      } finally {
+         setForgotLoading(false)
+      }
+   }
+
+   if (forgotMode) {
+      return (
+         <form onSubmit={handleForgotPassword} className="grid gap-3">
+            <div className="grid gap-1">
+               <Label className="text-sm font-light text-foreground/60" htmlFor="email-forgot">
+                  E-posta
+               </Label>
+               <Input
+                  id="email-forgot"
+                  placeholder="name@example.com"
+                  type="email"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  disabled={forgotLoading}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+               />
+            </div>
+            {forgotMsg && (
+               <p className="text-xs text-emerald-600 dark:text-emerald-400">{forgotMsg}</p>
+            )}
+            {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
+            <Button
+               type="submit"
+               disabled={forgotLoading || !isEmailValid(email)}
+            >
+               {forgotLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+               Sifre Sifirlama Baglantisi Gonder
+            </Button>
+            <button
+               type="button"
+               className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
+               onClick={() => { setForgotMode(false); setForgotMsg(''); setErrorMsg('') }}
+            >
+               Girisse don
+            </button>
+         </form>
+      )
    }
 
    return (
@@ -160,13 +243,22 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
                required
             />
          </div>
-         <div className="grid gap-1 mb-2">
-            <Label className="text-sm font-light text-foreground/60" htmlFor="password-login">
-               Şifre
-            </Label>
+         <div className="grid gap-1">
+            <div className="flex items-center justify-between">
+               <Label className="text-sm font-light text-foreground/60" htmlFor="password-login">
+                  Sifre
+               </Label>
+               <button
+                  type="button"
+                  className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
+                  onClick={() => { setForgotMode(true); setErrorMsg('') }}
+               >
+                  Sifremi unuttum
+               </button>
+            </div>
             <Input
                id="password-login"
-               placeholder="••••••••"
+               placeholder="********"
                type="password"
                disabled={isLoading}
                value={password}
@@ -180,7 +272,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
             disabled={isLoading || !isEmailValid(email) || password.length < 6}
          >
             {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-            Giriş Yap
+            Giris Yap
          </Button>
       </form>
    )
@@ -205,6 +297,7 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
 
       try {
          setIsLoading(true)
+         const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || window.location.origin
          const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -212,7 +305,7 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
                data: {
                   full_name: name,
                },
-               emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirectParams || '/'}`,
+               emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectParams || '/')}`,
             }
          })
 

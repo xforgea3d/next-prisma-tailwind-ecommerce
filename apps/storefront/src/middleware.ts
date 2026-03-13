@@ -60,6 +60,9 @@ const RATE_LIMITED_POSTS: Record<string, { limit: number; windowMs: number }> = 
    '/api/custom-order': { limit: 5, windowMs: 60_000 },
    '/api/payment/callback': { limit: 30, windowMs: 60_000 },
    '/api/error-logs': { limit: 20, windowMs: 60_000 },
+   '/api/auth/send-otp': { limit: 5, windowMs: 60_000 },
+   '/api/auth/verify-otp': { limit: 10, windowMs: 60_000 },
+   '/api/auth/forgot-password': { limit: 3, windowMs: 60_000 },
 }
 
 export async function middleware(request: NextRequest) {
