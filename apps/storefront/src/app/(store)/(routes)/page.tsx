@@ -117,33 +117,53 @@ export default async function Index() {
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                     {carBrands.map((brand: any) => (
-                        <Link
-                           key={brand.id}
-                           href={`/products?carBrand=${brand.slug}`}
-                           className="group relative flex flex-col items-center rounded-xl border bg-background p-5 hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
-                        >
-                           {brand.logoUrl ? (
-                              <div className="w-20 h-20 flex items-center justify-center bg-white rounded-xl border border-border/50 shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                                 <Image
-                                    src={brand.logoUrl}
-                                    alt={brand.name}
-                                    width={56}
-                                    height={56}
-                                    className="object-contain"
-                                 />
-                              </div>
-                           ) : (
-                              <div className="w-20 h-20 rounded-xl bg-foreground/5 flex items-center justify-center mb-3 group-hover:bg-orange-500/10 transition-colors">
-                                 <span className="text-2xl font-bold text-muted-foreground">{brand.name.charAt(0)}</span>
-                              </div>
-                           )}
-                           <span className="text-sm font-semibold text-center">{brand.name}</span>
-                           <span className="text-[10px] text-muted-foreground">
-                              {brand._count.models} model
-                           </span>
-                        </Link>
-                     ))}
+                     {carBrands.map((brand: any) => {
+                        const firstModelImage = brand.models?.[0]?.imageUrl
+                        return (
+                           <Link
+                              key={brand.id}
+                              href={`/products?carBrand=${brand.slug}`}
+                              className="group relative flex flex-col items-center rounded-xl border bg-background p-5 hover:border-orange-500/40 hover:shadow-lg hover:shadow-orange-500/5 transition-all"
+                           >
+                              {/* Model image preview */}
+                              {firstModelImage ? (
+                                 <div className="relative w-full h-24 rounded-lg overflow-hidden mb-3 bg-black">
+                                    <Image
+                                       src={firstModelImage}
+                                       alt={`${brand.name} model`}
+                                       fill
+                                       className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                                       sizes="200px"
+                                    />
+                                 </div>
+                              ) : (
+                                 <div className="w-full h-24 rounded-lg bg-black flex items-center justify-center mb-3">
+                                    <Car className="h-8 w-8 text-white/20" />
+                                 </div>
+                              )}
+                              {/* Brand logo */}
+                              {brand.logoUrl ? (
+                                 <div className="w-10 h-10 flex items-center justify-center bg-white rounded-lg border border-border/50 shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                                    <Image
+                                       src={brand.logoUrl}
+                                       alt={brand.name}
+                                       width={28}
+                                       height={28}
+                                       className="object-contain"
+                                    />
+                                 </div>
+                              ) : (
+                                 <div className="w-10 h-10 rounded-lg bg-foreground/5 flex items-center justify-center mb-2 group-hover:bg-orange-500/10 transition-colors">
+                                    <span className="text-lg font-bold text-muted-foreground">{brand.name.charAt(0)}</span>
+                                 </div>
+                              )}
+                              <span className="text-sm font-semibold text-center">{brand.name}</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                 {brand._count.models} model
+                              </span>
+                           </Link>
+                        )
+                     })}
                   </div>
                </div>
             </section>

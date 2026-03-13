@@ -27,6 +27,16 @@ module.exports = {
    eslint: { ignoreDuringBuilds: false },
    images: {
       unoptimized: true,
+      remotePatterns: [
+         {
+            protocol: 'https',
+            hostname: '*.supabase.co',
+         },
+         {
+            protocol: 'https',
+            hostname: 'wsomqsbgclyhhtaocxio.supabase.co',
+         },
+      ],
    },
    async headers() {
       return [

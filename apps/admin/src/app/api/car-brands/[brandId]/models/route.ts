@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { revalidateStorefront } from '@/lib/revalidate-storefront'
 
@@ -24,7 +25,8 @@ export async function POST(
          },
       })
 
-      await revalidateStorefront(['/', '/products'])
+      revalidatePath('/', 'layout')
+      await revalidateStorefront(['/', '/products', '/car-brands'])
 
       return NextResponse.json(model)
    } catch (error) {

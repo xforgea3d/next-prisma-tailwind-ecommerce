@@ -2,11 +2,29 @@
 
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
-import { Heading } from '@/components/ui/heading'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+   Dialog,
+   DialogContent,
+   DialogHeader,
+   DialogTitle,
+   DialogDescription,
+   DialogFooter,
+} from '@/components/ui/dialog'
 import ImageUpload from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
-import { Plus, Trash, Sparkles, Loader2, Car, Upload, PackagePlus } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import {
+   Plus,
+   Trash2,
+   Sparkles,
+   Loader2,
+   Car,
+   Upload,
+   Pencil,
+   PackagePlus,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -48,17 +66,41 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
    const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
    const [uploadingId, setUploadingId] = useState<string | null>(null)
 
-   // New model form
+   // Add dialog
+   const [addOpen, setAddOpen] = useState(false)
    const [newName, setNewName] = useState('')
    const [newSlug, setNewSlug] = useState('')
    const [newYear, setNewYear] = useState('')
    const [newImageUrl, setNewImageUrl] = useState('')
 
+   // Edit dialog
+   const [editOpen, setEditOpen] = useState(false)
+   const [editModel, setEditModel] = useState<CarModel | null>(null)
+   const [editName, setEditName] = useState('')
+   const [editSlug, setEditSlug] = useState('')
+   const [editYear, setEditYear] = useState('')
+
+   const resetAddForm = () => {
+      setNewName('')
+      setNewSlug('')
+      setNewYear('')
+      setNewImageUrl('')
+   }
+
+   const openEditDialog = (model: CarModel) => {
+      setEditModel(model)
+      setEditName(model.name)
+      setEditSlug(model.slug)
+      setEditYear(model.yearRange || '')
+      setEditOpen(true)
+   }
+
    const handleAddModel = async () => {
-      if (!newName || !newSlug) {
-         toast.error('Model adı ve slug zorunlu')
+      if (!newName) {
+         toast.error('Model adı zorunlu')
          return
       }
+      const slug = newSlug || slugify(newName)
       try {
          setLoading(true)
          const res = await fetch(`/api/car-brands/${brandId}/models`, {
@@ -66,18 +108,41 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                name: newName,
-               slug: newSlug,
+               slug,
                yearRange: newYear || null,
                imageUrl: newImageUrl || null,
             }),
          })
          if (!res.ok) throw new Error(await res.text())
-         setNewName('')
-         setNewSlug('')
-         setNewYear('')
-         setNewImageUrl('')
+         resetAddForm()
+         setAddOpen(false)
          router.refresh()
          toast.success('Model eklendi.')
+      } catch (e: any) {
+         toast.error('Hata: ' + (e?.message || 'Bilinmeyen'))
+      } finally {
+         setLoading(false)
+      }
+   }
+
+   const handleEditModel = async () => {
+      if (!editModel || !editName) return
+      try {
+         setLoading(true)
+         const res = await fetch(`/api/car-brands/${brandId}/models/${editModel.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               name: editName,
+               slug: editSlug || slugify(editName),
+               yearRange: editYear || null,
+            }),
+         })
+         if (!res.ok) throw new Error(await res.text())
+         setEditOpen(false)
+         setEditModel(null)
+         router.refresh()
+         toast.success('Model güncellendi.')
       } catch (e: any) {
          toast.error('Hata: ' + (e?.message || 'Bilinmeyen'))
       } finally {
@@ -159,6 +224,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
 
    return (
       <>
+         {/* Delete confirmation */}
          <AlertModal
             isOpen={deleteOpen}
             onClose={() => { setDeleteOpen(false); setDeleteTarget(null) }}
@@ -166,167 +232,279 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
             loading={loading}
          />
 
-         <Heading title={`Modeller (${models.length})`} description={`${brandName} araç modellerini yönetin`} />
-         <Separator />
+         {/* Add Model Dialog */}
+         <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogContent className="sm:max-w-md">
+               <DialogHeader>
+                  <DialogTitle>Yeni Model Ekle</DialogTitle>
+                  <DialogDescription>{brandName} markasına yeni bir model ekleyin.</DialogDescription>
+               </DialogHeader>
+               <div className="space-y-4 py-2">
+                  <div className="space-y-2">
+                     <Label htmlFor="model-name">Model Adı *</Label>
+                     <Input
+                        id="model-name"
+                        placeholder="3 Serisi"
+                        value={newName}
+                        onChange={e => {
+                           setNewName(e.target.value)
+                           setNewSlug(slugify(e.target.value))
+                        }}
+                        disabled={loading}
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label htmlFor="model-slug">Slug</Label>
+                     <Input
+                        id="model-slug"
+                        placeholder="3-serisi"
+                        value={newSlug}
+                        onChange={e => setNewSlug(e.target.value)}
+                        disabled={loading}
+                        className="font-mono text-sm"
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label htmlFor="model-year">Yıl Aralığı</Label>
+                     <Input
+                        id="model-year"
+                        placeholder="2019-2024"
+                        value={newYear}
+                        onChange={e => setNewYear(e.target.value)}
+                        disabled={loading}
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label>Görsel (opsiyonel)</Label>
+                     <ImageUpload
+                        value={newImageUrl ? [newImageUrl] : []}
+                        disabled={loading}
+                        onChange={(url) => setNewImageUrl(url)}
+                        onRemove={() => setNewImageUrl('')}
+                     />
+                  </div>
+               </div>
+               <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => { setAddOpen(false); resetAddForm() }} disabled={loading}>
+                     İptal
+                  </Button>
+                  <Button onClick={handleAddModel} disabled={loading} className="gap-2">
+                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                     Ekle
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
 
-         {/* Add new model */}
-         <div className="border rounded-xl p-4 bg-muted/20 space-y-4">
-            <h3 className="text-sm font-semibold">Yeni Model Ekle</h3>
-            <div className="flex items-end gap-3 flex-wrap">
-               <div className="space-y-1">
-                  <label className="text-xs font-medium">Model Adı *</label>
-                  <Input
-                     placeholder="3 Serisi"
-                     value={newName}
-                     onChange={e => {
-                        setNewName(e.target.value)
-                        setNewSlug(slugify(e.target.value))
-                     }}
-                     disabled={loading}
-                     className="w-44"
-                  />
+         {/* Edit Model Dialog */}
+         <Dialog open={editOpen} onOpenChange={setEditOpen}>
+            <DialogContent className="sm:max-w-md">
+               <DialogHeader>
+                  <DialogTitle>Modeli Düzenle</DialogTitle>
+                  <DialogDescription>Model bilgilerini güncelleyin.</DialogDescription>
+               </DialogHeader>
+               <div className="space-y-4 py-2">
+                  <div className="space-y-2">
+                     <Label htmlFor="edit-name">Model Adı *</Label>
+                     <Input
+                        id="edit-name"
+                        value={editName}
+                        onChange={e => {
+                           setEditName(e.target.value)
+                           setEditSlug(slugify(e.target.value))
+                        }}
+                        disabled={loading}
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label htmlFor="edit-slug">Slug</Label>
+                     <Input
+                        id="edit-slug"
+                        value={editSlug}
+                        onChange={e => setEditSlug(e.target.value)}
+                        disabled={loading}
+                        className="font-mono text-sm"
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label htmlFor="edit-year">Yıl Aralığı</Label>
+                     <Input
+                        id="edit-year"
+                        value={editYear}
+                        onChange={e => setEditYear(e.target.value)}
+                        disabled={loading}
+                     />
+                  </div>
                </div>
-               <div className="space-y-1">
-                  <label className="text-xs font-medium">Slug *</label>
-                  <Input
-                     placeholder="3-serisi"
-                     value={newSlug}
-                     onChange={e => setNewSlug(e.target.value)}
-                     disabled={loading}
-                     className="w-36"
-                  />
-               </div>
-               <div className="space-y-1">
-                  <label className="text-xs font-medium">Yıl Aralığı</label>
-                  <Input
-                     placeholder="2019-2024"
-                     value={newYear}
-                     onChange={e => setNewYear(e.target.value)}
-                     disabled={loading}
-                     className="w-32"
-                  />
-               </div>
-               <Button onClick={handleAddModel} disabled={loading} size="sm">
-                  <Plus className="h-4 w-4 mr-1" /> Ekle
-               </Button>
+               <DialogFooter className="gap-2">
+                  <Button variant="outline" onClick={() => setEditOpen(false)} disabled={loading}>
+                     İptal
+                  </Button>
+                  <Button onClick={handleEditModel} disabled={loading} className="gap-2">
+                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                     Kaydet
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
+
+         {/* Header with Add button */}
+         <div className="flex items-center justify-between">
+            <div>
+               <h3 className="text-lg font-semibold">Modeller</h3>
+               <p className="text-sm text-muted-foreground">
+                  {brandName} markasına ait {models.length} model
+               </p>
             </div>
-            {/* Image upload for new model */}
-            <div className="space-y-1">
-               <label className="text-xs font-medium">Görsel (opsiyonel)</label>
-               <ImageUpload
-                  value={newImageUrl ? [newImageUrl] : []}
-                  disabled={loading}
-                  onChange={(url) => setNewImageUrl(url)}
-                  onRemove={() => setNewImageUrl('')}
-               />
-            </div>
+            <Button onClick={() => setAddOpen(true)} className="gap-2">
+               <Plus className="h-4 w-4" />
+               Yeni Model Ekle
+            </Button>
          </div>
 
-         {/* Model list */}
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-            {models.map(model => (
-               <div key={model.id} className="border rounded-xl overflow-hidden group">
-                  {/* Image */}
-                  <div className="relative h-40 bg-muted flex items-center justify-center">
-                     {model.imageUrl ? (
-                        <Image
-                           src={model.imageUrl}
-                           alt={model.name}
-                           fill
-                           className="object-contain p-2"
-                           sizes="300px"
-                        />
-                     ) : (
-                        <Car className="h-12 w-12 text-muted-foreground/30" />
-                     )}
-                  </div>
-                  {/* Info */}
-                  <div className="p-3 space-y-2">
-                     <div className="flex items-center justify-between">
-                        <div>
-                           <h4 className="font-semibold text-sm">{model.name}</h4>
-                           {model.yearRange && (
-                              <span className="text-xs text-muted-foreground">{model.yearRange}</span>
-                           )}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground font-mono">{model.slug}</span>
-                     </div>
-                     <div className="flex gap-1.5 mb-1.5">
-                        {/* Add product for this model */}
-                        <Link
-                           href={`/products/new?carModelId=${model.id}`}
-                           className="flex-1"
-                        >
+         {/* Empty state */}
+         {models.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border rounded-xl border-dashed">
+               <Car className="h-12 w-12 text-muted-foreground/30 mb-3" />
+               <p className="text-sm text-muted-foreground">Henüz model eklenmemiş</p>
+               <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 gap-2"
+                  onClick={() => setAddOpen(true)}
+               >
+                  <Plus className="h-4 w-4" />
+                  İlk modeli ekle
+               </Button>
+            </div>
+         ) : (
+            /* Model cards grid */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+               {models.map(model => (
+                  <Card key={model.id} className="group overflow-hidden">
+                     {/* Image area */}
+                     <div className="relative h-44 bg-black flex items-center justify-center">
+                        {model.imageUrl ? (
+                           <Image
+                              src={model.imageUrl}
+                              alt={model.name}
+                              fill
+                              className="object-contain p-3"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                           />
+                        ) : (
+                           <Car className="h-14 w-14 text-white/10" />
+                        )}
+
+                        {/* Image action overlay */}
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                           {/* Upload */}
+                           <label>
+                              <input
+                                 type="file"
+                                 accept="image/*"
+                                 className="hidden"
+                                 onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) handleUploadImage(model.id, file)
+                                    e.target.value = ''
+                                 }}
+                                 disabled={uploadingId === model.id}
+                              />
+                              <Button
+                                 size="sm"
+                                 variant="secondary"
+                                 className="text-xs pointer-events-none"
+                                 disabled={uploadingId === model.id}
+                              >
+                                 {uploadingId === model.id ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                 ) : (
+                                    <Upload className="h-3.5 w-3.5" />
+                                 )}
+                              </Button>
+                           </label>
+
+                           {/* AI Generate */}
                            <Button
                               size="sm"
                               variant="secondary"
-                              className="w-full text-xs"
+                              className="text-xs gap-1.5"
+                              disabled={generatingId === model.id}
+                              onClick={() => handleGenerateImage(model)}
                            >
-                              <PackagePlus className="h-3 w-3 mr-1" />
-                              Ürün Ekle
+                              {generatingId === model.id ? (
+                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                 <Sparkles className="h-3.5 w-3.5" />
+                              )}
+                              AI
                            </Button>
-                        </Link>
+                        </div>
+
+                        {/* Loading overlay for AI generation */}
+                        {generatingId === model.id && (
+                           <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2">
+                              <Loader2 className="h-6 w-6 text-orange-500 animate-spin" />
+                              <span className="text-xs text-white/70">AI görsel oluşturuluyor...</span>
+                           </div>
+                        )}
                      </div>
-                     <div className="flex gap-1.5">
-                        {/* Upload image */}
-                        <label className="flex-1">
-                           <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                 const file = e.target.files?.[0]
-                                 if (file) handleUploadImage(model.id, file)
-                                 e.target.value = ''
-                              }}
-                              disabled={uploadingId === model.id}
-                           />
-                           <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-full text-xs"
-                              disabled={uploadingId === model.id}
-                              asChild
-                           >
-                              <span>
-                                 {uploadingId === model.id ? (
-                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                 ) : (
-                                    <Upload className="h-3 w-3 mr-1" />
+
+                     {/* Info */}
+                     <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                           <div className="min-w-0">
+                              <h4 className="font-semibold text-sm truncate">{model.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                 {model.yearRange && (
+                                    <Badge variant="secondary" className="text-[11px]">
+                                       {model.yearRange}
+                                    </Badge>
                                  )}
-                                 Yükle
-                              </span>
-                           </Button>
-                        </label>
-                        {/* AI Generate */}
-                        <Button
-                           size="sm"
-                           variant="outline"
-                           className="flex-1 text-xs"
-                           disabled={generatingId === model.id}
-                           onClick={() => handleGenerateImage(model)}
-                        >
-                           {generatingId === model.id ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                           ) : (
-                              <Sparkles className="h-3 w-3 mr-1" />
-                           )}
-                           AI
-                        </Button>
-                        {/* Delete */}
-                        <Button
-                           size="sm"
-                           variant="destructive"
-                           className="text-xs px-2"
-                           onClick={() => { setDeleteTarget(model.id); setDeleteOpen(true) }}
-                        >
-                           <Trash className="h-3 w-3" />
-                        </Button>
-                     </div>
-                  </div>
-               </div>
-            ))}
-         </div>
+                                 <span className="text-[10px] text-muted-foreground font-mono">
+                                    {model.slug}
+                                 </span>
+                              </div>
+                           </div>
+
+                           {/* Action buttons */}
+                           <div className="flex items-center gap-1 shrink-0">
+                              <Link href={`/products/new?carModelId=${model.id}`}>
+                                 <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7 text-muted-foreground hover:text-orange-600"
+                                    title="Ürün Ekle"
+                                 >
+                                    <PackagePlus className="h-3.5 w-3.5" />
+                                 </Button>
+                              </Link>
+                              <Button
+                                 size="icon"
+                                 variant="ghost"
+                                 className="h-7 w-7 text-muted-foreground hover:text-blue-600"
+                                 onClick={() => openEditDialog(model)}
+                                 title="Düzenle"
+                              >
+                                 <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                 size="icon"
+                                 variant="ghost"
+                                 className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                 onClick={() => { setDeleteTarget(model.id); setDeleteOpen(true) }}
+                                 title="Sil"
+                              >
+                                 <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                           </div>
+                        </div>
+                     </CardContent>
+                  </Card>
+               ))}
+            </div>
+         )}
       </>
    )
 }

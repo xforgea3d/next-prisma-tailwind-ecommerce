@@ -2,6 +2,7 @@
 
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
    Form,
    FormControl,
@@ -10,12 +11,10 @@ import {
    FormLabel,
    FormMessage,
 } from '@/components/ui/form'
-import { Heading } from '@/components/ui/heading'
 import ImageUpload from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trash } from 'lucide-react'
+import { Trash2, Save, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -60,11 +59,6 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
    const [open, setOpen] = useState(false)
    const [loading, setLoading] = useState(false)
 
-   const title = initialData ? 'Markayı Düzenle' : 'Yeni Marka Ekle'
-   const description = initialData ? 'Araç markası bilgilerini güncelleyin.' : 'Yeni bir araç markası ekleyin.'
-   const toastMessage = initialData ? 'Marka güncellendi.' : 'Marka oluşturuldu.'
-   const action = initialData ? 'Kaydet' : 'Oluştur'
-
    const form = useForm<FormValues>({
       resolver: zodResolver(formSchema),
       defaultValues: initialData
@@ -95,7 +89,7 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
          if (!res.ok) throw new Error(await res.text())
          router.refresh()
          router.push('/car-brands')
-         toast.success(toastMessage)
+         toast.success(initialData ? 'Marka güncellendi.' : 'Marka oluşturuldu.')
       } catch (e: any) {
          toast.error('Hata: ' + (e?.message || 'Bilinmeyen'))
       } finally {
@@ -132,102 +126,143 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
    return (
       <>
          <AlertModal isOpen={open} onClose={() => setOpen(false)} onConfirm={onDelete} loading={loading} />
-         <div className="flex items-center justify-between">
-            <Heading title={title} description={description} />
-            {initialData && (
-               <Button disabled={loading} variant="destructive" size="sm" onClick={() => setOpen(true)}>
-                  <Trash className="h-4" />
-               </Button>
-            )}
-         </div>
-         <Separator />
+
          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full">
-               {/* Logo Upload */}
-               <div className="space-y-3">
-                  <FormField
-                     control={form.control}
-                     name="logoUrl"
-                     render={({ field }) => (
-                        <FormItem>
-                           <FormLabel>Marka Logosu</FormLabel>
-                           <FormControl>
-                              <ImageUpload
-                                 value={field.value ? [field.value] : []}
-                                 disabled={loading}
-                                 onChange={(url) => field.onChange(url)}
-                                 onRemove={() => field.onChange('')}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+               {/* Logo Card */}
+               <Card>
+                  <CardHeader>
+                     <CardTitle className="text-base">Logo</CardTitle>
+                     <CardDescription>Marka logosu yükleyin (opsiyonel)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                     <div className="flex items-start gap-6">
+                        {/* Logo Preview */}
+                        {logoUrl && (
+                           <div className="relative w-20 h-20 bg-white rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden shrink-0">
+                              <Image
+                                 src={logoUrl}
+                                 alt="Logo"
+                                 width={64}
+                                 height={64}
+                                 className="object-contain"
                               />
-                           </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                     )}
-                  />
-                  {logoUrl && (
-                     <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-                        <div className="relative w-16 h-16 bg-white rounded-lg border flex items-center justify-center overflow-hidden">
-                           <Image
-                              src={logoUrl}
-                              alt="Logo preview"
-                              width={56}
-                              height={56}
-                              className="object-contain"
-                           />
-                        </div>
-                        <span className="text-xs text-muted-foreground truncate flex-1">{logoUrl}</span>
+                           </div>
+                        )}
+                        <FormField
+                           control={form.control}
+                           name="logoUrl"
+                           render={({ field }) => (
+                              <FormItem className="flex-1">
+                                 <FormControl>
+                                    <ImageUpload
+                                       value={field.value ? [field.value] : []}
+                                       disabled={loading}
+                                       onChange={(url) => field.onChange(url)}
+                                       onRemove={() => field.onChange('')}
+                                    />
+                                 </FormControl>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
                      </div>
+                  </CardContent>
+               </Card>
+
+               {/* Brand Details Card */}
+               <Card>
+                  <CardHeader>
+                     <CardTitle className="text-base">Marka Bilgileri</CardTitle>
+                     <CardDescription>Marka adı ve slug bilgilerini girin</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <FormField
+                           control={form.control}
+                           name="name"
+                           render={({ field }) => (
+                              <FormItem>
+                                 <FormLabel>Marka Adı</FormLabel>
+                                 <FormControl>
+                                    <Input
+                                       disabled={loading}
+                                       placeholder="BMW"
+                                       {...field}
+                                       onChange={handleNameChange}
+                                    />
+                                 </FormControl>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
+                        <FormField
+                           control={form.control}
+                           name="slug"
+                           render={({ field }) => (
+                              <FormItem>
+                                 <FormLabel>Slug</FormLabel>
+                                 <FormControl>
+                                    <Input
+                                       disabled={loading}
+                                       placeholder="bmw"
+                                       {...field}
+                                       className="font-mono text-sm"
+                                    />
+                                 </FormControl>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
+                        <FormField
+                           control={form.control}
+                           name="sortOrder"
+                           render={({ field }) => (
+                              <FormItem>
+                                 <FormLabel>Sıralama</FormLabel>
+                                 <FormControl>
+                                    <Input type="number" disabled={loading} placeholder="0" {...field} />
+                                 </FormControl>
+                                 <FormMessage />
+                              </FormItem>
+                           )}
+                        />
+                     </div>
+                  </CardContent>
+               </Card>
+
+               {/* Action Buttons */}
+               <div className="flex items-center gap-3">
+                  <Button disabled={loading} type="submit" className="gap-2">
+                     {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                     ) : (
+                        <Save className="h-4 w-4" />
+                     )}
+                     Kaydet
+                  </Button>
+                  <Button
+                     type="button"
+                     variant="outline"
+                     disabled={loading}
+                     onClick={() => router.push('/car-brands')}
+                  >
+                     İptal
+                  </Button>
+                  {initialData && (
+                     <Button
+                        type="button"
+                        disabled={loading}
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setOpen(true)}
+                        className="ml-auto gap-2"
+                     >
+                        <Trash2 className="h-4 w-4" />
+                        Sil
+                     </Button>
                   )}
                </div>
-
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <FormField
-                     control={form.control}
-                     name="name"
-                     render={({ field }) => (
-                        <FormItem>
-                           <FormLabel>Marka Adı</FormLabel>
-                           <FormControl>
-                              <Input
-                                 disabled={loading}
-                                 placeholder="BMW"
-                                 {...field}
-                                 onChange={handleNameChange}
-                              />
-                           </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                     )}
-                  />
-                  <FormField
-                     control={form.control}
-                     name="slug"
-                     render={({ field }) => (
-                        <FormItem>
-                           <FormLabel>Slug</FormLabel>
-                           <FormControl>
-                              <Input disabled={loading} placeholder="bmw" {...field} />
-                           </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                     )}
-                  />
-                  <FormField
-                     control={form.control}
-                     name="sortOrder"
-                     render={({ field }) => (
-                        <FormItem>
-                           <FormLabel>Sıralama</FormLabel>
-                           <FormControl>
-                              <Input type="number" disabled={loading} placeholder="0" {...field} />
-                           </FormControl>
-                           <FormMessage />
-                        </FormItem>
-                     )}
-                  />
-               </div>
-               <Button disabled={loading} type="submit">
-                  {action}
-               </Button>
             </form>
          </Form>
       </>
