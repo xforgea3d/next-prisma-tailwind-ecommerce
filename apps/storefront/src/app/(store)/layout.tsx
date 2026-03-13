@@ -1,5 +1,7 @@
 import Footer from '@/components/native/Footer'
 import Header from '@/components/native/nav/parent'
+import prisma from '@/lib/prisma'
+import { redirect } from 'next/navigation'
 import { StoreProviders } from './providers'
 
 export default async function DashboardLayout({
@@ -7,6 +9,21 @@ export default async function DashboardLayout({
 }: {
    children: React.ReactNode
 }) {
+   // Check maintenance mode - redirect all store pages to /maintenance
+   try {
+      const settings = await prisma.siteSettings.findUnique({
+         where: { id: 1 },
+         select: { maintenance_enabled: true },
+      })
+      if (settings?.maintenance_enabled) {
+         redirect('/maintenance')
+      }
+   } catch (e: any) {
+      // Re-throw Next.js redirect (it throws a special NEXT_REDIRECT error)
+      if (e?.digest?.startsWith('NEXT_REDIRECT')) throw e
+      // Swallow DB errors so the site doesn't crash
+   }
+
    return (
       <>
          <StoreProviders>

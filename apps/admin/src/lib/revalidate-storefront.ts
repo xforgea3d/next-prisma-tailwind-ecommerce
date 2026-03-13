@@ -21,15 +21,17 @@ if (!REVALIDATION_SECRET && process.env.NODE_ENV === 'production') {
 /**
  * Revalidate a single path with retry logic.
  * Retries up to {@link MAX_RETRIES} times with exponential back-off.
+ * @param scope - 'page' (default) or 'layout' to bust the entire layout tree
  */
-async function revalidateWithRetry(path: string): Promise<void> {
+async function revalidateWithRetry(path: string, scope: 'page' | 'layout' = 'page'): Promise<void> {
     const MAX_RETRIES = 3
     const BASE_DELAY_MS = 500
 
+    const scopeParam = scope === 'layout' ? '&scope=layout' : ''
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
             const res = await fetch(
-                `${STOREFRONT_URL}/api/revalidate?path=${encodeURIComponent(path)}`,
+                `${STOREFRONT_URL}/api/revalidate?path=${encodeURIComponent(path)}${scopeParam}`,
                 {
                     method: 'POST',
                     cache: 'no-store',
@@ -40,15 +42,15 @@ async function revalidateWithRetry(path: string): Promise<void> {
                 }
             )
             if (res.ok) return
-            console.error(`[STOREFRONT_REVALIDATE] HTTP ${res.status} for "${path}" (attempt ${attempt + 1})`)
+            console.error(`[STOREFRONT_REVALIDATE] HTTP ${res.status} for "${path}" scope=${scope} (attempt ${attempt + 1})`)
         } catch (err) {
-            console.error(`[STOREFRONT_REVALIDATE] Failed for "${path}" (attempt ${attempt + 1}):`, err)
+            console.error(`[STOREFRONT_REVALIDATE] Failed for "${path}" scope=${scope} (attempt ${attempt + 1}):`, err)
         }
         if (attempt < MAX_RETRIES) {
             await new Promise((r) => setTimeout(r, BASE_DELAY_MS * 2 ** attempt))
         }
     }
-    console.error(`[STOREFRONT_REVALIDATE] All retries exhausted for "${path}"`)
+    console.error(`[STOREFRONT_REVALIDATE] All retries exhausted for "${path}" scope=${scope}`)
 }
 
 /**
@@ -85,5 +87,12 @@ const ALL_STOREFRONT_PATHS = [
  * Use this from any admin mutation that changes data visible on the storefront.
  */
 export async function revalidateAllStorefront(): Promise<void> {
-    return revalidateStorefront(ALL_STOREFRONT_PATHS)
+    if (!STOREFRONT_URL || !REVALIDATION_SECRET) return
+
+    await Promise.allSettled([
+        // Bust the root layout tree (covers maintenance check in (store)/layout.tsx)
+        revalidateWithRetry('/', 'layout'),
+        // Also revalidate individual page/API paths
+        ...ALL_STOREFRONT_PATHS.map((path) => revalidateWithRetry(path)),
+    ])
 }

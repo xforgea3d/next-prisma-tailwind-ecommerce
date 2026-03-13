@@ -1,4 +1,4 @@
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 import Carousel from '@/components/native/Carousel'
 import { Separator } from '@/components/native/separator'
@@ -62,18 +62,6 @@ export async function generateMetadata(
       alternates: {
          canonical: `${SITE_URL}/products/${product.id}`,
       },
-   }
-}
-
-export async function generateStaticParams() {
-   try {
-      const products = await prisma.product.findMany({
-         where: { isAvailable: true },
-         select: { id: true },
-      })
-      return products.map((p) => ({ productId: p.id }))
-   } catch {
-      return []
    }
 }
 

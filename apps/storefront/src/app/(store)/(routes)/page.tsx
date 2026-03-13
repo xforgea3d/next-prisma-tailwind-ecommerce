@@ -1,4 +1,4 @@
-export const revalidate = 30
+export const dynamic = 'force-dynamic'
 
 import {
    BlogPostGrid,
@@ -22,23 +22,23 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 
-const CarModelImage = dynamic(
+const CarModelImage = nextDynamic(
    () => import('@/components/native/CarModelImage'),
    { ssr: false }
 )
 
-const FeaturedProductsCarousel = dynamic(
+const FeaturedProductsCarousel = nextDynamic(
    () => import('@/components/native/FeaturedProductsCarousel'),
    { ssr: false }
 )
 
-const ScrollReveal = dynamic(
+const ScrollReveal = nextDynamic(
    () => import('@/components/native/ScrollReveal').then(m => ({ default: m.ScrollReveal })),
    { ssr: false }
 )
-const AnimatedCounter = dynamic(
+const AnimatedCounter = nextDynamic(
    () => import('@/components/native/AnimatedCounter').then(m => ({ default: m.AnimatedCounter })),
    { ssr: false }
 )
