@@ -27,6 +27,10 @@ const data = [
             label: 'KVKK Aydınlatma Metni',
             url: '/policies/kvkk-aydinlatma-metni',
          },
+         {
+            label: 'Çerez Ayarları',
+            url: '#cerez-ayarlari',
+         },
       ],
    },
    {
@@ -159,6 +163,11 @@ function Newsletter() {
 }
 
 function Links() {
+   const handleCookieSettings = (e: React.MouseEvent) => {
+      e.preventDefault()
+      window.dispatchEvent(new CustomEvent('open-cookie-settings'))
+   }
+
    return (
       <div className="text-end justify-evenly grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-6">
          {data.map(({ label, links }) => (
@@ -167,13 +176,22 @@ function Links() {
                <ul className="block space-y-1">
                   {links.map(({ label, url }) => (
                      <li key={label}>
-                        <Link
-                           href={url}
-                           prefetch={true}
-                           className="text-sm transition duration-300 text-muted-foreground hover:text-foreground"
-                        >
-                           {label}
-                        </Link>
+                        {url === '#cerez-ayarlari' ? (
+                           <button
+                              onClick={handleCookieSettings}
+                              className="text-sm transition duration-300 text-muted-foreground hover:text-foreground"
+                           >
+                              {label}
+                           </button>
+                        ) : (
+                           <Link
+                              href={url}
+                              prefetch={true}
+                              className="text-sm transition duration-300 text-muted-foreground hover:text-foreground"
+                           >
+                              {label}
+                           </Link>
+                        )}
                      </li>
                   ))}
                </ul>
