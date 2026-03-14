@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       const { address, city, phone, postalCode, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
-         return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
+         return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
       }
 
       // Check max address limit
@@ -51,16 +51,16 @@ export async function POST(req: Request) {
       }
 
       if (!address || !city || !phone) {
-         return new NextResponse('Adres, sehir ve telefon zorunlu alanlardir', { status: 400 })
+         return new NextResponse('Adres, şehir ve telefon zorunlu alanlardır', { status: 400 })
       }
 
       if (address.length > 500 || city.length > 100) {
-         return new NextResponse('Alan uzunlugu limiti asildi', { status: 400 })
+         return new NextResponse('Alan uzunluğu limiti aşıldı', { status: 400 })
       }
 
       const phoneClean = phone.replace(/[^0-9+]/g, '')
       if (phoneClean.length < 10 || phoneClean.length > 15) {
-         return new NextResponse('Gecersiz telefon numarasi', { status: 400 })
+         return new NextResponse('Geçersiz telefon numarası', { status: 400 })
       }
 
       const object = await prisma.address.create({

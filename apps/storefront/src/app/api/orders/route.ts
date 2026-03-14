@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       const { addressId, discountCode, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
-         return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
+         return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
       }
 
       if (!addressId) return new NextResponse('addressId is required', { status: 400 })
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
          where: { id: addressId, userId },
       })
       if (!address) {
-         return new NextResponse('Adres bulunamadi veya size ait degil', { status: 403 })
+         return new NextResponse('Adres bulunamadı veya size ait değil', { status: 403 })
       }
 
       // Use transaction with serializable isolation for atomic order creation
@@ -248,7 +248,7 @@ export async function POST(req: Request) {
             await prisma.notification.createMany({
                data: admins.map((admin) => ({
                   userId: admin.id,
-                  content: `Siparis #${order.number} olusturuldu - ${payable.toFixed(2)} TL.`,
+                  content: `Sipariş #${order.number} oluşturuldu - ${payable.toFixed(2)} TL.`,
                })),
             })
 
@@ -256,7 +256,7 @@ export async function POST(req: Request) {
                await sendMail({
                   name: config.name,
                   to: admin.email,
-                  subject: 'Yeni siparis alindi.',
+                  subject: 'Yeni sipariş alındı.',
                   html: await render(
                      Mail({
                         id: order.id,
@@ -282,19 +282,19 @@ export async function POST(req: Request) {
       return NextResponse.json(order)
    } catch (error: any) {
       if (error?.message === 'INVALID_DISCOUNT') {
-         return new NextResponse('Gecersiz veya suresi dolmus indirim kodu', { status: 400 })
+         return new NextResponse('Geçersiz veya süresi dolmuş indirim kodu', { status: 400 })
       }
       if (error?.message === 'EMPTY_CART') {
-         return new NextResponse('Sepet bos', { status: 400 })
+         return new NextResponse('Sepet boş', { status: 400 })
       }
       if (error?.message?.startsWith('UNAVAILABLE:')) {
-         return new NextResponse(`${error.message.split(':')[1]} su an mevcut degil`, { status: 400 })
+         return new NextResponse(`${error.message.split(':')[1]} şu an mevcut değil`, { status: 400 })
       }
       if (error?.message?.startsWith('OUT_OF_STOCK:')) {
-         return new NextResponse(`${error.message.split(':')[1]} icin yeterli stok yok`, { status: 400 })
+         return new NextResponse(`${error.message.split(':')[1]} için yeterli stok yok`, { status: 400 })
       }
       if (error?.message === 'INVALID_PAYABLE') {
-         return new NextResponse('Siparis tutari gecersiz. Indirim kodunu kontrol edin.', { status: 400 })
+         return new NextResponse('Sipariş tutarı geçersiz. İndirim kodunu kontrol edin.', { status: 400 })
       }
       console.error('[ORDER_POST]', error)
       logError({

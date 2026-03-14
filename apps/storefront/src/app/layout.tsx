@@ -19,7 +19,7 @@ const LazyToastProvider = dynamic(
 )
 
 const inter = Inter({
-   subsets: ['latin'],
+   subsets: ['latin', 'latin-ext'],
    display: 'swap',
    preload: true,
 })
@@ -29,23 +29,23 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xforgea3d.com'
 export const metadata: Metadata = {
    metadataBase: new URL(SITE_URL),
    title: {
-      default: 'xForgea3D — Premium 3D Baski Urunleri',
+      default: 'xForgea3D — Premium 3D Baskı Ürünleri',
       template: '%s | xForgea3D',
    },
    description:
-      "Turkiye'nin premium 3D baski markasi. Yuksek kaliteli figurler, heykeller, dekoratif urunler, oto yedek parca aksesuarlari ve kisiye ozel 3D baski cozumleri. xForgea3D ile tasariminizi gercege donusturun.",
+      "Türkiye'nin premium 3D baskı markası. Yüksek kaliteli figürler, heykeller, dekoratif ürünler, oto yedek parça aksesuarları ve kişiye özel 3D baskı çözümleri. xForgea3D ile tasarımınızı gerçeğe dönüştürün.",
    keywords: [
-      '3D baski',
-      '3D yazici urunleri',
-      'figur',
+      '3D baskı',
+      '3D yazıcı ürünleri',
+      'figür',
       'heykel',
-      'dekoratif urunler',
-      'oto yedek parca',
-      '3D baski aksesuar',
-      'kisiye ozel 3D baski',
-      'PLA figur',
-      'recine baski',
-      'Turkiye 3D baski',
+      'dekoratif ürünler',
+      'oto yedek parça',
+      '3D baskı aksesuar',
+      'kişiye özel 3D baskı',
+      'PLA figür',
+      'reçine baskı',
+      'Türkiye 3D baskı',
       'xForgea3D',
       '3D printing Turkey',
       '3D printed figurines',
@@ -64,23 +64,23 @@ export const metadata: Metadata = {
       locale: 'tr_TR',
       url: SITE_URL,
       siteName: 'xForgea3D',
-      title: 'xForgea3D — Premium 3D Baski Urunleri',
+      title: 'xForgea3D — Premium 3D Baskı Ürünleri',
       description:
-         "Turkiye'nin premium 3D baski markasi. Figurler, heykeller, dekoratif urunler ve kisiye ozel 3D baski cozumleri.",
+         "Türkiye'nin premium 3D baskı markası. Figürler, heykeller, dekoratif ürünler ve kişiye özel 3D baskı çözümleri.",
       images: [
          {
             url: '/og-image.jpg',
             width: 1200,
             height: 630,
-            alt: 'xForgea3D — Premium 3D Baski Urunleri',
+            alt: 'xForgea3D — Premium 3D Baskı Ürünleri',
          },
       ],
    },
    twitter: {
       card: 'summary_large_image',
-      title: 'xForgea3D — Premium 3D Baski Urunleri',
+      title: 'xForgea3D — Premium 3D Baskı Ürünleri',
       description:
-         "Turkiye'nin premium 3D baski markasi. Figurler, heykeller ve kisiye ozel 3D baski cozumleri.",
+         "Türkiye'nin premium 3D baskı markası. Figürler, heykeller ve kişiye özel 3D baskı çözümleri.",
       images: ['/og-image.jpg'],
       creator: '@xforgea3d',
    },

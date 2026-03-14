@@ -132,7 +132,7 @@ export async function POST(req: NextRequest) {
                await prisma.notification.createMany({
                   data: admins.map((admin) => ({
                      userId: admin.id,
-                     content: `Odeme basarili! Siparis #${payment.order.number} icin ${payment.payable.toFixed(2)} TL odeme alindi.`,
+                     content: `Ödeme başarılı! Sipariş #${payment.order.number} için ${payment.payable.toFixed(2)} TL ödeme alındı.`,
                   })),
                })
             }

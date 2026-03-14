@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       const { code, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
-         return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
+         return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
       }
 
       if (!code) return NextResponse.json({ valid: false, error: 'Kod girilmedi' }, { status: 400 })
@@ -21,16 +21,16 @@ export async function POST(req: Request) {
       })
 
       if (!dc) {
-         return NextResponse.json({ valid: false, error: 'Gecersiz indirim kodu' })
+         return NextResponse.json({ valid: false, error: 'Geçersiz indirim kodu' })
       }
       if (dc.stock < 1) {
-         return NextResponse.json({ valid: false, error: 'Bu indirim kodu tukenmistir' })
+         return NextResponse.json({ valid: false, error: 'Bu indirim kodu tükenmiştir' })
       }
       if (dc.endDate < now) {
-         return NextResponse.json({ valid: false, error: 'Bu indirim kodunun suresi dolmus' })
+         return NextResponse.json({ valid: false, error: 'Bu indirim kodunun süresi dolmuş' })
       }
       if (dc.startDate > now) {
-         return NextResponse.json({ valid: false, error: 'Bu indirim kodu henuz aktif degil' })
+         return NextResponse.json({ valid: false, error: 'Bu indirim kodu henüz aktif değil' })
       }
 
       // Calculate discount amount based on user's cart
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       })
 
       if (!cart || !cart.items.length) {
-         return NextResponse.json({ valid: false, error: 'Sepetiniz bos' })
+         return NextResponse.json({ valid: false, error: 'Sepetiniz boş' })
       }
 
       let total = 0
@@ -63,6 +63,6 @@ export async function POST(req: Request) {
       })
    } catch (error: any) {
       console.error('[DISCOUNT_VALIDATE]', error)
-      return NextResponse.json({ valid: false, error: 'Bir hata olustu' })
+      return NextResponse.json({ valid: false, error: 'Bir hata oluştu' })
    }
 }

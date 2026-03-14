@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
       // CSRF validation (mandatory for authenticated mutations)
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
-         return NextResponse.json({ error: 'Gecersiz istek. Sayfayi yenileyip tekrar deneyin.' }, { status: 403 })
+         return NextResponse.json({ error: 'Geçersiz istek. Sayfayı yenileyip tekrar deneyin.' }, { status: 403 })
       }
 
       // Verify order exists and belongs to this user
@@ -30,26 +30,26 @@ export async function POST(req: NextRequest) {
       })
 
       if (!order) {
-         return NextResponse.json({ error: 'Siparis bulunamadi' }, { status: 404 })
+         return NextResponse.json({ error: 'Sipariş bulunamadı' }, { status: 404 })
       }
 
       if (order.userId !== userId) {
-         return NextResponse.json({ error: 'Yetkisiz erisim' }, { status: 403 })
+         return NextResponse.json({ error: 'Yetkisiz erişim' }, { status: 403 })
       }
 
       if (order.isPaid) {
-         return NextResponse.json({ error: 'Siparis zaten odenmis' }, { status: 400 })
+         return NextResponse.json({ error: 'Sipariş zaten ödenmiş' }, { status: 400 })
       }
 
       // Validate order is in a payable state
       const payableStatuses = ['OnayBekleniyor', 'Processing']
       if (!payableStatuses.includes(order.status)) {
-         return NextResponse.json({ error: 'Bu siparis icin odeme yapilamaz' }, { status: 400 })
+         return NextResponse.json({ error: 'Bu sipariş için ödeme yapılamaz' }, { status: 400 })
       }
 
       // Prevent zero-amount payments
       if (order.payable <= 0) {
-         return NextResponse.json({ error: 'Gecersiz odeme tutari' }, { status: 400 })
+         return NextResponse.json({ error: 'Geçersiz ödeme tutarı' }, { status: 400 })
       }
 
       // Check for payment provider configuration
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
                amount: order.payable.toFixed(2),
                currency: 'TRY',
                order_id: refId,
-               description: `xForgea3D Siparis #${order.number}`,
+               description: `xForgea3D Sipariş #${order.number}`,
                callback_url: `${SITE_URL}/api/payment/callback`,
                success_url: `${SITE_URL}/api/payment/success?refId=${refId}`,
                fail_url: `${SITE_URL}/api/payment/success?refId=${refId}&status=fail`,
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
                })
 
                return NextResponse.json(
-                  { error: 'Odeme baslatilamadi. Lutfen tekrar deneyin.' },
+                  { error: 'Ödeme başlatılamadı. Lütfen tekrar deneyin.' },
                   { status: 502 }
                )
             }
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
             })
 
             return NextResponse.json(
-               { error: 'Odeme servisi ile baglanti kurulamadi' },
+               { error: 'Ödeme servisi ile bağlantı kurulamadı' },
                { status: 502 }
             )
          }
@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
             paymentId: payment.id,
             refId,
             mode: 'test',
-            message: 'Odeme altyapisi test modunda. Gercek odeme islemi yapilmayacak.',
+            message: 'Ödeme altyapısı test modunda. Gerçek ödeme işlemi yapılmayacak.',
          })
       }
    } catch (error: any) {
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
          ...extractRequestContext(req),
       })
       return NextResponse.json(
-         { error: 'Odeme baslatilirken bir hata olustu' },
+         { error: 'Ödeme başlatılırken bir hata oluştu' },
          { status: 500 }
       )
    }

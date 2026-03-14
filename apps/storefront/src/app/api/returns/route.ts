@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       const { orderId, reason, description, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
-         return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
+         return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
       }
 
       if (!orderId || !reason) {
@@ -46,11 +46,11 @@ export async function POST(req: Request) {
       })
 
       if (!order) {
-         return new NextResponse('Siparis bulunamadi veya size ait degil', { status: 404 })
+         return new NextResponse('Sipariş bulunamadı veya size ait değil', { status: 404 })
       }
 
       if (order.status !== 'Delivered') {
-         return new NextResponse('Yalnizca teslim edilmis siparisler icin iade talebi olusturulabilir', { status: 400 })
+         return new NextResponse('Yalnızca teslim edilmiş siparişler için iade talebi oluşturulabilir', { status: 400 })
       }
 
       // Check if a return request already exists for this order
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       })
 
       if (existingReturn) {
-         return new NextResponse('Bu siparis icin zaten bir iade talebi bulunmaktadir', { status: 400 })
+         return new NextResponse('Bu sipariş için zaten bir iade talebi bulunmaktadır', { status: 400 })
       }
 
       // Create return request
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
             await prisma.notification.createMany({
                data: admins.map((admin) => ({
                   userId: admin.id,
-                  content: `Yeni iade talebi: Siparis #${order.number} - Sebep: ${reason}`,
+                  content: `Yeni iade talebi: Sipariş #${order.number} - Sebep: ${reason}`,
                })),
             })
          }
