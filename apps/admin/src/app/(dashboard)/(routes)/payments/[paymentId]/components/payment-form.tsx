@@ -19,6 +19,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -189,7 +190,14 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
                )}
             />
             <Button disabled={loading} type="submit">
-               {action}
+               {loading ? (
+                  <>
+                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                     Kaydediliyor...
+                  </>
+               ) : (
+                  action
+               )}
             </Button>
          </form>
       </Form>

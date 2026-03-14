@@ -12,7 +12,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from '@/components/ui/select'
-import { Plus, Trash, GripVertical, Eye, EyeOff, Pencil, Check, X } from 'lucide-react'
+import { Loader2, Plus, Trash, GripVertical, Eye, EyeOff, Pencil, Check, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -283,7 +283,16 @@ export default function NavItemsPage() {
                   </div>
                   <div className="flex gap-2">
                      <Button size="sm" onClick={handleAdd} disabled={saving}>
-                        <Plus className="h-3 w-3 mr-1" /> Ekle
+                        {saving ? (
+                           <>
+                              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                              Ekleniyor...
+                           </>
+                        ) : (
+                           <>
+                              <Plus className="h-3 w-3 mr-1" /> Ekle
+                           </>
+                        )}
                      </Button>
                      <Button size="sm" variant="outline" onClick={() => setShowAdd(false)}>
                         İptal
@@ -331,7 +340,11 @@ export default function NavItemsPage() {
                                        className="h-8 w-20"
                                     />
                                     <Button size="sm" variant="ghost" onClick={handleSaveEdit} disabled={saving}>
-                                       <Check className="h-3.5 w-3.5 text-green-500" />
+                                       {saving ? (
+                                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                       ) : (
+                                          <Check className="h-3.5 w-3.5 text-green-500" />
+                                       )}
                                     </Button>
                                     <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>
                                        <X className="h-3.5 w-3.5" />

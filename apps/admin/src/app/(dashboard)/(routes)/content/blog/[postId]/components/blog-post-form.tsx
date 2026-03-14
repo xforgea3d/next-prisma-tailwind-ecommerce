@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { BlogPost } from '@prisma/client'
-import { Trash } from 'lucide-react'
+import { Loader2, Trash } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -224,7 +224,14 @@ export function BlogPostForm({ initialData }: { initialData: BlogPost | null }) 
                     )} />
 
                     <Button disabled={loading} type="submit">
-                        {isNew ? 'Oluştur' : 'Kaydet'}
+                        {loading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Kaydediliyor...
+                            </>
+                        ) : (
+                            isNew ? 'Oluştur' : 'Kaydet'
+                        )}
                     </Button>
                 </form>
             </Form>

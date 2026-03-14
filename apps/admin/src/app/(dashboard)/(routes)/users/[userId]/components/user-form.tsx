@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import type { ProfileWithIncludes } from '@/types/prisma'
+import { Loader2 } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -147,7 +148,14 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
             />
 
             <Button disabled={loading} className="ml-auto" type="submit">
-               {action}
+               {loading ? (
+                  <>
+                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                     Kaydediliyor...
+                  </>
+               ) : (
+                  action
+               )}
             </Button>
          </form>
       </Form>

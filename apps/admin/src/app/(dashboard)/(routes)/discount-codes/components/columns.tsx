@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { ColumnDef } from '@tanstack/react-table'
-import { Copy, EditIcon, Trash } from 'lucide-react'
+import { Copy, EditIcon, Loader2, Trash } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 import { useState } from 'react'
@@ -77,7 +77,11 @@ const DeleteAction = ({ id }: { id: string }) => {
             disabled={loading}
             onClick={() => setOpen(true)}
          >
-            <Trash className="h-4" />
+            {loading ? (
+               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+               <Trash className="h-4" />
+            )}
          </Button>
       </>
    )
