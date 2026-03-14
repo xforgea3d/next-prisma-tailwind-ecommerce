@@ -101,6 +101,10 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
    async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
       const file = e.target.files?.[0]
       if (!file) return
+      if (file.size > 5 * 1024 * 1024) {
+         toast.error('Dosya boyutu 5MB\'dan küçük olmalıdır')
+         return
+      }
       try {
          setUploading(true)
          const formData = new FormData()

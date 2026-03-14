@@ -27,7 +27,11 @@ module.exports = {
     // next/image is no longer used — all images use native <img> tags
     // to avoid remotePatterns issues with Supabase storage URLs.
     images: {
-        unoptimized: true,
+        remotePatterns: [
+            { protocol: 'https', hostname: '*.supabase.co' },
+            { protocol: 'https', hostname: 'images.unsplash.com' },
+            { protocol: 'https', hostname: 'wsomqsbgclyhhtaocxio.supabase.co' },
+        ],
     },
     async headers() {
         return [
@@ -40,7 +44,7 @@ module.exports = {
                     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
                     { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
                     { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-                    { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com; frame-ancestors 'none';" },
+                    { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.supabase.co https://images.unsplash.com https://wsomqsbgclyhhtaocxio.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com; frame-ancestors 'none';" },
                 ],
             },
             {

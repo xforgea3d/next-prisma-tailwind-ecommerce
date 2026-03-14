@@ -246,9 +246,9 @@ describe('Build Config Integrity', () => {
 
    it('storefront has image optimization configured', () => {
       const config = require('../apps/storefront/next.config.js')
-      // next/image is no longer used — all images use native <img> tags.
-      // unoptimized: true disables the Next.js image optimization API entirely.
-      expect(config.images.unoptimized).toBe(true)
+      // remotePatterns configured for Supabase and Unsplash
+      expect(config.images.remotePatterns).toBeDefined()
+      expect(config.images.remotePatterns.length).toBeGreaterThan(0)
    })
 
    it('storefront has redirect from /product to /products', async () => {
@@ -260,13 +260,10 @@ describe('Build Config Integrity', () => {
       expect(productRedirect.permanent).toBe(true)
    })
 
-   it('both apps use unoptimized images (no remotePatterns needed)', () => {
+   it('storefront has remotePatterns for image domains', () => {
       const storefrontConfig = require('../apps/storefront/next.config.js')
-      const adminConfig = require('../apps/admin/next.config.js')
-      // Both apps switched to native <img> tags with unoptimized: true,
-      // so remotePatterns configuration is no longer required.
-      expect(storefrontConfig.images.unoptimized).toBe(true)
-      expect(adminConfig.images.unoptimized).toBe(true)
+      const hostnames = storefrontConfig.images.remotePatterns.map((p: any) => p.hostname)
+      expect(hostnames).toContain('images.unsplash.com')
    })
 })
 

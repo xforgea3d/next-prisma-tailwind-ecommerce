@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 import Carousel from '@/components/native/Carousel'
 import Hero from '@/components/native/Hero'
@@ -27,7 +27,6 @@ const CarModelImage = nextDynamic(
 
 const FeaturedProductsCarousel = nextDynamic(
    () => import('@/components/native/FeaturedProductsCarousel'),
-   { ssr: false }
 )
 
 const CountdownTimer = nextDynamic(

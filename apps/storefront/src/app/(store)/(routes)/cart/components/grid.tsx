@@ -31,7 +31,7 @@ export const CartGrid = () => {
          <div className="md:col-span-2">
             {isVariableValid(cart?.items)
                ? cart?.items?.map((cartItem, index) => (
-                    <Item cartItem={cartItem} key={index} />
+                    <Item cartItem={cartItem} key={cartItem.product?.id || index} />
                  ))
                : [...Array(5)].map((cartItem, index) => (
                     <Skeleton key={index} />
