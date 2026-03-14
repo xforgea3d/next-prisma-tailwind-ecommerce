@@ -1,8 +1,13 @@
+import dynamic from 'next/dynamic'
 import Footer from '@/components/native/Footer'
 import Header from '@/components/native/nav/parent'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { StoreProviders } from './providers'
+
+const WhatsAppFloat = dynamic(() => import('@/components/native/WhatsAppFloat'), {
+   ssr: false,
+})
 
 export default async function DashboardLayout({
    children,
@@ -33,6 +38,7 @@ export default async function DashboardLayout({
             </main>
          </StoreProviders>
          <Footer />
+         <WhatsAppFloat />
       </>
    )
 }

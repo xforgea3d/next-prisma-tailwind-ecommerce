@@ -10,6 +10,7 @@ export async function PATCH(req: Request) {
             'brand_name', 'slogan', 'contact_email', 'contact_phone',
             'whatsapp', 'address_text', 'instagram_url', 'tiktok_url',
             'youtube_url', 'maintenance_enabled', 'maintenance_message',
+            'tax_rate',
         ] as const
         const data: Record<string, unknown> = {}
         for (const key of allowedFields) {

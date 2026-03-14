@@ -34,6 +34,7 @@ const formSchema = z.object({
     youtube_url: z.string().optional(),
     maintenance_enabled: z.boolean().default(false),
     maintenance_message: z.string().optional(),
+    tax_rate: z.coerce.number().min(0).max(100).default(20),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -138,6 +139,20 @@ export function SiteSettingsForm({ initialData }: { initialData: FormValues }) {
                                 )} />
                             ))}
                         </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Vergi</h3>
+                        <FormField control={form.control} name="tax_rate" render={({ field }) => (
+                            <FormItem className="max-w-xs">
+                                <FormLabel>KDV Oranı (%)</FormLabel>
+                                <FormControl>
+                                    <Input type="number" min={0} max={100} step={1} disabled={loading} {...field} />
+                                </FormControl>
+                                <FormDescription>Siparişlere uygulanacak KDV yüzdesi (ör. 20 = %20).</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                     </div>
 
                     <div className="space-y-4">

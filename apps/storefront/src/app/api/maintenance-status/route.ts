@@ -9,10 +9,11 @@ export async function GET() {
     try {
         const settings = await prisma.siteSettings.findUnique({
             where: { id: 1 },
-            select: { maintenance_enabled: true },
+            select: { maintenance_enabled: true, tax_rate: true },
         })
         return NextResponse.json({
             maintenance_enabled: settings?.maintenance_enabled ?? false,
+            tax_rate: settings?.tax_rate ?? 20,
         })
     } catch {
         return NextResponse.json({ maintenance_enabled: false })

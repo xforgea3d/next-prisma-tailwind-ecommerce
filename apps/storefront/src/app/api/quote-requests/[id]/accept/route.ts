@@ -64,7 +64,15 @@ export async function POST(
       }
 
       const price = quoteRequest.quotedPrice
-      const tax = parseFloat((price * 0.09).toFixed(2))
+
+      // Fetch tax rate from SiteSettings
+      const siteSettings = await prisma.siteSettings.findUnique({
+         where: { id: 1 },
+         select: { tax_rate: true },
+      })
+      const taxRate = siteSettings?.tax_rate ?? 20
+
+      const tax = parseFloat((price * (taxRate / 100)).toFixed(2))
       const payable = parseFloat((price + tax).toFixed(2))
 
       // Atomic: create order + update quote request in transaction

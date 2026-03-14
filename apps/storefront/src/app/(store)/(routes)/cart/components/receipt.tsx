@@ -7,11 +7,21 @@ import { useAuthenticated } from '@/hooks/useAuthentication'
 import { isVariableValid } from '@/lib/utils'
 import { useCartContext } from '@/state/Cart'
 import Link from 'next/link'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export function Receipt() {
    const { authenticated } = useAuthenticated()
    const { loading, cart } = useCartContext()
+   const [taxRate, setTaxRate] = useState(20)
+
+   useEffect(() => {
+      fetch('/api/maintenance-status')
+         .then((r) => r.json())
+         .then((data) => {
+            if (data.tax_rate != null) setTaxRate(data.tax_rate)
+         })
+         .catch(() => {})
+   }, [])
 
    const costs = useMemo(() => {
       let totalAmount = 0,
@@ -25,7 +35,7 @@ export function Receipt() {
       }
 
       const afterDiscountAmount = totalAmount - discountAmount
-      const taxAmount = afterDiscountAmount * 0.09
+      const taxAmount = afterDiscountAmount * (taxRate / 100)
       const payableAmount = afterDiscountAmount + taxAmount
 
       return {
@@ -35,7 +45,7 @@ export function Receipt() {
          taxAmount: taxAmount.toFixed(2),
          payableAmount: payableAmount.toFixed(2),
       }
-   }, [cart?.items])
+   }, [cart?.items, taxRate])
 
    return (
       <Card className={loading ? 'animate-pulse' : undefined}>
@@ -53,7 +63,7 @@ export function Receipt() {
                   <h3>{costs.discountAmount} ₺</h3>
                </div>
                <div className="flex justify-between">
-                  <p>KDV (%9)</p>
+                  <p>KDV (%{taxRate})</p>
                   <h3>{costs.taxAmount} ₺</h3>
                </div>
             </div>

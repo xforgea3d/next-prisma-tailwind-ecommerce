@@ -35,7 +35,9 @@ export async function GET(
                   text: true,
                   rating: true,
                   createdAt: true,
+                  user: { select: { id: true, name: true } },
                },
+               orderBy: { createdAt: 'desc' },
             },
             carModels: {
                select: {

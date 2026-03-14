@@ -3,8 +3,11 @@ export const dynamic = 'force-dynamic'
 import { ProductGrid, ProductSkeletonGrid } from '@/components/native/Product'
 import { Heading } from '@/components/native/heading'
 import { Separator } from '@/components/native/separator'
+import { Button } from '@/components/ui/button'
 import prisma from '@/lib/prisma'
 import { isVariableValid } from '@/lib/utils'
+import { Package } from 'lucide-react'
+import Link from 'next/link'
 
 import {
    AvailableToggle,
@@ -12,6 +15,8 @@ import {
    CategoriesCombobox,
    SortBy,
 } from './components/options'
+
+const PAGE_SIZE = 12
 
 export default async function Products({ searchParams }) {
    const { sort, isAvailable, brand, category, carModel, carBrand, page = 1 } = searchParams ?? {}
@@ -34,16 +39,18 @@ export default async function Products({ searchParams }) {
             : undefined,
    }
 
-   let brands: any[] = [], categories: any[] = [], products: any[] = []
+   const currentPage = Math.max(1, Number(page))
+
+   let brands: any[] = [], categories: any[] = [], products: any[] = [], totalCount = 0
    try {
-      ;[brands, categories, products] = await Promise.all([
+      ;[brands, categories, products, totalCount] = await Promise.all([
          prisma.brand.findMany({ orderBy: { title: 'asc' } }),
          prisma.category.findMany({ orderBy: { title: 'asc' } }),
          prisma.product.findMany({
             where: whereClause,
             orderBy,
-            skip: (Number(page) - 1) * 12,
-            take: 12,
+            skip: (currentPage - 1) * PAGE_SIZE,
+            take: PAGE_SIZE,
             select: {
                id: true, title: true, price: true, discount: true,
                images: true, isAvailable: true, stock: true, isFeatured: true,
@@ -51,9 +58,24 @@ export default async function Products({ searchParams }) {
                categories: { select: { id: true, title: true } },
             },
          }),
+         prisma.product.count({ where: whereClause }),
       ])
    } catch (e) {
       console.warn('[products] DB unavailable, rendering empty state')
+   }
+
+   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+
+   function buildPageUrl(targetPage: number) {
+      const params = new URLSearchParams()
+      if (sort) params.set('sort', sort)
+      if (isAvailable) params.set('isAvailable', isAvailable)
+      if (brand) params.set('brand', brand)
+      if (category) params.set('category', category)
+      if (carModel) params.set('carModel', carModel)
+      if (carBrand) params.set('carBrand', carBrand)
+      params.set('page', String(targetPage))
+      return `/products?${params.toString()}`
    }
 
    return (
@@ -73,9 +95,44 @@ export default async function Products({ searchParams }) {
          </div>
          <Separator />
          {isVariableValid(products) ? (
-            <ProductGrid products={products} />
+            <>
+               <ProductGrid products={products} />
+               {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 mt-8 mb-4">
+                     {currentPage > 1 ? (
+                        <Link href={buildPageUrl(currentPage - 1)}>
+                           <Button variant="outline" className="rounded-full">
+                              Önceki
+                           </Button>
+                        </Link>
+                     ) : (
+                        <Button variant="outline" className="rounded-full" disabled>
+                           Önceki
+                        </Button>
+                     )}
+                     <span className="text-sm font-medium text-muted-foreground">
+                        Sayfa {currentPage} / {totalPages}
+                     </span>
+                     {currentPage < totalPages ? (
+                        <Link href={buildPageUrl(currentPage + 1)}>
+                           <Button variant="outline" className="rounded-full border-orange-500 text-orange-500 hover:bg-orange-50">
+                              Sonraki
+                           </Button>
+                        </Link>
+                     ) : (
+                        <Button variant="outline" className="rounded-full" disabled>
+                           Sonraki
+                        </Button>
+                     )}
+                  </div>
+               )}
+            </>
          ) : (
-            <ProductSkeletonGrid />
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+               <Package className="h-16 w-16 mb-4 stroke-1" />
+               <p className="text-lg font-medium">Ürün bulunamadı</p>
+               <p className="text-sm mt-1">Filtrelerinizi değiştirmeyi deneyin.</p>
+            </div>
          )}
       </>
    )

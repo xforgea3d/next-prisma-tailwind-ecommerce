@@ -1,5 +1,5 @@
 import PageLoader from '@/components/native/PageLoader'
 
-export default function Loading() {
+export default function PaymentLoading() {
     return <PageLoader />
 }

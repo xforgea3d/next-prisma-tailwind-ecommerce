@@ -42,6 +42,14 @@ const AnimatedCounter = nextDynamic(
    () => import('@/components/native/AnimatedCounter').then(m => ({ default: m.AnimatedCounter })),
    { ssr: false }
 )
+const NewsletterSection = nextDynamic(
+   () => import('@/components/native/NewsletterSection'),
+   { ssr: false }
+)
+const ReviewBand = nextDynamic(
+   () => import('@/components/native/ReviewBand'),
+   { ssr: false }
+)
 
 export default async function Index() {
    let featuredProducts: any[] = [], blogs: any[] = [], banners: any[] = [], carBrands: any[] = []
@@ -349,6 +357,77 @@ export default async function Index() {
                </div>
             </div>
          </section>
+
+         {/* ── 8.5 MÜŞTERİ YORUMLARI ─────────────────────────────── */}
+         <section className="py-12 bg-neutral-50/50 dark:bg-neutral-900/50">
+            <div className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
+               <div className="mb-8 text-center">
+                  <h2 className="text-3xl font-bold tracking-tight">Müşterilerimiz Ne Diyor?</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                     Binlerce mutlu müşterimizden bazıları.
+                  </p>
+               </div>
+               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                  {[
+                     {
+                        name: 'Mehmet K.',
+                        stars: 5,
+                        review: 'ürün beklediğimden çok daha kaliteli geldi. detaylar harika, boyama da çok düzgün. teşekkürler xforgea',
+                     },
+                     {
+                        name: 'Ayşe D.',
+                        stars: 5,
+                        review: 'kendi logomun 3d baskısını yaptırdım ofis masamda duruyor herkes soruyor nerden aldın diye :)',
+                     },
+                     {
+                        name: 'Emre T.',
+                        stars: 4,
+                        review: 'kargo biraz geç geldi 5 gün sürdü ama ürün gerçekten kaliteli. bir dahakine daha hızlı olursa 5 yıldız veririm',
+                     },
+                     {
+                        name: 'Zeynep A.',
+                        stars: 5,
+                        review: 'hediye olarak aldım çok beğenildi. paketleme de gayet özenli bubble wrap falan hepsi var',
+                     },
+                     {
+                        name: 'Can B.',
+                        stars: 5,
+                        review: 'araç için telefon tutucu aldım tam oturdu süper kalite. 3d yazıcıdan çıktığına inanmıyosun',
+                     },
+                     {
+                        name: 'Selin M.',
+                        stars: 4,
+                        review: 'figür aldım rengi fotoğraftakinden biraz farklıydı ama işçilik olarak kusursuz. tekrar alırım',
+                     },
+                  ].map(({ name, stars, review }) => (
+                     <div
+                        key={name}
+                        className="rounded-xl border bg-background p-5 flex flex-col gap-3 hover:shadow-lg transition-shadow"
+                     >
+                        <span className="text-3xl text-orange-500/30 font-serif leading-none">&ldquo;</span>
+                        <p className="text-sm text-muted-foreground flex-1 -mt-1">{review}</p>
+                        <div className="flex items-center gap-0.5">
+                           {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                 key={i}
+                                 className={`h-3.5 w-3.5 ${i < stars ? 'fill-orange-500 text-orange-500' : 'fill-muted text-muted'}`}
+                              />
+                           ))}
+                        </div>
+                        <div className="pt-2 border-t border-border/50">
+                           <span className="text-sm font-semibold">{name}</span>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+            <div className="mt-8">
+               <ReviewBand />
+            </div>
+         </section>
+
+         {/* ── 8.7 NEWSLETTER ─────────────────────────────────────── */}
+         <NewsletterSection />
 
          {/* ── 9. GÜNDEMDEN (Blog) ───────────────────────────────── */}
          <section className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem] py-12 bg-neutral-50/50 dark:bg-neutral-900/50">

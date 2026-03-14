@@ -51,6 +51,7 @@ model SiteSettings {
   youtube_url          String?
   maintenance_enabled  Boolean  @default(false)
   maintenance_message  String?  @default("Bakım çalışmaları devam ediyor. Lütfen daha sonra tekrar deneyin.")
+  tax_rate             Float    @default(20)
 
   updatedAt DateTime @updatedAt
 }

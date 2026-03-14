@@ -33,6 +33,16 @@ export default function CheckoutPage() {
    const [loadingAddresses, setLoadingAddresses] = useState(true)
    const [showNewAddress, setShowNewAddress] = useState(false)
    const [newAddress, setNewAddress] = useState({ address: '', city: '', phone: '', postalCode: '' })
+   const [taxRate, setTaxRate] = useState(20)
+
+   useEffect(() => {
+      fetch('/api/maintenance-status')
+         .then((r) => r.json())
+         .then((data) => {
+            if (data.tax_rate != null) setTaxRate(data.tax_rate)
+         })
+         .catch(() => {})
+   }, [])
 
    useEffect(() => {
       fetch('/api/addresses')
@@ -54,7 +64,7 @@ export default function CheckoutPage() {
          }
       }
       const afterDiscount = total - discount
-      const tax = afterDiscount * 0.09
+      const tax = afterDiscount * (taxRate / 100)
       const payable = afterDiscount + tax
       return {
          total: total.toFixed(2),
@@ -62,7 +72,7 @@ export default function CheckoutPage() {
          tax: tax.toFixed(2),
          payable: payable.toFixed(2),
       }
-   }, [cart?.items])
+   }, [cart?.items, taxRate])
 
    const handleNewAddress = useCallback(async () => {
       if (!newAddress.address || !newAddress.city || !newAddress.phone || !newAddress.postalCode) {
@@ -269,7 +279,7 @@ export default function CheckoutPage() {
                            <span>-{costs.discount} ₺</span>
                         </div>
                         <div className="flex justify-between">
-                           <span>KDV (%9)</span>
+                           <span>KDV (%{taxRate})</span>
                            <span>{costs.tax} ₺</span>
                         </div>
                         <div className="flex justify-between">

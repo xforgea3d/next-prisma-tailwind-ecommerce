@@ -3,6 +3,12 @@ export const dynamic = 'force-dynamic'
 import Carousel from '@/components/native/Carousel'
 import { Separator } from '@/components/native/separator'
 import prisma from '@/lib/prisma'
+import nextDynamic from 'next/dynamic'
+
+const ProductReviews = nextDynamic(
+   () => import('@/components/native/ProductReviews'),
+   { ssr: false }
+)
 import { isVariableValid } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import { ProductJsonLd } from '@/app/json-ld'
@@ -131,6 +137,11 @@ export default async function Product({
 
          {/* Koleksiyonun Hikayesi — Storytelling block */}
          <StoryBlock product={product} />
+
+         <Separator />
+
+         {/* Degerlendirmeler */}
+         <ProductReviews productId={params.productId} />
 
          {/* Related Products */}
          {finalRelated.length > 0 && (

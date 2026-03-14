@@ -113,7 +113,14 @@ export async function POST(req: Request) {
             }
          }
 
-         const { tax, total, discount, payable } = calculateCosts({ cart, discountCodeData })
+         // Fetch tax rate from SiteSettings
+         const siteSettings = await tx.siteSettings.findUnique({
+            where: { id: 1 },
+            select: { tax_rate: true },
+         })
+         const taxRate = siteSettings?.tax_rate ?? 20
+
+         const { tax, total, discount, payable } = calculateCosts({ cart, discountCodeData, taxRate })
 
          // Prevent zero-amount orders
          if (payable <= 0) {
@@ -259,9 +266,11 @@ export async function POST(req: Request) {
 function calculateCosts({
    cart,
    discountCodeData,
+   taxRate = 20,
 }: {
    cart: { items: Array<{ count: number; product: { price: number; discount: number } }> }
    discountCodeData?: { percent: number; maxDiscountAmount: number | null } | null
+   taxRate?: number
 }) {
    let total = 0
    let discount = 0
@@ -282,7 +291,7 @@ function calculateCosts({
    }
 
    const afterDiscount = Math.max(total - discount, 0)
-   const tax = afterDiscount * 0.09
+   const tax = afterDiscount * (taxRate / 100)
    const payable = afterDiscount + tax
 
    return {
