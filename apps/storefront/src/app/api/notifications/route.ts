@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { verifyCsrfToken } from '@/lib/csrf'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -35,17 +36,21 @@ export async function PATCH(req: Request) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const body = await req.json()
+      const { ids, all, csrfToken } = await req.json()
 
-      if (body.all === true) {
+      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
+         return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
+      }
+
+      if (all === true) {
          await prisma.notification.updateMany({
             where: { userId, isRead: false },
             data: { isRead: true },
          })
-      } else if (Array.isArray(body.ids) && body.ids.length > 0) {
+      } else if (Array.isArray(ids) && ids.length > 0) {
          await prisma.notification.updateMany({
             where: {
-               id: { in: body.ids },
+               id: { in: ids },
                userId,
             },
             data: { isRead: true },

@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuthenticated } from '@/hooks/useAuthentication'
+import { useCsrf } from '@/hooks/useCsrf'
 import { Star } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
@@ -39,16 +40,16 @@ function relativeDate(dateStr: string): string {
    const then = new Date(dateStr).getTime()
    const diff = now - then
    const mins = Math.floor(diff / 60_000)
-   if (mins < 1) return 'Az once'
-   if (mins < 60) return `${mins} dakika once`
+   if (mins < 1) return 'Az önce'
+   if (mins < 60) return `${mins} dakika önce`
    const hours = Math.floor(mins / 60)
-   if (hours < 24) return `${hours} saat once`
+   if (hours < 24) return `${hours} saat önce`
    const days = Math.floor(hours / 24)
-   if (days < 30) return `${days} gun once`
+   if (days < 30) return `${days} gün önce`
    const months = Math.floor(days / 30)
-   if (months < 12) return `${months} ay once`
+   if (months < 12) return `${months} ay önce`
    const years = Math.floor(months / 12)
-   return `${years} yil once`
+   return `${years} yıl önce`
 }
 
 // ─── User Initials Avatar ────────────────────────────────────────
@@ -78,6 +79,7 @@ function ReviewForm({
    onSuccess: (review: Review) => void
 }) {
    const { authenticated } = useAuthenticated()
+   const csrfToken = useCsrf()
    const [rating, setRating] = useState(0)
    const [hoverRating, setHoverRating] = useState(0)
    const [text, setText] = useState('')
@@ -87,13 +89,13 @@ function ReviewForm({
       return (
          <div className="rounded-xl border p-6 text-center space-y-2">
             <p className="text-sm text-muted-foreground">
-               Degerlendirme yapmak icin hesabiniza giris yapin.
+               Değerlendirme yapmak için hesabınıza giriş yapın.
             </p>
             <Link
                href="/login"
                className="inline-block text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors"
             >
-               Giris yapin
+               Giriş yapın
             </Link>
          </div>
       )
@@ -102,11 +104,11 @@ function ReviewForm({
    async function handleSubmit(e: React.FormEvent) {
       e.preventDefault()
       if (rating === 0) {
-         toast.error('Lutfen bir puan secin')
+         toast.error('Lütfen bir puan seçin')
          return
       }
       if (!text.trim()) {
-         toast.error('Lutfen bir degerlendirme yazin')
+         toast.error('Lütfen bir değerlendirme yazın')
          return
       }
 
@@ -114,22 +116,25 @@ function ReviewForm({
       try {
          const res = await fetch(`/api/products/${productId}/reviews`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating, text: text.trim() }),
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
+            body: JSON.stringify({ rating, text: text.trim(), csrfToken }),
          })
 
          if (!res.ok) {
             const errorText = await res.text()
-            throw new Error(errorText || 'Bir hata olustu')
+            throw new Error(errorText || 'Bir hata oluştu')
          }
 
          const review: Review = await res.json()
          onSuccess(review)
          setRating(0)
          setText('')
-         toast.success('Degerlendirmeniz eklendi!')
+         toast.success('Değerlendirmeniz eklendi!')
       } catch (err: any) {
-         toast.error(err?.message || 'Degerlendirme gonderilemedi')
+         toast.error(err?.message || 'Değerlendirme gönderilemedi')
       } finally {
          setSubmitting(false)
       }
@@ -137,7 +142,7 @@ function ReviewForm({
 
    return (
       <form onSubmit={handleSubmit} className="rounded-xl border p-6 space-y-4">
-         <h3 className="text-base font-semibold">Degerlendirmenizi Yazin</h3>
+         <h3 className="text-base font-semibold">Değerlendirmenizi Yazın</h3>
 
          {/* Star Selector */}
          <div className="flex items-center gap-1">
@@ -171,7 +176,7 @@ function ReviewForm({
          <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Urun hakkindaki dusuncelerinizi paylasin..."
+            placeholder="Ürün hakkındaki düşüncelerinizi paylaşın..."
             rows={4}
             maxLength={1000}
             className="w-full rounded-lg border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 resize-none transition-colors"
@@ -183,7 +188,7 @@ function ReviewForm({
             disabled={submitting}
             className="inline-flex items-center justify-center rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
          >
-            {submitting ? 'Gonderiliyor...' : 'Degerlendirmeyi Gonder'}
+            {submitting ? 'Gönderiliyor...' : 'Değerlendirmeyi Gönder'}
          </button>
       </form>
    )
@@ -225,10 +230,10 @@ export default function ProductReviews({ productId }: { productId: string }) {
          {/* Section Header */}
          <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-bold tracking-tight">
-               Degerlendirmeler
+               Değerlendirmeler
             </h2>
             <p className="text-sm text-muted-foreground">
-               Musterilerimizin bu urun hakkindaki gorusleri.
+               Müşterilerimizin bu ürün hakkındaki görüşleri.
             </p>
          </div>
 
@@ -243,7 +248,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
                      </div>
                      <Stars rating={Math.round(avgRating)} size={22} />
                      <p className="text-sm text-muted-foreground">
-                        {reviews.length} degerlendirme
+                        {reviews.length} değerlendirme
                      </p>
                   </div>
                )}
@@ -267,10 +272,10 @@ export default function ProductReviews({ productId }: { productId: string }) {
                         />
                      </div>
                      <p className="text-base font-medium">
-                        Henuz degerlendirme yapilmamis
+                        Henüz değerlendirme yapılmamış
                      </p>
                      <p className="text-sm text-muted-foreground">
-                        Bu urunu degerlendiren ilk kisi siz olun!
+                        Bu ürünü değerlendiren ilk kişi siz olun!
                      </p>
                   </div>
                ) : (

@@ -10,6 +10,7 @@ import Link from 'next/link'
 interface Notification {
    id: string
    content: string
+   type: string
    isRead: boolean
    createdAt: string
 }
@@ -31,13 +32,13 @@ function relativeTime(dateStr: string): string {
    const hours = Math.floor(minutes / 60)
    const days = Math.floor(hours / 24)
 
-   if (seconds < 60) return 'az once'
-   if (minutes < 60) return `${minutes} dk once`
-   if (hours < 24) return `${hours} saat once`
-   if (days === 1) return 'dun'
-   if (days < 7) return `${days} gun once`
-   if (days < 30) return `${Math.floor(days / 7)} hafta once`
-   return `${Math.floor(days / 30)} ay once`
+   if (seconds < 60) return 'az önce'
+   if (minutes < 60) return `${minutes} dk önce`
+   if (hours < 24) return `${hours} saat önce`
+   if (days === 1) return 'dün'
+   if (days < 7) return `${days} gün önce`
+   if (days < 30) return `${Math.floor(days / 7)} hafta önce`
+   return `${Math.floor(days / 30)} ay önce`
 }
 
 export function NotificationBell() {
@@ -85,13 +86,15 @@ export function NotificationBell() {
                'Content-Type': 'application/json',
                ...(csrfToken && { 'x-csrf-token': csrfToken }),
             },
-            body: JSON.stringify({ ids }),
+            body: JSON.stringify({ ids, csrfToken }),
          })
-         if (res.ok) {
-            await fetchNotifications()
+         if (!res.ok) {
+            console.error('[NotificationBell] markAsRead failed:', res.status)
+            return
          }
-      } catch {
-         // silently fail
+         await fetchNotifications()
+      } catch (err) {
+         console.error('[NotificationBell] markAsRead error:', err)
       }
    }
 
@@ -103,13 +106,15 @@ export function NotificationBell() {
                'Content-Type': 'application/json',
                ...(csrfToken && { 'x-csrf-token': csrfToken }),
             },
-            body: JSON.stringify({ all: true }),
+            body: JSON.stringify({ all: true, csrfToken }),
          })
-         if (res.ok) {
-            await fetchNotifications()
+         if (!res.ok) {
+            console.error('[NotificationBell] markAllAsRead failed:', res.status)
+            return
          }
-      } catch {
-         // silently fail
+         await fetchNotifications()
+      } catch (err) {
+         console.error('[NotificationBell] markAllAsRead error:', err)
       }
    }
 
@@ -140,7 +145,7 @@ export function NotificationBell() {
                         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                      >
                         <CheckCheckIcon className="h-3 w-3" />
-                        Tumunu Okundu Isaretle
+                        Tümünü Okundu İşaretle
                      </button>
                   )}
                </div>
@@ -181,6 +186,11 @@ export function NotificationBell() {
                                        <p className="text-xs text-muted-foreground">
                                           {relativeTime(notification.createdAt)}
                                        </p>
+                                       {notification.type === 'popup' && (
+                                          <span className="text-[10px] bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-1.5 py-0.5 rounded-full font-medium">
+                                             Popup
+                                          </span>
+                                       )}
                                     </div>
                                  </div>
                               </div>
@@ -196,7 +206,7 @@ export function NotificationBell() {
                      className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
                      onClick={() => setOpen(false)}
                   >
-                     Tum Bildirimleri Gor
+                     Tüm Bildirimleri Gör
                   </Link>
                </div>
             </div>

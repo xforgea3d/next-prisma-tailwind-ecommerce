@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useCsrf } from '@/hooks/useCsrf'
 
 export default function NewsletterSection() {
+   const csrfToken = useCsrf()
    const [email, setEmail] = useState('')
    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
    const [message, setMessage] = useState('')
@@ -15,8 +17,11 @@ export default function NewsletterSection() {
       try {
          const res = await fetch('/api/subscription/email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
+            body: JSON.stringify({ email, csrfToken }),
          })
 
          if (res.ok) {

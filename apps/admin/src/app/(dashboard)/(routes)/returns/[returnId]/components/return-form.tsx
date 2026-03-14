@@ -83,6 +83,7 @@ export function ReturnForm({
 
          toast.success('Durum guncellendi')
          router.refresh()
+         router.push('/returns')
       } catch (error) {
          toast.error('Bir hata olustu')
          console.error(error)

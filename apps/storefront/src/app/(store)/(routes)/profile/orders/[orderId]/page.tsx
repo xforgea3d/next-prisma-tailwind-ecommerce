@@ -6,24 +6,25 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
+import { useCsrf } from '@/hooks/useCsrf'
 import { cn } from '@/lib/utils'
 import { AlertCircle, CheckCircle, Clock, Copy, CreditCard, Loader2, MapPin, Package, Printer, RotateCcw, Send, Truck, XCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCallback, useEffect, useState } from 'react'
 
 const returnReasons = [
-   'Urun hasarli',
-   'Yanlis urun',
-   'Begenmedim',
-   'Diger',
+   'Ürün hasarlı',
+   'Yanlış ürün',
+   'Beğenmedim',
+   'Diğer',
 ]
 
 const returnStatusMap: Record<string, { label: string; color: string }> = {
    Pending: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-800' },
-   Approved: { label: 'Onaylandi', color: 'bg-green-100 text-green-800' },
+   Approved: { label: 'Onaylandı', color: 'bg-green-100 text-green-800' },
    ReturnShipping: { label: 'Kargo Bekleniyor', color: 'bg-purple-100 text-purple-800' },
-   Received: { label: 'Teslim Alindi', color: 'bg-blue-100 text-blue-800' },
-   Refunded: { label: 'Iade Tamamlandi', color: 'bg-gray-100 text-gray-800' },
+   Received: { label: 'Teslim Alındı', color: 'bg-blue-100 text-blue-800' },
+   Refunded: { label: 'İade Tamamlandı', color: 'bg-gray-100 text-gray-800' },
    Rejected: { label: 'Reddedildi', color: 'bg-red-100 text-red-800' },
 }
 
@@ -195,6 +196,7 @@ function OrderTimeline({ status }: { status: string }) {
 }
 
 function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturnCreated: () => void }) {
+   const csrfToken = useCsrf()
    const [returnRequest, setReturnRequest] = useState<any>(null)
    const [loadingReturn, setLoadingReturn] = useState(true)
    const [showForm, setShowForm] = useState(false)
@@ -227,27 +229,31 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
       try {
          const res = await fetch('/api/returns', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
             body: JSON.stringify({
                orderId: order.id,
                reason,
                description: description || undefined,
+               csrfToken,
             }),
          })
 
          if (!res.ok) {
             const text = await res.text()
-            toast.error(text || 'Bir hata olustu')
+            toast.error(text || 'Bir hata oluştu')
             return
          }
 
          const created = await res.json()
          setReturnRequest(created)
          setShowForm(false)
-         toast.success('Iade talebiniz olusturuldu')
+         toast.success('İade talebiniz oluşturuldu')
          onReturnCreated()
       } catch (err) {
-         toast.error('Bir hata olustu')
+         toast.error('Bir hata oluştu')
          console.error(err)
       } finally {
          setSubmitting(false)
@@ -263,7 +269,7 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
          <Card className="border-orange-200 dark:border-orange-800/50">
             <CardHeader>
                <CardTitle className="flex items-center gap-2 text-lg">
-                  <RotateCcw className="h-5 w-5" /> Iade Talebi #{returnRequest.number}
+                  <RotateCcw className="h-5 w-5" /> İade Talebi #{returnRequest.number}
                </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
@@ -277,7 +283,7 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
                </div>
                {returnRequest.description && (
                   <div>
-                     <span className="text-muted-foreground">Aciklama</span>
+                     <span className="text-muted-foreground">Açıklama</span>
                      <p className="mt-1">{returnRequest.description}</p>
                   </div>
                )}
@@ -295,7 +301,7 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
                )}
                {returnRequest.refundAmount && (
                   <div className="flex justify-between">
-                     <span className="text-muted-foreground">Iade Tutari</span>
+                     <span className="text-muted-foreground">İade Tutarı</span>
                      <span className="font-semibold">{returnRequest.refundAmount.toFixed(2)} TL</span>
                   </div>
                )}
@@ -317,7 +323,7 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
                   className="w-full gap-2"
                >
                   <RotateCcw className="h-4 w-4" />
-                  Iade Talebi Olustur
+                  İade Talebi Oluştur
                </Button>
             </CardContent>
          </Card>
@@ -328,12 +334,12 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
       <Card className="border-orange-200 dark:border-orange-800/50">
          <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-               <RotateCcw className="h-5 w-5" /> Iade Talebi Olustur
+               <RotateCcw className="h-5 w-5" /> İade Talebi Oluştur
             </CardTitle>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="space-y-2">
-               <label className="text-sm font-medium">Iade Sebebi</label>
+               <label className="text-sm font-medium">İade Sebebi</label>
                <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
@@ -347,11 +353,11 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
             </div>
 
             <div className="space-y-2">
-               <label className="text-sm font-medium">Aciklama (Opsiyonel)</label>
+               <label className="text-sm font-medium">Açıklama (Opsiyonel)</label>
                <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Iade sebebinizi detayli aciklayabilirsiniz..."
+                  placeholder="İade sebebinizi detaylı açıklayabilirsiniz..."
                   rows={3}
                   className="w-full rounded-md border px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   disabled={submitting}
@@ -369,14 +375,14 @@ function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturn
                   ) : (
                      <Send className="h-4 w-4" />
                   )}
-                  {submitting ? 'Gonderiliyor...' : 'Talebi Gonder'}
+                  {submitting ? 'Gönderiliyor...' : 'Talebi Gönder'}
                </Button>
                <Button
                   onClick={() => setShowForm(false)}
                   variant="outline"
                   disabled={submitting}
                >
-                  Iptal
+                  İptal
                </Button>
             </div>
          </CardContent>

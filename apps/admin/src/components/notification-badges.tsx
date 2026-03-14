@@ -18,7 +18,10 @@ export function NotificationBadges() {
    useEffect(() => {
       const fetchCounts = () => {
          fetch('/api/notifications/counts')
-            .then(r => r.json())
+            .then(r => {
+               if (!r.ok) throw new Error('Failed to fetch')
+               return r.json()
+            })
             .then(setCounts)
             .catch(() => {})
       }

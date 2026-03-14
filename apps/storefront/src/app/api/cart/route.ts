@@ -86,12 +86,8 @@ export async function POST(req: Request) {
          return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
       }
 
-      if (!productId || typeof count !== 'number') {
-         return new NextResponse('productId ve count zorunlu', { status: 400 })
-      }
-
-      if (count > 99) {
-         return new NextResponse('Maksimum 99 adet eklenebilir', { status: 400 })
+      if (!productId || !Number.isInteger(count) || count < 0 || count > 99) {
+         return new NextResponse('productId zorunlu, count 0-99 arasi tam sayi olmali', { status: 400 })
       }
 
       if (count < 1) {

@@ -31,6 +31,14 @@ const formSchema = z.object({
    description: z.string().optional(),
    startDate: z.string().min(1, 'Baslangic tarihi zorunlu'),
    endDate: z.string().min(1, 'Bitis tarihi zorunlu'),
+}).refine((data) => {
+   if (data.startDate && data.endDate) {
+      return new Date(data.endDate) > new Date(data.startDate)
+   }
+   return true
+}, {
+   message: 'Bitis tarihi baslangic tarihinden sonra olmalidir',
+   path: ['endDate'],
 })
 
 type DiscountFormValues = z.infer<typeof formSchema>

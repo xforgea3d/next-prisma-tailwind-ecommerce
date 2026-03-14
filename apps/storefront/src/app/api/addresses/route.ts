@@ -44,6 +44,12 @@ export async function POST(req: Request) {
          return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
       }
 
+      // Check max address limit
+      const existingCount = await prisma.address.count({ where: { userId } })
+      if (existingCount >= 10) {
+         return new NextResponse('En fazla 10 adres ekleyebilirsiniz', { status: 400 })
+      }
+
       if (!address || !city || !phone) {
          return new NextResponse('Adres, sehir ve telefon zorunlu alanlardir', { status: 400 })
       }

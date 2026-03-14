@@ -4,11 +4,13 @@ import { NextResponse } from 'next/server'
 export async function POST(req: Request) {
    try {
       const body = await req.json()
-      const { content } = body
+      const { content, type } = body
 
       if (!content || typeof content !== 'string') {
          return new NextResponse('Bad Request: content is required', { status: 400 })
       }
+
+      const notificationType = type === 'popup' ? 'popup' : 'notification'
 
       // Support both single userId and multiple userIds
       const userIds: string[] = body.userIds ?? (body.userId ? [body.userId] : [])
@@ -21,6 +23,7 @@ export async function POST(req: Request) {
          data: userIds.map(userId => ({
             userId,
             content,
+            type: notificationType,
          })),
       })
 

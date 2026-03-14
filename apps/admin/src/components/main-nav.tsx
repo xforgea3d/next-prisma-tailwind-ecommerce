@@ -21,6 +21,7 @@ import {
    Bug,
    Ticket,
    RotateCcw,
+   Bell,
 } from 'lucide-react'
 
 const navGroups = [
@@ -61,6 +62,7 @@ const navGroups = [
    {
       label: 'Sistem',
       items: [
+         { href: '/notifications', label: 'Bildirim Gönder', icon: Bell },
          { href: '/error-logs', label: 'Hata Loglari', icon: Bug },
          { href: '/settings/site', label: 'Ayarlar', icon: Settings },
       ],

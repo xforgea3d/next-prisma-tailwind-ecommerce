@@ -269,6 +269,7 @@ model Address {
 model Notification {
   id      String  @id @default(cuid())
   content String
+  type    String  @default("notification") // "notification" | "popup"
   isRead  Boolean @default(false)
 
   user   Profile   @relation(fields: [userId], references: [id])

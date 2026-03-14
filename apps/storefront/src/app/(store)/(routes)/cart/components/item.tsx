@@ -42,6 +42,7 @@ export const Item = ({ cartItem }) => {
             cache: 'no-store',
          })
 
+         if (!response.ok) return null
          return await response.json()
       } catch (error) {
          console.error({ error })
@@ -68,6 +69,7 @@ export const Item = ({ cartItem }) => {
                },
             })
 
+            if (!response.ok) throw new Error('Sepet güncellenemedi')
             const json = await response.json()
 
             dispatchCart(json)
@@ -127,6 +129,7 @@ export const Item = ({ cartItem }) => {
                },
             })
 
+            if (!response.ok) throw new Error('Sepet güncellenemedi')
             const json = await response.json()
             dispatchCart(json)
          }
@@ -176,7 +179,7 @@ export const Item = ({ cartItem }) => {
          )
 
       if (count === 0) {
-         return <Button onClick={onAddToCart}>🛒 Add to Cart</Button>
+         return <Button onClick={onAddToCart}>Sepete Ekle</Button>
       }
 
       if (count > 0) {

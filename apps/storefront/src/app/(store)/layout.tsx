@@ -13,6 +13,11 @@ const BackToTop = dynamic(() => import('@/components/native/BackToTop'), {
    ssr: false,
 })
 
+const PopupNotification = dynamic(
+   () => import('@/components/native/PopupNotification'),
+   { ssr: false }
+)
+
 export default async function DashboardLayout({
    children,
 }: {
@@ -42,6 +47,7 @@ export default async function DashboardLayout({
             </main>
          </StoreProviders>
          <Footer />
+         <PopupNotification />
          <WhatsAppFloat />
          <BackToTop />
       </>

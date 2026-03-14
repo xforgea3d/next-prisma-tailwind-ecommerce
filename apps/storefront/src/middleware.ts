@@ -40,6 +40,7 @@ const PUBLIC_API_ROUTES = [
    '/api/collections',
    '/api/maintenance-status',
    '/api/health',
+   '/api/subscription',
 ]
 
 // Mutating HTTP methods that require CSRF protection
