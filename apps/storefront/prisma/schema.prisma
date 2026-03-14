@@ -133,8 +133,8 @@ model Product {
   wishlists      Profile[]       @relation("Wishlist")
   productReviews ProductReview[]
 
-  brand   Brand  @relation(fields: [brandId], references: [id])
-  brandId String
+  brand   Brand?  @relation(fields: [brandId], references: [id])
+  brandId String?
 
   categories Category[]
   carModels  CarModel[] @relation("CarModelProducts")

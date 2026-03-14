@@ -30,6 +30,12 @@ export async function DELETE(
    try {
       if (!params.brandId) return new NextResponse('Brand id is required', { status: 400 })
 
+      // Disconnect all products from this brand first
+      await prisma.product.updateMany({
+         where: { brandId: params.brandId },
+         data: { brandId: null as any },
+      })
+
       const brand = await prisma.brand.delete({
          where: { id: params.brandId },
       })
@@ -55,14 +61,21 @@ export async function PATCH(
       const body = await req.json()
       const { title, description, logo } = body
 
-      // Build update data, treating empty strings as valid values (clearing a field)
+      // Check if title conflicts with another brand (not this one)
+      if (title) {
+         const existing = await prisma.brand.findFirst({
+            where: { title, id: { not: params.brandId } },
+         })
+         if (existing) {
+            return new NextResponse('Bu koleksiyon adı zaten kullanılıyor', { status: 400 })
+         }
+      }
+
       const data: Record<string, any> = {}
       if (title !== undefined && title !== '') data.title = title
       if (description !== undefined) data.description = description || null
       if (logo !== undefined) data.logo = logo || null
 
-      // If title was sent as empty but is the only field, keep existing title
-      // At minimum we need the brand to exist, so just do a touch-update
       const updatedBrand = await prisma.brand.update({
          where: { id: params.brandId },
          data,
@@ -75,7 +88,9 @@ export async function PATCH(
       return NextResponse.json(updatedBrand)
    } catch (error: any) {
       console.error('[BRAND_PATCH]', error)
-      const message = error?.message || 'Internal error'
-      return new NextResponse(message, { status: 500 })
+      if (error?.code === 'P2002') {
+         return new NextResponse('Bu koleksiyon adı zaten kullanılıyor', { status: 400 })
+      }
+      return new NextResponse(error?.message || 'Internal error', { status: 500 })
    }
 }

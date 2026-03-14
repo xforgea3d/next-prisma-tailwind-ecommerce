@@ -58,12 +58,14 @@ const prismaProduct = {
    findMany: vi.fn(),
    findUniqueOrThrow: vi.fn(),
    update: vi.fn(),
+   updateMany: vi.fn(),
    delete: vi.fn(),
 }
 
 const prismaBrand = {
    create: vi.fn(),
    findMany: vi.fn(),
+   findFirst: vi.fn(),
    findUnique: vi.fn(),
    update: vi.fn(),
    delete: vi.fn(),
@@ -642,6 +644,7 @@ describe('Brand API Routes', () => {
 
    describe('PATCH /api/brands/[brandId]', () => {
       it('should update brand fields', async () => {
+         prismaBrand.findFirst.mockResolvedValue(null)
          prismaBrand.update.mockResolvedValue({ id: 'b1', title: 'Bosch Pro' })
 
          const { PATCH } = await import('@admin/app/api/brands/[brandId]/route')
@@ -674,6 +677,7 @@ describe('Brand API Routes', () => {
 
    describe('DELETE /api/brands/[brandId]', () => {
       it('should delete a brand', async () => {
+         prismaProduct.updateMany.mockResolvedValue({ count: 0 })
          prismaBrand.delete.mockResolvedValue({ id: 'b1' })
 
          const { DELETE } = await import('@admin/app/api/brands/[brandId]/route')
