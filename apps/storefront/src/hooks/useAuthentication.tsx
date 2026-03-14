@@ -22,10 +22,23 @@ function readLoggedInCookie(): boolean {
  *
  * It also subscribes to Supabase auth state changes so the navbar updates
  * immediately after login/logout without requiring a full page reload.
+ *
+ * IMPORTANT: Initial state is always `false` to match SSR output and prevent
+ * React hydration errors (#418/#422). The cookie hint is read in a useEffect
+ * so the first client render matches the server render exactly.
  */
 export function useAuthenticated() {
-   // Start with cookie hint so there's no flash of wrong state on hard navigation
-   const [authenticated, setAuthenticated] = useState<boolean>(readLoggedInCookie)
+   // Always start false to match SSR — prevents hydration mismatch
+   const [authenticated, setAuthenticated] = useState<boolean>(false)
+
+   // Read the cookie hint immediately after mount (before Supabase async check)
+   // This gives a fast visual update without causing hydration errors
+   useEffect(() => {
+      const cookieHint = readLoggedInCookie()
+      if (cookieHint) {
+         setAuthenticated(true)
+      }
+   }, [])
 
    useEffect(() => {
       const supabase = createClient()

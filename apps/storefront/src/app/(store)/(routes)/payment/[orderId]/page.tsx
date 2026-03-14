@@ -59,13 +59,6 @@ export default async function PaymentPage({ params, searchParams }: Props) {
       )
    }
 
-   // Check if payment keys are configured
-   const hasPaymentKeys = !!(
-      process.env.PAYMENT_API_KEY &&
-      process.env.PAYMENT_SECRET_KEY &&
-      process.env.PAYMENT_MERCHANT_ID
-   )
-
    const hasError = searchParams?.error === 'payment_failed'
 
    return (
@@ -157,43 +150,11 @@ export default async function PaymentPage({ params, searchParams }: Props) {
 
          {/* Payment Action */}
          <div className="rounded-xl border p-6 space-y-4">
-            {hasPaymentKeys ? (
-               <>
-                  <h2 className="font-semibold text-lg">Kredi/Banka Kartı ile Öde</h2>
-                  <p className="text-sm text-muted-foreground">
-                     Güvenli ödeme sayfasına yönlendirileceksiniz. Kart bilgileriniz sitemizde saklanmaz.
-                  </p>
-                  <PaymentButton orderId={order.id} amount={order.payable} />
-               </>
-            ) : (
-               <>
-                  <div className="text-center space-y-3 py-4">
-                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900">
-                        <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                     </div>
-                     <h2 className="font-semibold text-lg">Ödeme Altyapısı Yakında Aktif Olacak</h2>
-                     <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        Online ödeme altyapımız şu anda hazırlanmaktadır. Siparişlerinizi oluşturabilir,
-                        ödeme aktif olduğunda kolayca tamamlayabilirsiniz.
-                     </p>
-                     <p className="text-sm text-muted-foreground">
-                        Sorularınız için bize WhatsApp veya e-posta ile ulaşabilirsiniz.
-                     </p>
-                  </div>
-
-                  {/* Test mode button */}
-                  {process.env.NODE_ENV === 'development' && (
-                     <div className="border-t pt-4">
-                        <p className="text-xs text-muted-foreground mb-2 text-center">
-                           Geliştirici Modu: Test ödemesi yapabilirsiniz
-                        </p>
-                        <PaymentButton orderId={order.id} amount={order.payable} isTest />
-                     </div>
-                  )}
-               </>
-            )}
+            <h2 className="font-semibold text-lg">Kartla Öde</h2>
+            <p className="text-sm text-muted-foreground">
+               Güvenli ödeme sayfasına yönlendirileceksiniz. Kart bilgileriniz sitemizde saklanmaz.
+            </p>
+            <PaymentButton orderId={order.id} amount={order.payable} />
          </div>
 
          {/* Back link */}

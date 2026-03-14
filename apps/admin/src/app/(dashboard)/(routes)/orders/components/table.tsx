@@ -22,12 +22,21 @@ export type OrderColumn = {
    statusLabel: string
    createdAt: string
    date: string
+   rawDate: string
    trackingNumber: string | null
    shippingCompany: string | null
    itemCount: number
    customerName: string
    customerEmail: string
+   customerPhone: string
    city: string
+   fullAddress: string
+   postalCode: string
+   products: string
+   subtotal: string
+   discountAmount: string
+   taxAmount: string
+   shippingAmount: string
 }
 
 interface OrdersClientProps {
@@ -206,6 +215,8 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ data }) => {
    const router = useRouter()
    const [search, setSearch] = useState('')
    const [activeTab, setActiveTab] = useState<TabKey>('tumu')
+   const [dateFrom, setDateFrom] = useState('')
+   const [dateTo, setDateTo] = useState('')
 
    const handleStatusChange = useCallback(async (orderId: string, newStatus: string) => {
       try {
@@ -245,28 +256,47 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ data }) => {
             order.number.toLowerCase().includes(q) ||
             order.customerName.toLowerCase().includes(q) ||
             order.customerEmail.toLowerCase().includes(q)
-         return matchesSearch && tabFilter(order)
+         const matchesDateFrom = !dateFrom || order.rawDate >= dateFrom
+         const matchesDateTo = !dateTo || order.rawDate <= dateTo
+         return matchesSearch && tabFilter(order) && matchesDateFrom && matchesDateTo
       })
-   }, [data, search, activeTab])
+   }, [data, search, activeTab, dateFrom, dateTo])
 
    const exportCSV = () => {
       const BOM = '\uFEFF'
-      const headers = ['Sipariş Kodu', 'Müşteri', 'E-posta', 'Şehir', 'Durum', 'Toplam', 'Ödeme', 'Kargo Takip', 'Kargo Firması', 'Tarih']
+      const headers = [
+         'Sipariş Kodu', 'Sipariş No', 'Tarih',
+         'Müşteri Adı', 'Müşteri Email', 'Müşteri Telefon',
+         'Şehir', 'Tam Adres', 'Posta Kodu',
+         'Ürünler',
+         'Ara Toplam', 'İndirim', 'KDV', 'Kargo', 'Toplam',
+         'Ödeme Durumu', 'Sipariş Durumu',
+         'Kargo Takip No', 'Kargo Firması',
+      ]
       const rows = filteredData.map((order) => [
          order.orderCode,
+         order.number,
+         order.createdAt,
          order.customerName,
          order.customerEmail,
+         order.customerPhone,
          order.city,
-         order.statusLabel,
+         order.fullAddress,
+         order.postalCode,
+         order.products,
+         order.subtotal,
+         order.discountAmount,
+         order.taxAmount,
+         order.shippingAmount,
          order.payable,
          order.isPaid ? 'Ödendi' : 'Ödenmedi',
+         order.statusLabel,
          order.trackingNumber ?? '',
          order.shippingCompany ?? '',
-         order.createdAt,
       ])
       const csv =
          BOM +
-         [headers, ...rows].map((row) => row.map((cell) => `"${cell}"`).join(',')).join('\n')
+         [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -302,13 +332,42 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ data }) => {
                ))}
             </TabsList>
 
-            <div className="flex items-center gap-3 py-4">
+            <div className="flex items-center gap-3 py-4 flex-wrap">
                <Input
                   placeholder="Sipariş kodu, müşteri adı veya e-posta ile ara..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="max-w-sm"
                />
+               <div className="flex items-center gap-2">
+                  <label className="text-xs text-muted-foreground whitespace-nowrap">Başlangıç</label>
+                  <input
+                     type="date"
+                     value={dateFrom}
+                     onChange={(e) => setDateFrom(e.target.value)}
+                     className="text-xs border rounded-md px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+               </div>
+               <div className="flex items-center gap-2">
+                  <label className="text-xs text-muted-foreground whitespace-nowrap">Bitiş</label>
+                  <input
+                     type="date"
+                     value={dateTo}
+                     onChange={(e) => setDateTo(e.target.value)}
+                     className="text-xs border rounded-md px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+               </div>
+               {(dateFrom || dateTo) && (
+                  <Button
+                     variant="ghost"
+                     size="sm"
+                     className="h-7 px-2 text-xs"
+                     onClick={() => { setDateFrom(''); setDateTo('') }}
+                  >
+                     <XIcon className="h-3 w-3 mr-1" />
+                     Tarihi Temizle
+                  </Button>
+               )}
                <div className="ml-auto">
                   <Button variant="outline" size="sm" onClick={exportCSV}>
                      <DownloadIcon className="h-4 w-4 mr-2" />

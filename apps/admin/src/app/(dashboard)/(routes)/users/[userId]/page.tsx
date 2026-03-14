@@ -42,6 +42,7 @@ const UserPage = async ({ params }: { params: { userId: string } }) => {
          number: `Sipariş #${order.number}`,
          orderCode: (order as any).orderCode || `XF-${order.number}`,
          date: order.createdAt.toUTCString(),
+         rawDate: order.createdAt.toISOString().split('T')[0],
          payable: order.payable.toFixed(2) + ' ₺',
          isPaid: order.isPaid,
          status: (order as any).status || 'OnayBekleniyor',
@@ -51,7 +52,15 @@ const UserPage = async ({ params }: { params: { userId: string } }) => {
          itemCount: (order as any).items?.length || 0,
          customerName: user?.name || '-',
          customerEmail: user?.email || '-',
+         customerPhone: '-',
          city: '-',
+         fullAddress: '-',
+         postalCode: '-',
+         products: '',
+         subtotal: order.payable.toFixed(2) + ' ₺',
+         discountAmount: '0.00 ₺',
+         taxAmount: '0.00 ₺',
+         shippingAmount: '0.00 ₺',
          createdAt: format(order.createdAt, 'MMMM do, yyyy'),
       }))
 

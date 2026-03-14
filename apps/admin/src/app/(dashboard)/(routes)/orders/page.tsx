@@ -35,11 +35,11 @@ export default async function OrdersPage() {
          include: {
             orderItems: {
                include: {
-                  product: true,
+                  product: { select: { title: true } },
                },
             },
             user: { select: { name: true, email: true } },
-            address: { select: { city: true } },
+            address: { select: { city: true, address: true, phone: true, postalCode: true } },
          },
          orderBy: { createdAt: 'desc' },
       })
@@ -54,7 +54,12 @@ export default async function OrdersPage() {
       status: order.status,
       statusLabel: STATUS_LABELS[order.status] ?? order.status,
       date: order.createdAt.toUTCString(),
+      rawDate: order.createdAt.toISOString().slice(0, 10),
       payable: '₺' + order.payable.toString(),
+      subtotal: '₺' + order.total.toString(),
+      discountAmount: '₺' + order.discount.toString(),
+      taxAmount: '₺' + order.tax.toString(),
+      shippingAmount: '₺' + order.shipping.toString(),
       isPaid: order.isPaid,
       trackingNumber: order.trackingNumber ?? null,
       shippingCompany: order.shippingCompany ?? null,
@@ -62,7 +67,11 @@ export default async function OrdersPage() {
       itemCount: order.orderItems?.length ?? 0,
       customerName: order.user?.name || '-',
       customerEmail: order.user?.email || '-',
+      customerPhone: order.address?.phone || '-',
       city: order.address?.city || '-',
+      fullAddress: order.address?.address || '-',
+      postalCode: order.address?.postalCode || '-',
+      products: order.orderItems?.map((item: any) => `${item.product?.title || '-'} x${item.count}`).join('; ') || '-',
    }))
 
    return (
