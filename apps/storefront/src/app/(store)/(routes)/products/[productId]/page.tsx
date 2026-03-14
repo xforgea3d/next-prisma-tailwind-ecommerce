@@ -90,7 +90,14 @@ export default async function Product({
    const [product, relatedProducts] = await Promise.all([
       prisma.product.findUnique({
          where: { id: params.productId },
-         include: { brand: true, categories: true },
+         include: {
+            brand: true,
+            categories: true,
+            productReviews: {
+               include: { user: { select: { name: true } } },
+               orderBy: { createdAt: 'desc' },
+            },
+         },
       }),
       prisma.product.findMany({
          where: {

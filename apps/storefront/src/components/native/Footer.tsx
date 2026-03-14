@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Separator } from '@/components/native/separator'
 import config from '@/config/site'
-import { InstagramIcon, TwitterIcon, Mail, ShieldCheck, CreditCard, Lock, Send } from 'lucide-react'
+import { InstagramIcon, TwitterIcon, Mail, ShieldCheck, CreditCard, Lock, Send, MapPin, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -89,7 +89,10 @@ export default function Footer() {
          <Separator className="my-8" />
 
          <div className="flex flex-col md:flex-row justify-between gap-8 px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
-            <Trademark />
+            <div className="space-y-6">
+               <Trademark />
+               <BusinessInfo />
+            </div>
             <Links />
          </div>
 
@@ -233,6 +236,35 @@ function TrustBadges() {
          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span>Kredi Kartı / Havale</span>
+         </div>
+      </div>
+   )
+}
+
+function BusinessInfo() {
+   return (
+      <div className="space-y-2 text-sm text-muted-foreground">
+         <div className="flex items-start gap-2">
+            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <span>Ataşehir, İstanbul, Türkiye</span>
+         </div>
+         <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 flex-shrink-0" />
+            <a
+               href="tel:+905382880738"
+               className="transition-colors hover:text-foreground"
+            >
+               +90 (538) 288 07 38
+            </a>
+         </div>
+         <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 flex-shrink-0" />
+            <a
+               href="mailto:info@xforgea3d.com"
+               className="transition-colors hover:text-foreground"
+            >
+               info@xforgea3d.com
+            </a>
          </div>
       </div>
    )

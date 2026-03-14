@@ -1,6 +1,7 @@
 import { ModalProvider } from '@/providers/modal-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { GlobalErrorHandler } from '@/components/GlobalErrorHandler'
+import GoogleAnalytics from '@/components/native/GoogleAnalytics'
 import { OrganizationJsonLd, WebSiteJsonLd } from './json-ld'
 import { Inter } from 'next/font/google'
 import dynamic from 'next/dynamic'
@@ -113,6 +114,7 @@ export default async function RootLayout({
    return (
       <html lang="tr" suppressHydrationWarning>
          <body className={inter.className} suppressHydrationWarning>
+            <GoogleAnalytics />
             <GlobalErrorHandler />
             <OrganizationJsonLd />
             <WebSiteJsonLd />

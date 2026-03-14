@@ -151,6 +151,52 @@ export function BrandCombobox({ brands, initialBrand }) {
    )
 }
 
+export function PriceRangeFilter({ initialMin, initialMax }: { initialMin?: string; initialMax?: string }) {
+   const { navigate, searchParams } = useFilterNav()
+   const [minPrice, setMinPrice] = React.useState(initialMin || '')
+   const [maxPrice, setMaxPrice] = React.useState(initialMax || '')
+
+   useEffect(() => {
+      if (initialMin) setMinPrice(initialMin)
+      if (initialMax) setMaxPrice(initialMax)
+   }, [initialMin, initialMax])
+
+   const applyMin = (val: string) => {
+      setMinPrice(val)
+      navigate('minPrice', val || null)
+   }
+
+   const applyMax = (val: string) => {
+      setMaxPrice(val)
+      navigate('maxPrice', val || null)
+   }
+
+   return (
+      <div className="flex w-full gap-2 col-span-2 md:col-span-3 lg:col-span-4">
+         <div className="flex-1 relative">
+            <input
+               type="number"
+               min={0}
+               placeholder="Min Fiyat"
+               value={minPrice}
+               onChange={(e) => applyMin(e.target.value)}
+               className="w-full border rounded-md h-10 px-3 text-sm bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+         </div>
+         <div className="flex-1 relative">
+            <input
+               type="number"
+               min={0}
+               placeholder="Max Fiyat"
+               value={maxPrice}
+               onChange={(e) => applyMax(e.target.value)}
+               className="w-full border rounded-md h-10 px-3 text-sm bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+         </div>
+      </div>
+   )
+}
+
 export function AvailableToggle({ initialData }) {
    const { navigate } = useFilterNav()
    const [value, setValue] = React.useState(false)

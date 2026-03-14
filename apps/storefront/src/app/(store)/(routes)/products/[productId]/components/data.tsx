@@ -22,10 +22,12 @@ import {
    ClockIcon,
    Layers3Icon,
    LinkIcon,
+   LockIcon,
    MessageCircleIcon,
    PackageCheckIcon,
    PaletteIcon,
    PaperclipIcon,
+   RotateCcwIcon,
    Share2Icon,
    ShieldCheckIcon,
    SparklesIcon,
@@ -41,6 +43,28 @@ import WishlistButton from './wishlist_button'
 
 const STANDARD_PRODUCTION_DAYS = '2–3 iş günü'
 const CUSTOM_PRODUCTION_DAYS = '5–7 iş günü'
+
+function getEstimatedDeliveryRange(): string {
+   const today = new Date()
+   let minDays = 0
+   let maxDays = 0
+   const d = new Date(today)
+   while (minDays < 3) {
+      d.setDate(d.getDate() + 1)
+      const day = d.getDay()
+      if (day !== 0 && day !== 6) minDays++
+   }
+   const minDate = new Date(d)
+   while (maxDays < 2) {
+      d.setDate(d.getDate() + 1)
+      const day = d.getDay()
+      if (day !== 0 && day !== 6) maxDays++
+   }
+   const maxDate = new Date(d)
+   const fmt = (date: Date) =>
+      date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
+   return `${fmt(minDate)} - ${fmt(maxDate)}`
+}
 
 export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
    const csrfToken = useCsrf()
@@ -435,6 +459,9 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
                   { icon: <PackageCheckIcon className="h-4 w-4" />, label: 'Özenli Paketleme' },
                   { icon: <ShieldCheckIcon className="h-4 w-4" />, label: 'Hasarsız Teslimat' },
                   { icon: <CheckCircle2Icon className="h-4 w-4" />, label: 'Müşteri Memnuniyeti' },
+                  { icon: <RotateCcwIcon className="h-4 w-4" />, label: '14 Gün İade Garantisi' },
+                  { icon: <ShieldCheckIcon className="h-4 w-4" />, label: 'Güvenli Ödeme' },
+                  { icon: <LockIcon className="h-4 w-4" />, label: '256-bit SSL' },
                ].map(({ icon, label }) => (
                   <div key={label} className="flex flex-col items-center gap-1.5 rounded-lg border p-2.5 text-center">
                      <span className="text-muted-foreground">{icon}</span>
@@ -493,7 +520,7 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
                   <div className="divide-y text-sm">
                      {[
                         ['Kargo Ücreti', 'Ücretsiz'],
-                        ['Teslimat Süresi', '1–3 iş günü'],
+                        ['Tahmini Teslimat', getEstimatedDeliveryRange()],
                         ['Kargo Firması', 'Yurtiçi Kargo'],
                         ['Teslimat Bölgesi', 'Türkiye\'nin 81 İli'],
                      ].map(([k, v]) => (

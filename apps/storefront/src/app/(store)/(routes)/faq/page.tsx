@@ -49,9 +49,32 @@ const faqs = [
     },
 ]
 
+function FaqJsonLd() {
+    const schema = {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.answer,
+            },
+        })),
+    }
+
+    return (
+        <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+    )
+}
+
 export default function FaqPage() {
     return (
         <div className="w-full">
+            <FaqJsonLd />
             {/* Hero Header */}
             <section className="relative overflow-hidden bg-gradient-to-br from-orange-500/10 via-orange-400/5 to-transparent dark:from-orange-500/20 dark:via-orange-400/10 dark:to-transparent">
                 <div className="mx-auto max-w-4xl px-4 py-16 sm:py-20 text-center">

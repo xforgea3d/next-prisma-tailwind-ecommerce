@@ -71,6 +71,13 @@ export function WebSiteJsonLd() {
 }
 
 // ── Product JSON-LD (for product detail pages) ───────────────
+interface ProductReviewForJsonLd {
+   rating: number
+   text: string
+   user: { name?: string | null }
+   createdAt: Date | string
+}
+
 interface ProductForJsonLd {
    id: string
    title: string
@@ -81,11 +88,15 @@ interface ProductForJsonLd {
    stock: number
    isAvailable: boolean
    brand?: { title: string } | null
+   productReviews?: ProductReviewForJsonLd[]
 }
 
 export function productJsonLd(product: ProductForJsonLd) {
    const finalPrice = product.price - product.discount
-   const schema = {
+   const reviews = product.productReviews ?? []
+   const hasReviews = reviews.length > 0
+
+   const schema: Record<string, unknown> = {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: product.title,
@@ -121,6 +132,35 @@ export function productJsonLd(product: ProductForJsonLd) {
             value: product.price.toFixed(2),
          },
       }),
+   }
+
+   if (hasReviews) {
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0)
+      const avgRating = Math.round((totalRating / reviews.length) * 10) / 10
+
+      schema.aggregateRating = {
+         '@type': 'AggregateRating',
+         ratingValue: avgRating.toString(),
+         reviewCount: reviews.length.toString(),
+         bestRating: '5',
+         worstRating: '1',
+      }
+
+      schema.review = reviews.map((r) => ({
+         '@type': 'Review',
+         reviewRating: {
+            '@type': 'Rating',
+            ratingValue: r.rating.toString(),
+            bestRating: '5',
+            worstRating: '1',
+         },
+         author: {
+            '@type': 'Person',
+            name: r.user.name ?? 'Anonim',
+         },
+         reviewBody: r.text,
+         datePublished: new Date(r.createdAt).toISOString().slice(0, 10),
+      }))
    }
 
    return schema

@@ -13,6 +13,7 @@ import {
    AvailableToggle,
    BrandCombobox,
    CategoriesCombobox,
+   PriceRangeFilter,
    SortBy,
 } from './components/options'
 import FilterRestorer from './components/FilterRestorer'
@@ -20,7 +21,7 @@ import FilterRestorer from './components/FilterRestorer'
 const PAGE_SIZE = 12
 
 export default async function Products({ searchParams }) {
-   const { sort, isAvailable, brand, category, carModel, carBrand, page = 1 } = searchParams ?? {}
+   const { sort, isAvailable, brand, category, carModel, carBrand, page = 1, minPrice, maxPrice } = searchParams ?? {}
 
    const orderBy = getOrderBy(sort)
 
@@ -38,6 +39,12 @@ export default async function Products({ searchParams }) {
          : carBrand
             ? { some: { brand: { slug: carBrand } } }
             : undefined,
+      price: (minPrice || maxPrice)
+         ? {
+            ...(minPrice ? { gte: parseFloat(minPrice) } : {}),
+            ...(maxPrice ? { lte: parseFloat(maxPrice) } : {}),
+         }
+         : undefined,
    }
 
    const currentPage = Math.max(1, Number(page))
@@ -75,6 +82,8 @@ export default async function Products({ searchParams }) {
       if (category) params.set('category', category)
       if (carModel) params.set('carModel', carModel)
       if (carBrand) params.set('carBrand', carBrand)
+      if (minPrice) params.set('minPrice', minPrice)
+      if (maxPrice) params.set('maxPrice', maxPrice)
       params.set('page', String(targetPage))
       return `/products?${params.toString()}`
    }
@@ -94,6 +103,7 @@ export default async function Products({ searchParams }) {
             />
             <BrandCombobox initialBrand={brand} brands={brands} />
             <AvailableToggle initialData={isAvailable} />
+            <PriceRangeFilter initialMin={minPrice} initialMax={maxPrice} />
          </div>
          <Separator />
          {isVariableValid(products) ? (

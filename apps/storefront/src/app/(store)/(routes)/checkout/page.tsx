@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCsrf } from '@/hooks/useCsrf'
 import { useCartContext } from '@/state/Cart'
-import { CheckCircle2Icon, ChevronRightIcon, Loader2, MapPin, Plus, Tag, XCircle } from 'lucide-react'
+import { CheckCircle2Icon, ChevronRightIcon, Loader2, MapPin, Plus, Tag, Truck, XCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 
 interface Address {
@@ -27,6 +27,30 @@ interface DiscountInfo {
    valid: boolean
    percent: number
    discountAmount: number
+}
+
+function getEstimatedDeliveryRange(): string {
+   const today = new Date()
+   let minDays = 0
+   let maxDays = 0
+   let d = new Date(today)
+   // Calculate 3 business days for min
+   while (minDays < 3) {
+      d.setDate(d.getDate() + 1)
+      const day = d.getDay()
+      if (day !== 0 && day !== 6) minDays++
+   }
+   const minDate = new Date(d)
+   // Continue to 5 business days for max
+   while (maxDays < 2) {
+      d.setDate(d.getDate() + 1)
+      const day = d.getDay()
+      if (day !== 0 && day !== 6) maxDays++
+   }
+   const maxDate = new Date(d)
+   const fmt = (date: Date) =>
+      date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
+   return `${fmt(minDate)} - ${fmt(maxDate)}`
 }
 
 export default function CheckoutPage() {
@@ -45,6 +69,17 @@ export default function CheckoutPage() {
    const [showNewAddress, setShowNewAddress] = useState(false)
    const [newAddress, setNewAddress] = useState({ address: '', city: '', phone: '', postalCode: '' })
    const [taxRate, setTaxRate] = useState(20)
+   const searchParams = useSearchParams()
+   const discountAppliedFromUrl = useRef(false)
+
+   // Task 3: Auto-fill discount code from URL param
+   useEffect(() => {
+      const urlDiscount = searchParams.get('discount')
+      if (urlDiscount && !discountAppliedFromUrl.current) {
+         discountAppliedFromUrl.current = true
+         setDiscountCode(urlDiscount.toUpperCase())
+      }
+   }, [searchParams])
 
    useEffect(() => {
       fetch('/api/maintenance-status')
@@ -65,6 +100,14 @@ export default function CheckoutPage() {
          .catch(() => toast.error('Adresler yüklenemedi'))
          .finally(() => setLoadingAddresses(false))
    }, [])
+
+   // Task 3: Auto-validate discount code from URL after it's been set
+   useEffect(() => {
+      const urlDiscount = searchParams.get('discount')
+      if (urlDiscount && discountCode === urlDiscount.toUpperCase() && !discountInfo && !validatingDiscount && !discountError) {
+         handleValidateDiscount()
+      }
+   }, [discountCode, searchParams])
 
    const costs = useMemo(() => {
       let total = 0, productDiscount = 0
@@ -469,6 +512,12 @@ export default function CheckoutPage() {
                         <div className="flex justify-between">
                            <span>Kargo</span>
                            <span className="text-green-600 font-medium">Ücretsiz</span>
+                        </div>
+                        <div className="flex items-center gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 px-3 py-2 mt-1">
+                           <Truck className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                           <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                              Tahmini Teslimat: {getEstimatedDeliveryRange()}
+                           </span>
                         </div>
                      </div>
 
