@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { BellIcon, CheckCheckIcon } from 'lucide-react'
+import { BellIcon, CheckCheckIcon, CopyIcon } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { useCsrf } from '@/hooks/useCsrf'
 import Link from 'next/link'
@@ -20,8 +21,14 @@ function getNotificationLink(content: string): string {
    if (/parça talebi|talep/i.test(lower)) return '/profile/quote-requests'
    if (/sipari[sş]|siparis/i.test(lower)) return '/profile/orders'
    if (/iade/i.test(lower)) return '/profile/orders'
-   if (/indirim|kupon/i.test(lower)) return '/products'
+   if (/indirim|kupon/i.test(lower)) return '/profile/notifications'
    return '/profile/notifications'
+}
+
+function extractCouponCode(content: string): string | null {
+   if (!/kupon|indirim/i.test(content)) return null
+   const match = content.match(/\b([A-Z0-9]{4,20})\b/)
+   return match ? match[1] : null
 }
 
 function relativeTime(dateStr: string): string {
@@ -169,6 +176,11 @@ export function NotificationBell() {
                               onClick={() => {
                                  if (!notification.isRead) {
                                     markAsRead([notification.id])
+                                 }
+                                 const coupon = extractCouponCode(notification.content)
+                                 if (coupon) {
+                                    navigator.clipboard.writeText(coupon)
+                                    toast.success(`İndirim kodu kopyalandı: ${coupon}`)
                                  }
                                  const link = getNotificationLink(notification.content)
                                  setOpen(false)

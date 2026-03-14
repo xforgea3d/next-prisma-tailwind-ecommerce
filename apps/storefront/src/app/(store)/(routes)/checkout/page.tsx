@@ -101,8 +101,11 @@ export default function CheckoutPage() {
       try {
          const res = await fetch('/api/discount-validate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: discountCode.trim() }),
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
+            body: JSON.stringify({ code: discountCode.trim(), csrfToken }),
          })
          const data = await res.json()
 

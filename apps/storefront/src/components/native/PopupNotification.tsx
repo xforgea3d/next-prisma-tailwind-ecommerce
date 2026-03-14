@@ -187,13 +187,31 @@ export default function PopupNotification() {
                            </p>
                         </div>
 
-                        {/* Close button */}
-                        <button
-                           onClick={() => dismissModal(modals[0].id)}
-                           className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                        >
-                           Tamam
-                        </button>
+                        {/* Copy coupon + Close */}
+                        <div className="space-y-2">
+                           {/kupon|indirim/i.test(modals[0].content) && (() => {
+                              const match = modals[0].content.match(/\b([A-Z0-9]{4,20})\b/)
+                              return match ? (
+                                 <button
+                                    onClick={() => {
+                                       navigator.clipboard.writeText(match[1])
+                                       const el = document.getElementById('coupon-copied')
+                                       if (el) el.textContent = 'Kopyalandı!'
+                                    }}
+                                    className="w-full rounded-xl border-2 border-orange-500 text-orange-600 dark:text-orange-400 font-semibold py-3 text-sm hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors flex items-center justify-center gap-2"
+                                 >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                                    <span id="coupon-copied">Kodu Kopyala: {match[1]}</span>
+                                 </button>
+                              ) : null
+                           })()}
+                           <button
+                              onClick={() => dismissModal(modals[0].id)}
+                              className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                           >
+                              Tamam
+                           </button>
+                        </div>
                      </div>
                   </div>
                </div>
