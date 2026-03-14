@@ -68,6 +68,21 @@ function OrderTimeline({ status }: { status: string }) {
    const isReturned = returnStatuses.includes(status)
    const currentIndex = getStepIndex(status)
 
+   // Unknown status — show a simple badge instead of a broken timeline
+   if (!isCancelled && !isReturned && currentIndex === -1) {
+      const info = statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-800' }
+      return (
+         <div className="w-full flex flex-col items-center gap-2 py-4">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-muted text-muted-foreground">
+               <Clock className="h-6 w-6" />
+            </div>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${info.color}`}>
+               {info.label}
+            </span>
+         </div>
+      )
+   }
+
    if (isCancelled) {
       return (
          <div className="w-full flex flex-col items-center gap-2 py-4">

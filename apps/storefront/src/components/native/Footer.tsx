@@ -104,14 +104,28 @@ function Newsletter() {
    const [email, setEmail] = useState('')
    const { toast } = useToast()
 
-   const handleSubmit = (e: React.FormEvent) => {
+   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
       if (!email) return
-      toast({
-         title: 'Teşekkürler!',
-         description: 'E-posta adresiniz başarıyla kaydedildi. Kampanyalardan haberdar olacaksınız.',
-      })
-      setEmail('')
+      try {
+         const res = await fetch('/api/subscription/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+         })
+         if (!res.ok) throw new Error('Subscription failed')
+         toast({
+            title: 'Teşekkürler!',
+            description: 'E-posta adresiniz başarıyla kaydedildi. Kampanyalardan haberdar olacaksınız.',
+         })
+         setEmail('')
+      } catch {
+         toast({
+            title: 'Hata',
+            description: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+            variant: 'destructive',
+         })
+      }
    }
 
    return (

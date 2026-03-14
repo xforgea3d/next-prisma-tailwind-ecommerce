@@ -38,7 +38,14 @@ export function ReturnForm({
    const [trackingNumber, setTrackingNumber] = useState(currentTrackingNumber || '')
    const [refundAmount, setRefundAmount] = useState(currentRefundAmount?.toString() || '')
 
+   const refundAmountNum = refundAmount ? parseFloat(refundAmount) : 0
+   const refundExceedsOrder = refundAmountNum > orderPayable
+
    async function handleSubmit() {
+      if (refundExceedsOrder) {
+         toast.error(`Iade tutari siparis tutarini (${orderPayable.toFixed(2)} TL) asamaz`)
+         return
+      }
       setLoading(true)
       try {
          const res = await fetch(`/api/returns/${returnId}`, {
@@ -146,12 +153,18 @@ export function ReturnForm({
                   type="number"
                   step="0.01"
                   min="0"
+                  max={orderPayable}
                   value={refundAmount}
                   onChange={(e) => setRefundAmount(e.target.value)}
                   placeholder="Orn: 250.00"
-                  className="w-full rounded-md border px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  className={`w-full rounded-md border px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring ${refundExceedsOrder ? 'border-red-500' : ''}`}
                   disabled={loading}
                />
+               {refundExceedsOrder && (
+                  <p className="text-sm text-red-500">
+                     Iade tutari siparis tutarini ({orderPayable.toFixed(2)} TL) asamaz
+                  </p>
+               )}
             </div>
 
             <Button

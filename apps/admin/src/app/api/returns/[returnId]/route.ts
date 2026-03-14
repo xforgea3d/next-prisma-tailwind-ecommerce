@@ -43,6 +43,17 @@ export async function PATCH(
       const body = await req.json()
       const { status, adminNote, returnTrackingNumber, refundAmount } = body
 
+      // Validate status
+      const validStatuses = ['Pending', 'Approved', 'ReturnShipping', 'Received', 'Refunded', 'Rejected']
+      if (status && !validStatuses.includes(status)) {
+         return new NextResponse('Invalid status', { status: 400 })
+      }
+
+      // Validate refund amount
+      if (refundAmount !== undefined && refundAmount !== null && refundAmount < 0) {
+         return new NextResponse('Refund amount must be >= 0', { status: 400 })
+      }
+
       // Get current return request for context
       const current = await prisma.returnRequest.findUnique({
          where: { id: params.returnId },

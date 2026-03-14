@@ -84,7 +84,7 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
          const json = await res.json()
          setFileUrl(json?.url ?? null)
       } catch {
-         // silent fail — user can re-try
+         toast.error('Dosya yüklenirken bir hata oluştu')
       } finally {
          setUploading(false)
       }
