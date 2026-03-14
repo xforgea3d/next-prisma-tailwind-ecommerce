@@ -7,9 +7,25 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { cn } from '@/lib/utils'
-import { AlertCircle, CheckCircle, Clock, Copy, CreditCard, Loader2, MapPin, Package, Printer, RotateCcw, Truck, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, Clock, Copy, CreditCard, Loader2, MapPin, Package, Printer, RotateCcw, Send, Truck, XCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCallback, useEffect, useState } from 'react'
+
+const returnReasons = [
+   'Urun hasarli',
+   'Yanlis urun',
+   'Begenmedim',
+   'Diger',
+]
+
+const returnStatusMap: Record<string, { label: string; color: string }> = {
+   Pending: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-800' },
+   Approved: { label: 'Onaylandi', color: 'bg-green-100 text-green-800' },
+   ReturnShipping: { label: 'Kargo Bekleniyor', color: 'bg-purple-100 text-purple-800' },
+   Received: { label: 'Teslim Alindi', color: 'bg-blue-100 text-blue-800' },
+   Refunded: { label: 'Iade Tamamlandi', color: 'bg-gray-100 text-gray-800' },
+   Rejected: { label: 'Reddedildi', color: 'bg-red-100 text-red-800' },
+}
 
 const statusMap: Record<string, { label: string; color: string }> = {
    OnayBekleniyor: { label: 'Onay Bekleniyor', color: 'bg-yellow-100 text-yellow-800' },
@@ -175,6 +191,196 @@ function OrderTimeline({ status }: { status: string }) {
             })}
          </div>
       </div>
+   )
+}
+
+function ReturnRequestSection({ order, onReturnCreated }: { order: any; onReturnCreated: () => void }) {
+   const [returnRequest, setReturnRequest] = useState<any>(null)
+   const [loadingReturn, setLoadingReturn] = useState(true)
+   const [showForm, setShowForm] = useState(false)
+   const [reason, setReason] = useState(returnReasons[0])
+   const [description, setDescription] = useState('')
+   const [submitting, setSubmitting] = useState(false)
+
+   const isDelivered = order.status === 'Delivered'
+
+   useEffect(() => {
+      async function fetchReturn() {
+         try {
+            const res = await fetch('/api/returns')
+            if (res.ok) {
+               const returns = await res.json()
+               const existing = returns.find((r: any) => r.orderId === order.id)
+               if (existing) setReturnRequest(existing)
+            }
+         } catch (err) {
+            console.error(err)
+         } finally {
+            setLoadingReturn(false)
+         }
+      }
+      fetchReturn()
+   }, [order.id])
+
+   async function handleSubmit() {
+      setSubmitting(true)
+      try {
+         const res = await fetch('/api/returns', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               orderId: order.id,
+               reason,
+               description: description || undefined,
+            }),
+         })
+
+         if (!res.ok) {
+            const text = await res.text()
+            toast.error(text || 'Bir hata olustu')
+            return
+         }
+
+         const created = await res.json()
+         setReturnRequest(created)
+         setShowForm(false)
+         toast.success('Iade talebiniz olusturuldu')
+         onReturnCreated()
+      } catch (err) {
+         toast.error('Bir hata olustu')
+         console.error(err)
+      } finally {
+         setSubmitting(false)
+      }
+   }
+
+   if (loadingReturn) return null
+
+   // If return request exists, show its status
+   if (returnRequest) {
+      const rs = returnStatusMap[returnRequest.status] || { label: returnRequest.status, color: 'bg-gray-100 text-gray-800' }
+      return (
+         <Card className="border-orange-200 dark:border-orange-800/50">
+            <CardHeader>
+               <CardTitle className="flex items-center gap-2 text-lg">
+                  <RotateCcw className="h-5 w-5" /> Iade Talebi #{returnRequest.number}
+               </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+               <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Durum</span>
+                  <Badge className={`${rs.color} px-2 py-0.5 text-xs font-medium`}>{rs.label}</Badge>
+               </div>
+               <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sebep</span>
+                  <span>{returnRequest.reason}</span>
+               </div>
+               {returnRequest.description && (
+                  <div>
+                     <span className="text-muted-foreground">Aciklama</span>
+                     <p className="mt-1">{returnRequest.description}</p>
+                  </div>
+               )}
+               {returnRequest.adminNote && (
+                  <div>
+                     <span className="text-muted-foreground">Admin Notu</span>
+                     <p className="mt-1">{returnRequest.adminNote}</p>
+                  </div>
+               )}
+               {returnRequest.returnTrackingNumber && (
+                  <div className="flex justify-between">
+                     <span className="text-muted-foreground">Kargo Takip No</span>
+                     <code className="bg-muted px-2 py-0.5 rounded text-xs font-mono">{returnRequest.returnTrackingNumber}</code>
+                  </div>
+               )}
+               {returnRequest.refundAmount && (
+                  <div className="flex justify-between">
+                     <span className="text-muted-foreground">Iade Tutari</span>
+                     <span className="font-semibold">{returnRequest.refundAmount.toFixed(2)} TL</span>
+                  </div>
+               )}
+            </CardContent>
+         </Card>
+      )
+   }
+
+   // Only show the button for delivered orders
+   if (!isDelivered) return null
+
+   if (!showForm) {
+      return (
+         <Card>
+            <CardContent className="pt-6">
+               <Button
+                  onClick={() => setShowForm(true)}
+                  variant="outline"
+                  className="w-full gap-2"
+               >
+                  <RotateCcw className="h-4 w-4" />
+                  Iade Talebi Olustur
+               </Button>
+            </CardContent>
+         </Card>
+      )
+   }
+
+   return (
+      <Card className="border-orange-200 dark:border-orange-800/50">
+         <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+               <RotateCcw className="h-5 w-5" /> Iade Talebi Olustur
+            </CardTitle>
+         </CardHeader>
+         <CardContent className="space-y-4">
+            <div className="space-y-2">
+               <label className="text-sm font-medium">Iade Sebebi</label>
+               <select
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full rounded-md border px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  disabled={submitting}
+               >
+                  {returnReasons.map((r) => (
+                     <option key={r} value={r}>{r}</option>
+                  ))}
+               </select>
+            </div>
+
+            <div className="space-y-2">
+               <label className="text-sm font-medium">Aciklama (Opsiyonel)</label>
+               <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Iade sebebinizi detayli aciklayabilirsiniz..."
+                  rows={3}
+                  className="w-full rounded-md border px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                  disabled={submitting}
+               />
+            </div>
+
+            <div className="flex gap-2">
+               <Button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="flex-1 gap-2"
+               >
+                  {submitting ? (
+                     <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                     <Send className="h-4 w-4" />
+                  )}
+                  {submitting ? 'Gonderiliyor...' : 'Talebi Gonder'}
+               </Button>
+               <Button
+                  onClick={() => setShowForm(false)}
+                  variant="outline"
+                  disabled={submitting}
+               >
+                  Iptal
+               </Button>
+            </div>
+         </CardContent>
+      </Card>
    )
 }
 
@@ -391,6 +597,9 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
                      </CardContent>
                   </Card>
                )}
+
+               {/* Return Request Section */}
+               <ReturnRequestSection order={order} onReturnCreated={fetchOrder} />
             </div>
          </div>
       </div>

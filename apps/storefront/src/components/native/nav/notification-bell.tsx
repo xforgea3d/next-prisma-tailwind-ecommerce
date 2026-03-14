@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { BellIcon, CheckCheckIcon } from 'lucide-react'
+import { BellIcon, CheckCheckIcon, PackageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -10,6 +10,17 @@ interface Notification {
    content: string
    isRead: boolean
    createdAt: string
+}
+
+function isOrderRelated(content: string): boolean {
+   return /sipari[sş]/i.test(content)
+}
+
+function getOrderLink(content: string): string | null {
+   const match = content.match(/[Ss]ipari[sş]\s*#?(\d+)/i)
+   if (match) return `/profile/orders/${match[1]}`
+   if (isOrderRelated(content)) return '/profile/orders'
+   return null
 }
 
 function relativeTime(dateStr: string): string {
@@ -34,6 +45,7 @@ export function NotificationBell() {
    const [notifications, setNotifications] = useState<Notification[]>([])
    const [unreadCount, setUnreadCount] = useState(0)
    const [open, setOpen] = useState(false)
+   const [expandedId, setExpandedId] = useState<string | null>(null)
    const dropdownRef = useRef<HTMLDivElement>(null)
 
    const fetchNotifications = useCallback(async () => {
@@ -132,31 +144,54 @@ export function NotificationBell() {
                         Bildiriminiz yok
                      </div>
                   ) : (
-                     notifications.map(notification => (
-                        <button
-                           key={notification.id}
-                           className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-accent/50 transition-colors ${
-                              !notification.isRead ? 'bg-accent/20' : ''
-                           }`}
-                           onClick={() => {
-                              if (!notification.isRead) {
-                                 markAsRead([notification.id])
-                              }
-                           }}
-                        >
-                           <div className="flex items-start gap-2">
-                              {!notification.isRead && (
-                                 <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                 <p className="text-sm leading-snug">{notification.content}</p>
-                                 <p className="text-xs text-muted-foreground mt-1">
-                                    {relativeTime(notification.createdAt)}
-                                 </p>
+                     notifications.map(notification => {
+                        const orderLink = getOrderLink(notification.content)
+                        const isExpanded = expandedId === notification.id
+
+                        return (
+                           <button
+                              key={notification.id}
+                              className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-accent/50 transition-colors ${
+                                 !notification.isRead ? 'bg-accent/20' : ''
+                              }`}
+                              onClick={() => {
+                                 if (!notification.isRead) {
+                                    markAsRead([notification.id])
+                                 }
+                                 setExpandedId(prev => (prev === notification.id ? null : notification.id))
+                              }}
+                           >
+                              <div className="flex items-start gap-2">
+                                 {!notification.isRead && (
+                                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+                                 )}
+                                 <div className="flex-1 min-w-0">
+                                    <p className={`text-sm leading-snug ${isExpanded ? '' : 'line-clamp-2'}`}>
+                                       {notification.content}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                       <p className="text-xs text-muted-foreground">
+                                          {relativeTime(notification.createdAt)}
+                                       </p>
+                                       {orderLink && (
+                                          <Link
+                                             href={orderLink}
+                                             className="inline-flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
+                                             onClick={(e) => {
+                                                e.stopPropagation()
+                                                setOpen(false)
+                                             }}
+                                          >
+                                             <PackageIcon className="h-3 w-3" />
+                                             Siparisi Gor
+                                          </Link>
+                                       )}
+                                    </div>
+                                 </div>
                               </div>
-                           </div>
-                        </button>
-                     ))
+                           </button>
+                        )
+                     })
                   )}
                </div>
 

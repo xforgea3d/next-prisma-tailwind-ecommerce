@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       })
 
       // Bust admin cache and storefront
+      revalidatePath('/categories')
       revalidatePath('/', 'layout')
       await revalidateAllStorefront()
 

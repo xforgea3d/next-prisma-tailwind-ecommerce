@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
    try {
-      const [pendingOrders, shippedWithoutTracking, pendingQuotes, unreadErrors] = await Promise.all([
+      const [pendingOrders, shippedWithoutTracking, pendingQuotes, pendingReturns, unreadErrors] = await Promise.all([
          prisma.order.count({
             where: { status: 'OnayBekleniyor' },
          }),
@@ -16,6 +16,9 @@ export async function GET() {
          prisma.quoteRequest.count({
             where: { status: 'Pending' },
          }),
+         prisma.returnRequest.count({
+            where: { status: 'Pending' },
+         }),
          prisma.error.count({
             where: { resolved: false, severity: { in: ['critical', 'high'] } },
          }),
@@ -24,10 +27,11 @@ export async function GET() {
       return NextResponse.json({
          orders: pendingOrders + shippedWithoutTracking,
          quotes: pendingQuotes,
+         returns: pendingReturns,
          errors: unreadErrors,
       })
    } catch (error) {
       console.error('[NOTIFICATION_COUNTS]', error)
-      return NextResponse.json({ orders: 0, quotes: 0, errors: 0 })
+      return NextResponse.json({ orders: 0, quotes: 0, returns: 0, errors: 0 })
    }
 }

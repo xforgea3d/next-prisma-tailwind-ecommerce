@@ -15,10 +15,23 @@ export async function PATCH(
         const body = await req.json()
         const { status, shipping, payable, discount, isPaid, isCompleted, trackingNumber, shippingCompany } = body
 
+        // Auto-set status to Shipped when tracking number is added
+        let finalStatus = status
+        if (trackingNumber && trackingNumber.trim() !== '') {
+            const currentOrder = await prisma.order.findUnique({
+                where: { id: params.orderId },
+                select: { status: true },
+            })
+            const shippedStatuses = ['Shipped', 'KargoyaVerildi', 'Delivered', 'TeslimEdildi']
+            if (currentOrder && !shippedStatuses.includes(currentOrder.status) && !shippedStatuses.includes(status)) {
+                finalStatus = 'Shipped'
+            }
+        }
+
         const order = await prisma.order.update({
             where: { id: params.orderId },
             data: {
-                ...(status && { status }),
+                ...(finalStatus && { status: finalStatus }),
                 ...(shipping !== undefined && { shipping }),
                 ...(payable !== undefined && { payable }),
                 ...(discount !== undefined && { discount }),
@@ -30,6 +43,7 @@ export async function PATCH(
         })
 
         revalidatePath('/orders')
+        revalidatePath('/', 'layout')
         await revalidateAllStorefront()
 
         return NextResponse.json(order)

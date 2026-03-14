@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, MessageSquare, AlertTriangle } from 'lucide-react'
+import { ShoppingCart, MessageSquare, AlertTriangle, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Counts {
    orders: number
    quotes: number
+   returns: number
    errors: number
 }
 
 export function NotificationBadges() {
-   const [counts, setCounts] = useState<Counts>({ orders: 0, quotes: 0, errors: 0 })
+   const [counts, setCounts] = useState<Counts>({ orders: 0, quotes: 0, returns: 0, errors: 0 })
 
    useEffect(() => {
       const fetchCounts = () => {
@@ -28,6 +29,7 @@ export function NotificationBadges() {
 
    const badges = [
       { href: '/orders', icon: ShoppingCart, count: counts.orders, label: 'Yeni Sipariş', color: 'bg-blue-500' },
+      { href: '/returns', icon: RotateCcw, count: counts.returns, label: 'İade Talebi', color: 'bg-purple-500' },
       { href: '/quote-requests', icon: MessageSquare, count: counts.quotes, label: 'Parça Talebi', color: 'bg-orange-500' },
       { href: '/error-logs', icon: AlertTriangle, count: counts.errors, label: 'Kritik Hata', color: 'bg-red-500' },
    ]

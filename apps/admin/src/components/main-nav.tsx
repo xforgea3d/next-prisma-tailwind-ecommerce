@@ -20,6 +20,7 @@ import {
    Users,
    Bug,
    Ticket,
+   RotateCcw,
 } from 'lucide-react'
 
 const navGroups = [
@@ -43,6 +44,7 @@ const navGroups = [
       label: 'Satışlar',
       items: [
          { href: '/orders', label: 'Siparişler', icon: ShoppingCart },
+         { href: '/returns', label: 'İade Talepleri', icon: RotateCcw },
          { href: '/payments', label: 'Ödemeler', icon: CreditCard },
          { href: '/discount-codes', label: 'Kuponlar', icon: Ticket },
          { href: '/users', label: 'Kullanıcılar', icon: Users },

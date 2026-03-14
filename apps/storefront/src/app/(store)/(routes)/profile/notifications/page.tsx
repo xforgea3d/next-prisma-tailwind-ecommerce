@@ -2,13 +2,48 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { CheckCheckIcon, BellIcon, InboxIcon } from 'lucide-react'
+import { CheckCheckIcon, BellIcon, InboxIcon, PackageIcon } from 'lucide-react'
+import Link from 'next/link'
 
 interface Notification {
    id: string
    content: string
    isRead: boolean
    createdAt: string
+}
+
+function linkifyOrderReferences(content: string): React.ReactNode {
+   const regex = /([Ss]ipari[sş]\s*#?)(\d+)/g
+   const parts: React.ReactNode[] = []
+   let lastIndex = 0
+   let match: RegExpExecArray | null
+
+   while ((match = regex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+         parts.push(content.slice(lastIndex, match.index))
+      }
+      parts.push(
+         <Link
+            key={match.index}
+            href={`/profile/orders/${match[2]}`}
+            className="font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 underline underline-offset-2"
+            onClick={(e) => e.stopPropagation()}
+         >
+            {match[0]}
+         </Link>
+      )
+      lastIndex = regex.lastIndex
+   }
+
+   if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex))
+   }
+
+   return parts.length > 0 ? parts : content
+}
+
+function isOrderRelated(content: string): boolean {
+   return /sipari[sş]/i.test(content)
 }
 
 function relativeTime(dateStr: string): string {
@@ -117,40 +152,48 @@ export default function NotificationsPage() {
             </div>
          ) : (
             <div className="space-y-2">
-               {notifications.map(notification => (
-                  <div
-                     key={notification.id}
-                     className={`flex items-start gap-3 rounded-lg border p-4 transition-colors ${
-                        !notification.isRead
-                           ? 'bg-accent/20 border-accent'
-                           : 'bg-background'
-                     }`}
-                  >
-                     <div className="mt-0.5 shrink-0">
-                        {!notification.isRead ? (
-                           <span className="flex h-2.5 w-2.5 rounded-full bg-blue-500" />
-                        ) : (
-                           <BellIcon className="h-4 w-4 text-muted-foreground" />
+               {notifications.map(notification => {
+                  const orderRelated = isOrderRelated(notification.content)
+
+                  return (
+                     <div
+                        key={notification.id}
+                        className={`flex items-start gap-3 rounded-lg border p-4 transition-colors ${
+                           !notification.isRead
+                              ? 'bg-accent/20 border-l-4 border-l-orange-500 border-t border-r border-b'
+                              : 'bg-background border-muted'
+                        }`}
+                     >
+                        <div className="mt-0.5 shrink-0">
+                           {orderRelated ? (
+                              <PackageIcon className={`h-4 w-4 ${!notification.isRead ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                           ) : !notification.isRead ? (
+                              <span className="flex h-2.5 w-2.5 rounded-full bg-blue-500 mt-0.5" />
+                           ) : (
+                              <BellIcon className="h-4 w-4 text-muted-foreground" />
+                           )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                           <p className={`text-sm ${!notification.isRead ? 'font-medium' : 'text-muted-foreground'}`}>
+                              {linkifyOrderReferences(notification.content)}
+                           </p>
+                           <p className="text-xs text-muted-foreground mt-1.5">
+                              {relativeTime(notification.createdAt)}
+                           </p>
+                        </div>
+                        {!notification.isRead && (
+                           <Button
+                              variant="ghost"
+                              size="sm"
+                              className="shrink-0 text-xs"
+                              onClick={() => markAsRead(notification.id)}
+                           >
+                              Okundu
+                           </Button>
                         )}
                      </div>
-                     <div className="flex-1 min-w-0">
-                        <p className="text-sm">{notification.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                           {relativeTime(notification.createdAt)}
-                        </p>
-                     </div>
-                     {!notification.isRead && (
-                        <Button
-                           variant="ghost"
-                           size="sm"
-                           className="shrink-0 text-xs"
-                           onClick={() => markAsRead(notification.id)}
-                        >
-                           Okundu
-                        </Button>
-                     )}
-                  </div>
-               ))}
+                  )
+               })}
             </div>
          )}
       </div>

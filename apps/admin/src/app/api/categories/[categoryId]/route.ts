@@ -41,6 +41,7 @@ export async function DELETE(
       })
 
       // Bust admin cache and storefront
+      revalidatePath('/categories')
       revalidatePath('/', 'layout')
       await revalidateAllStorefront()
 
@@ -83,6 +84,7 @@ export async function PATCH(
       })
 
       // Bust admin cache and storefront
+      revalidatePath('/categories')
       revalidatePath('/', 'layout')
       await revalidateAllStorefront()
 

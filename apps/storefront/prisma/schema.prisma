@@ -28,6 +28,7 @@ model Profile {
   errors         Error[]
   files          File[]
   quoteRequests  QuoteRequest[]
+  returnRequests ReturnRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,10 +196,11 @@ model Order {
   trackingNumber  String?
   shippingCompany String?
 
-  payments     Payment[]
-  orderItems   OrderItem[]
-  refund       Refund?
-  quoteRequest QuoteRequest?
+  payments       Payment[]
+  orderItems     OrderItem[]
+  refund         Refund?
+  quoteRequest   QuoteRequest?
+  returnRequests ReturnRequest[]
 
   discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
   discountCodeId String?
@@ -591,4 +593,34 @@ model QuoteRequest {
 
   @@index([userId])
   @@index([status])
+}
+
+// ── Return / Refund Request System ────────────────────────────
+
+enum ReturnStatusEnum {
+  Pending        // User submitted return request
+  Approved       // Admin approved
+  ReturnShipping // User shipping product back (tracking number given)
+  Received       // Product received by xForgea3D
+  Refunded       // Refund completed
+  Rejected       // Return rejected
+}
+
+model ReturnRequest {
+  id            String           @id @default(cuid())
+  number        Int              @unique @default(autoincrement())
+  reason        String
+  description   String?
+  status        ReturnStatusEnum @default(Pending)
+  adminNote     String?
+  returnTrackingNumber String?
+  refundAmount  Float?
+  order         Order            @relation(fields: [orderId], references: [id])
+  orderId       String
+  user          Profile          @relation(fields: [userId], references: [id])
+  userId        String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([userId, orderId])
 }

@@ -21,6 +21,7 @@ export async function POST(req: Request) {
          },
       })
 
+      revalidatePath('/brands')
       revalidatePath('/', 'layout')
       await revalidateAllStorefront()
 

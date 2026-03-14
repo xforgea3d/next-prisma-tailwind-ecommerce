@@ -4,6 +4,7 @@ import { ProductWithIncludes } from '@/types/prisma'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { QuickAddButton } from '@/components/native/QuickAddButton'
+import { WishlistHeart } from '@/components/native/WishlistHeart'
 
 export const ProductGrid = ({
    products,
@@ -67,6 +68,9 @@ export const Product = ({
                         <ImageSkeleton />
                      </div>
                   )}
+
+                  {/* Wishlist heart */}
+                  <WishlistHeart productId={product.id} />
 
                   {/* Discount badge overlay */}
                   {hasDiscount && (
