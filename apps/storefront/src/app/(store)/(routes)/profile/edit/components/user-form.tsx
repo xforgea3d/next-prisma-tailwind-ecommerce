@@ -58,6 +58,10 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
    })
 
    const onSubmit = async (data: UserFormValues) => {
+      if (!csrfToken) {
+         toast.error('Sayfa yükleniyor, lütfen birkaç saniye bekleyin.')
+         return
+      }
       try {
          setLoading(true)
 
@@ -67,24 +71,24 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
             method: 'PATCH',
             headers: {
                'Content-Type': 'application/json',
-               ...(csrfToken ? { 'x-csrf-token': csrfToken } : {}),
+               'x-csrf-token': csrfToken,
             },
             body: JSON.stringify({
                ...updateData,
                csrfToken,
             }),
-            cache: 'no-store',
          })
 
          if (!res.ok) {
-            throw new Error('Profile update failed')
+            const text = await res.text()
+            throw new Error(text || 'Güncelleme başarısız')
          }
 
          router.refresh()
-         router.push(`/profile`)
+         router.push(`/profile/edit`)
          toast.success('Profil güncellendi.')
       } catch (error: any) {
-         toast.error('Bir hata oluştu. Lütfen tekrar deneyin.')
+         toast.error(error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.')
       } finally {
          setLoading(false)
       }

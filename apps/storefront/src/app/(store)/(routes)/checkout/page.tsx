@@ -80,10 +80,14 @@ export default function CheckoutPage() {
          toast.error('Tüm adres alanlarını doldurun')
          return
       }
+      if (!csrfToken) {
+         toast.error('Sayfa yükleniyor, lütfen birkaç saniye bekleyin.')
+         return
+      }
       try {
          const res = await fetch('/api/addresses', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...(csrfToken && { 'x-csrf-token': csrfToken }) },
+            headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
             body: JSON.stringify({ ...newAddress, csrfToken }),
          })
          if (!res.ok) throw new Error()

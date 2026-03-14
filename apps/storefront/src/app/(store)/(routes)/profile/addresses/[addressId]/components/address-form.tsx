@@ -45,10 +45,10 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
    const [open, setOpen] = useState(false)
    const [loading, setLoading] = useState(false)
 
-   const title = initialData ? 'Edit address' : 'Create address'
-   const description = initialData ? 'Edit a address.' : 'Add a new address'
-   const toastMessage = initialData ? 'Address updated.' : 'Address created.'
-   const action = initialData ? 'Save changes' : 'Create'
+   const title = initialData ? 'Adresi Düzenle' : 'Yeni Adres'
+   const description = initialData ? 'Adres bilgilerinizi güncelleyin.' : 'Yeni bir adres ekleyin.'
+   const toastMessage = initialData ? 'Adres güncellendi.' : 'Adres oluşturuldu.'
+   const action = initialData ? 'Kaydet' : 'Oluştur'
 
    const form = useForm<AddressFormValues>({
       resolver: zodResolver(formSchema),
@@ -61,52 +61,60 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
    })
 
    const onSubmit = async (data: AddressFormValues) => {
+      if (!csrfToken) {
+         toast.error('Sayfa yükleniyor, lütfen birkaç saniye bekleyin.')
+         return
+      }
       try {
          setLoading(true)
 
-         if (initialData) {
-            await fetch(`/api/addresses/${params.addressId}`, {
-               method: 'PATCH',
-               headers: { 'Content-Type': 'application/json', ...(csrfToken && { 'x-csrf-token': csrfToken }) },
-               body: JSON.stringify({ ...data, csrfToken }),
-               cache: 'no-store',
-            })
-         } else {
-            await fetch(`/api/addresses`, {
-               method: 'POST',
-               headers: { 'Content-Type': 'application/json', ...(csrfToken && { 'x-csrf-token': csrfToken }) },
-               body: JSON.stringify({ ...data, csrfToken }),
-               cache: 'no-store',
-            })
+         const url = initialData ? `/api/addresses/${params.addressId}` : `/api/addresses`
+         const method = initialData ? 'PATCH' : 'POST'
+
+         const res = await fetch(url, {
+            method,
+            headers: {
+               'Content-Type': 'application/json',
+               'x-csrf-token': csrfToken,
+            },
+            body: JSON.stringify({ ...data, csrfToken }),
+         })
+
+         if (!res.ok) {
+            const text = await res.text()
+            throw new Error(text || 'İşlem başarısız')
          }
 
          router.refresh()
          router.push(`/profile/addresses`)
          toast.success(toastMessage)
       } catch (error: any) {
-         toast.error('Something went wrong.')
+         toast.error(error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.')
       } finally {
          setLoading(false)
       }
    }
 
    const onDelete = async () => {
+      if (!csrfToken) {
+         toast.error('Sayfa yükleniyor, lütfen birkaç saniye bekleyin.')
+         return
+      }
       try {
          setLoading(true)
 
-         await fetch(`/api/addresses/${params.addressId}`, {
+         const res = await fetch(`/api/addresses/${params.addressId}`, {
             method: 'DELETE',
-            headers: { ...(csrfToken && { 'x-csrf-token': csrfToken }) },
-            cache: 'no-store',
+            headers: { 'x-csrf-token': csrfToken },
          })
+
+         if (!res.ok) throw new Error()
 
          router.refresh()
          router.push(`/profile/addresses`)
-         toast.success('Address deleted.')
+         toast.success('Adres silindi.')
       } catch (error: any) {
-         toast.error(
-            'Adres silinirken bir hata oluştu.'
-         )
+         toast.error('Adres silinirken bir hata oluştu.')
       } finally {
          setLoading(false)
          setOpen(false)
@@ -150,7 +158,7 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
                            <FormControl>
                               <Input
                                  disabled={loading}
-                                 placeholder="Tehran"
+                                 placeholder="İstanbul"
                                  {...field}
                               />
                            </FormControl>
@@ -164,11 +172,11 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
                      name="phone"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>Phone</FormLabel>
+                           <FormLabel>Telefon</FormLabel>
                            <FormControl>
                               <Input
                                  disabled={loading}
-                                 placeholder="09123456789"
+                                 placeholder="05XX XXX XX XX"
                                  {...field}
                               />
                            </FormControl>
@@ -181,11 +189,11 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
                      name="postalCode"
                      render={({ field }) => (
                         <FormItem>
-                           <FormLabel>Postal Code</FormLabel>
+                           <FormLabel>Posta Kodu</FormLabel>
                            <FormControl>
                               <Input
                                  disabled={loading}
-                                 placeholder="1234567890"
+                                 placeholder="34000"
                                  {...field}
                               />
                            </FormControl>
@@ -199,11 +207,11 @@ export const AddressForm: React.FC<AddressFormProps> = ({ initialData }) => {
                         name="address"
                         render={({ field }) => (
                            <FormItem>
-                              <FormLabel>Address</FormLabel>
+                              <FormLabel>Adres</FormLabel>
                               <FormControl>
                                  <Textarea
                                     disabled={loading}
-                                    placeholder="Street - Building Number"
+                                    placeholder="Mahalle, Cadde, Bina No, Daire No"
                                     {...field}
                                  />
                               </FormControl>
