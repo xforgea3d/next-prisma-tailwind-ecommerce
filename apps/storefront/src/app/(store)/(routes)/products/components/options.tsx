@@ -1,20 +1,6 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import {
-   Command,
-   CommandEmpty,
-   CommandGroup,
-   CommandInput,
-   CommandItem,
-   CommandList,
-} from '@/components/ui/command'
 import { Label } from '@/components/ui/label'
-import {
-   Popover,
-   PopoverContent,
-   PopoverTrigger,
-} from '@/components/ui/popover'
 import {
    Select,
    SelectContent,
@@ -23,11 +9,9 @@ import {
    SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { cn, isVariableValid } from '@/lib/utils'
-import { slugify } from '@persepolis/slugify'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { isVariableValid } from '@/lib/utils'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect } from 'react'
 
 // ─── Session storage helpers for filter persistence ─────────────────────────
 const FILTER_STORAGE_KEY = 'xforgea3d_product_filters'
@@ -46,12 +30,30 @@ export function getFiltersFromSession(): string | null {
    }
 }
 
-export function SortBy({ initialData }) {
+function useFilterNav() {
    const router = useRouter()
    const pathname = usePathname()
    const searchParams = useSearchParams()
 
-   const [value, setValue] = React.useState('featured')
+   const navigate = (key: string, val: string | null) => {
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+      if (val) {
+         current.set(key, val)
+      } else {
+         current.delete(key)
+      }
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
+      saveFiltersToSession(search)
+      router.replace(`${pathname}${query}`, { scroll: false })
+   }
+
+   return { searchParams, navigate }
+}
+
+export function SortBy({ initialData }) {
+   const { navigate } = useFilterNav()
+   const [value, setValue] = React.useState(initialData || '')
 
    useEffect(() => {
       if (isVariableValid(initialData)) setValue(String(initialData))
@@ -59,26 +61,10 @@ export function SortBy({ initialData }) {
 
    return (
       <Select
-         onValueChange={(currentValue) => {
-            const current = new URLSearchParams(
-               Array.from(searchParams.entries())
-            )
-
-            if (currentValue === value) {
-               current.delete('sort')
-               setValue('')
-            } else {
-               current.set('sort', currentValue)
-               setValue(currentValue)
-            }
-
-            const search = current.toString()
-            const query = search ? `?${search}` : ''
-
-            saveFiltersToSession(search)
-            router.replace(`${pathname}${query}`, {
-               scroll: false,
-            })
+         value={value || undefined}
+         onValueChange={(v) => {
+            setValue(v)
+            navigate('sort', v || null)
          }}
       >
          <SelectTrigger className="w-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm">
@@ -94,181 +80,79 @@ export function SortBy({ initialData }) {
 }
 
 export function CategoriesCombobox({ categories, initialCategory }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
-
-   const [open, setOpen] = React.useState(false)
-   const [value, setValue] = React.useState('')
-
-   function getCategoryTitle() {
-      for (const category of categories) {
-         if (slugify(category.title) === slugify(value)) return category.title
-      }
-   }
+   const { navigate } = useFilterNav()
+   const [value, setValue] = React.useState(initialCategory || '')
 
    useEffect(() => {
-      setValue(initialCategory)
+      if (initialCategory) setValue(initialCategory)
    }, [initialCategory])
 
    return (
-      <Popover open={open} onOpenChange={setOpen}>
-         <PopoverTrigger asChild>
-            <Button
-               variant="outline"
-               role="combobox"
-               aria-expanded={open}
-               className="w-full justify-between hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm"
-            >
-               {value ? getCategoryTitle() : 'Kategori Seç...'}
-               <ChevronsUpDown className="ml-2 h-4 shrink-0 opacity-50" />
-            </Button>
-         </PopoverTrigger>
-         <PopoverContent className="w-[200px] p-0">
-            <Command shouldFilter={false}>
-               <CommandInput placeholder="Kategori ara..." />
-               <CommandList>
-                  <CommandEmpty>Kategori bulunamadı.</CommandEmpty>
-                  <CommandGroup>
-                     {categories.map((category) => (
-                        <CommandItem
-                           key={category.title}
-                           value={category.title}
-                           onSelect={() => {
-                              const selectedValue = category.title
-                              const current = new URLSearchParams(
-                                 Array.from(searchParams.entries())
-                              )
-
-                              if (selectedValue === value) {
-                                 current.delete('category')
-                                 setValue('')
-                              } else {
-                                 current.set('category', selectedValue)
-                                 setValue(selectedValue)
-                              }
-
-                              const search = current.toString()
-                              const query = search ? `?${search}` : ''
-
-                              saveFiltersToSession(search)
-                              router.replace(`${pathname}${query}`, {
-                                 scroll: false,
-                              })
-
-                              setOpen(false)
-                           }}
-                           className="cursor-pointer py-2"
-                        >
-                           <Check
-                              className={cn(
-                                 'mr-2 h-4 w-4 text-emerald-500',
-                                 value === category.title
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
-                              )}
-                           />
-                           {category.title}
-                        </CommandItem>
-                     ))}
-                  </CommandGroup>
-               </CommandList>
-            </Command>
-         </PopoverContent>
-      </Popover>
+      <Select
+         value={value || undefined}
+         onValueChange={(v) => {
+            if (v === '__clear__') {
+               setValue('')
+               navigate('category', null)
+            } else {
+               setValue(v)
+               navigate('category', v)
+            }
+         }}
+      >
+         <SelectTrigger className="w-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm">
+            <SelectValue placeholder="Kategori Seç..." />
+         </SelectTrigger>
+         <SelectContent>
+            <SelectItem value="__clear__">Tüm Kategoriler</SelectItem>
+            {categories.map((category) => (
+               <SelectItem key={category.id || category.title} value={category.title}>
+                  {category.title}
+               </SelectItem>
+            ))}
+         </SelectContent>
+      </Select>
    )
 }
 
 export function BrandCombobox({ brands, initialBrand }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
-
-   const [open, setOpen] = React.useState(false)
-   const [value, setValue] = React.useState('')
-
-   function getBrandTitle() {
-      for (const brand of brands) {
-         if (slugify(brand.title) === slugify(value)) return brand.title
-      }
-   }
+   const { navigate } = useFilterNav()
+   const [value, setValue] = React.useState(initialBrand || '')
 
    useEffect(() => {
-      setValue(initialBrand)
+      if (initialBrand) setValue(initialBrand)
    }, [initialBrand])
 
    return (
-      <Popover open={open} onOpenChange={setOpen}>
-         <PopoverTrigger asChild>
-            <Button
-               variant="outline"
-               role="combobox"
-               aria-expanded={open}
-               className="w-full justify-between hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm"
-            >
-               {value ? getBrandTitle() : 'Marka Seç...'}
-               <ChevronsUpDown className="ml-2 h-4 shrink-0 opacity-50" />
-            </Button>
-         </PopoverTrigger>
-         <PopoverContent className="w-[200px] p-0">
-            <Command shouldFilter={false}>
-               <CommandInput placeholder="Marka ara..." />
-               <CommandList>
-                  <CommandEmpty>Marka bulunamadı.</CommandEmpty>
-                  <CommandGroup>
-                     {brands.map((brand) => (
-                        <CommandItem
-                           key={brand.title}
-                           value={brand.title}
-                           onSelect={() => {
-                              const selectedValue = brand.title
-                              const current = new URLSearchParams(
-                                 Array.from(searchParams.entries())
-                              )
-
-                              if (selectedValue === value) {
-                                 current.delete('brand')
-                                 setValue('')
-                              } else {
-                                 current.set('brand', selectedValue)
-                                 setValue(selectedValue)
-                              }
-
-                              const search = current.toString()
-                              const query = search ? `?${search}` : ''
-
-                              saveFiltersToSession(search)
-                              router.replace(`${pathname}${query}`, {
-                                 scroll: false,
-                              })
-
-                              setOpen(false)
-                           }}
-                           className="cursor-pointer py-2"
-                        >
-                           <Check
-                              className={cn(
-                                 'mr-2 h-4 w-4 text-emerald-500',
-                                 value === brand.title
-                                    ? 'opacity-100'
-                                    : 'opacity-0'
-                              )}
-                           />
-                           {brand.title}
-                        </CommandItem>
-                     ))}
-                  </CommandGroup>
-               </CommandList>
-            </Command>
-         </PopoverContent>
-      </Popover>
+      <Select
+         value={value || undefined}
+         onValueChange={(v) => {
+            if (v === '__clear__') {
+               setValue('')
+               navigate('brand', null)
+            } else {
+               setValue(v)
+               navigate('brand', v)
+            }
+         }}
+      >
+         <SelectTrigger className="w-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors bg-white/50 dark:bg-black/50 backdrop-blur shadow-sm">
+            <SelectValue placeholder="Marka Seç..." />
+         </SelectTrigger>
+         <SelectContent>
+            <SelectItem value="__clear__">Tüm Markalar</SelectItem>
+            {brands.map((brand) => (
+               <SelectItem key={brand.id || brand.title} value={brand.title}>
+                  {brand.title}
+               </SelectItem>
+            ))}
+         </SelectContent>
+      </Select>
    )
 }
 
 export function AvailableToggle({ initialData }) {
-   const router = useRouter()
-   const pathname = usePathname()
-   const searchParams = useSearchParams()
+   const { navigate } = useFilterNav()
    const [value, setValue] = React.useState(false)
 
    useEffect(() => {
@@ -281,23 +165,8 @@ export function AvailableToggle({ initialData }) {
          <Switch
             checked={value}
             onCheckedChange={(currentValue: boolean) => {
-               const current = new URLSearchParams(
-                  Array.from(searchParams.entries())
-               )
-
-               current.set(
-                  'isAvailable',
-                  currentValue == true ? 'true' : 'false'
-               )
                setValue(currentValue)
-
-               const search = current.toString()
-               const query = search ? `?${search}` : ''
-
-               saveFiltersToSession(search)
-               router.replace(`${pathname}${query}`, {
-                  scroll: false,
-               })
+               navigate('isAvailable', currentValue ? 'true' : 'false')
             }}
             id="available"
          />
