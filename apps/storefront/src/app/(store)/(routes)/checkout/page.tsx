@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCsrf } from '@/hooks/useCsrf'
 import { useCartContext } from '@/state/Cart'
-import { CheckCircle2Icon, ChevronRightIcon, Loader2, MapPin, Plus } from 'lucide-react'
+import { CheckCircle2Icon, ChevronRightIcon, Loader2, MapPin, Plus, Tag, XCircle } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -22,6 +23,12 @@ interface Address {
    postalCode: string
 }
 
+interface DiscountInfo {
+   valid: boolean
+   percent: number
+   discountAmount: number
+}
+
 export default function CheckoutPage() {
    const router = useRouter()
    const csrfToken = useCsrf()
@@ -30,6 +37,9 @@ export default function CheckoutPage() {
    const [addresses, setAddresses] = useState<Address[]>([])
    const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
    const [discountCode, setDiscountCode] = useState('')
+   const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null)
+   const [discountError, setDiscountError] = useState<string | null>(null)
+   const [validatingDiscount, setValidatingDiscount] = useState(false)
    const [loading, setLoading] = useState(false)
    const [loadingAddresses, setLoadingAddresses] = useState(true)
    const [showNewAddress, setShowNewAddress] = useState(false)
@@ -57,23 +67,65 @@ export default function CheckoutPage() {
    }, [])
 
    const costs = useMemo(() => {
-      let total = 0, discount = 0
+      let total = 0, productDiscount = 0
       if (cart?.items) {
          for (const item of cart.items) {
             total += item.count * item.product.price
-            discount += item.count * item.product.discount
+            productDiscount += item.count * item.product.discount
          }
       }
-      const afterDiscount = total - discount
+      const couponDiscount = discountInfo?.discountAmount ?? 0
+      const totalDiscount = productDiscount + couponDiscount
+      const afterDiscount = Math.max(total - totalDiscount, 0)
       const tax = afterDiscount * (taxRate / 100)
       const payable = afterDiscount + tax
       return {
          total: total.toFixed(2),
-         discount: discount.toFixed(2),
+         productDiscount: productDiscount.toFixed(2),
+         couponDiscount: couponDiscount.toFixed(2),
          tax: tax.toFixed(2),
          payable: payable.toFixed(2),
       }
-   }, [cart?.items, taxRate])
+   }, [cart?.items, taxRate, discountInfo])
+
+   const handleValidateDiscount = useCallback(async () => {
+      if (!discountCode.trim()) {
+         setDiscountError('Lütfen bir indirim kodu girin')
+         return
+      }
+
+      setValidatingDiscount(true)
+      setDiscountError(null)
+      setDiscountInfo(null)
+
+      try {
+         const res = await fetch('/api/discount-validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: discountCode.trim() }),
+         })
+         const data = await res.json()
+
+         if (data.valid) {
+            setDiscountInfo(data)
+            setDiscountError(null)
+            toast.success('Kod uygulandı!')
+         } else {
+            setDiscountInfo(null)
+            setDiscountError(data.error || 'Geçersiz indirim kodu')
+         }
+      } catch {
+         setDiscountError('Kod doğrulanırken hata oluştu')
+      } finally {
+         setValidatingDiscount(false)
+      }
+   }, [discountCode])
+
+   const handleClearDiscount = useCallback(() => {
+      setDiscountCode('')
+      setDiscountInfo(null)
+      setDiscountError(null)
+   }, [])
 
    const handleNewAddress = useCallback(async () => {
       if (!newAddress.address || !newAddress.city || !newAddress.phone || !newAddress.postalCode) {
@@ -119,7 +171,7 @@ export default function CheckoutPage() {
             headers: { 'Content-Type': 'application/json', ...(csrfToken && { 'x-csrf-token': csrfToken }) },
             body: JSON.stringify({
                addressId: selectedAddress,
-               ...(discountCode && { discountCode }),
+               ...(discountCode && discountInfo?.valid && { discountCode }),
                csrfToken,
             }),
          })
@@ -134,11 +186,29 @@ export default function CheckoutPage() {
          toast.success(`Sipariş #${order.number} başarıyla oluşturuldu!`)
          router.push(`/profile/orders/${order.id}`)
       } catch (err: any) {
-         toast.error(err.message || 'Sipariş oluşturulamadı')
+         const msg = err.message || ''
+         // Parse specific error messages from API and show user-friendly Turkish messages
+         if (msg.includes('indirim kodu') || msg.includes('INVALID_DISCOUNT')) {
+            toast.error('Geçersiz veya süresi dolmuş indirim kodu')
+            setDiscountError('Geçersiz veya süresi dolmuş indirim kodu')
+            setDiscountInfo(null)
+         } else if (msg.includes('Sepet bos') || msg.includes('EMPTY_CART')) {
+            toast.error('Sepetiniz boş')
+         } else if (msg.includes('mevcut degil')) {
+            toast.error(msg)
+         } else if (msg.includes('stok yok')) {
+            toast.error(msg)
+         } else if (msg.includes('Siparis tutari')) {
+            toast.error('Sipariş tutarı geçersiz. İndirim kodunu kontrol edin.')
+         } else {
+            toast.error(msg || 'Sipariş oluşturulamadı')
+         }
+         // DO NOT call refreshCart() on error — this prevents the cart from being cleared
+         // when the order fails (e.g., invalid discount code)
       } finally {
          setLoading(false)
       }
-   }, [selectedAddress, discountCode, cart, refreshCart, router])
+   }, [selectedAddress, discountCode, discountInfo, cart, refreshCart, router])
 
    return (
       <div className="flex flex-col border-neutral-200 dark:border-neutral-700 pb-24">
@@ -263,18 +333,59 @@ export default function CheckoutPage() {
                <Card>
                   <CardHeader>
                      <CardTitle className="flex items-center gap-2">
-                        <CheckCircle2Icon className="text-primary h-5 w-5" />
+                        <Tag className="text-primary h-5 w-5" />
                         İndirim Kodu
                      </CardTitle>
                   </CardHeader>
                   <CardContent>
-                     <div className="flex gap-2">
-                        <Input
-                           placeholder="İndirim kodunuz varsa girin"
-                           value={discountCode}
-                           onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                        />
-                     </div>
+                     {discountInfo?.valid ? (
+                        <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800 p-3">
+                           <CheckCircle2Icon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                           <div className="flex-1">
+                              <p className="text-sm font-medium text-green-800 dark:text-green-400">
+                                 Kod uygulandı! %{discountInfo.percent} indirim
+                              </p>
+                              <p className="text-xs text-green-600 dark:text-green-500">
+                                 {discountInfo.discountAmount.toFixed(2)} TL indirim uygulanacak
+                              </p>
+                           </div>
+                           <Button variant="ghost" size="sm" onClick={handleClearDiscount} className="text-green-700 hover:text-red-600">
+                              <XCircle className="h-4 w-4" />
+                           </Button>
+                        </div>
+                     ) : (
+                        <div className="space-y-2">
+                           <div className="flex gap-2">
+                              <Input
+                                 placeholder="İndirim kodunuz varsa girin"
+                                 value={discountCode}
+                                 onChange={(e) => {
+                                    setDiscountCode(e.target.value.toUpperCase())
+                                    setDiscountError(null)
+                                 }}
+                                 onKeyDown={(e) => e.key === 'Enter' && handleValidateDiscount()}
+                                 className={discountError ? 'border-red-400' : ''}
+                              />
+                              <Button
+                                 variant="outline"
+                                 onClick={handleValidateDiscount}
+                                 disabled={validatingDiscount || !discountCode.trim()}
+                              >
+                                 {validatingDiscount ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                 ) : (
+                                    'Kodu Uygula'
+                                 )}
+                              </Button>
+                           </div>
+                           {discountError && (
+                              <p className="text-sm text-red-500 flex items-center gap-1">
+                                 <XCircle className="h-3.5 w-3.5" />
+                                 {discountError}
+                              </p>
+                           )}
+                        </div>
+                     )}
                   </CardContent>
                </Card>
             </div>
@@ -284,41 +395,84 @@ export default function CheckoutPage() {
                <Card className="sticky top-24">
                   <CardHeader className="pb-4">
                      <CardTitle>Sipariş Özeti</CardTitle>
+                     <CardDescription>{cart?.items?.length ?? 0} ürün</CardDescription>
                   </CardHeader>
                   <CardContent className="text-sm">
+                     {/* Item list with thumbnails */}
                      <div className="space-y-3">
-                        {cart?.items?.map((item, i) => (
-                           <div key={i} className="flex justify-between items-center gap-4">
-                              <span className="truncate">{item.count}x {item.product.title}</span>
-                              <span className="font-semibold whitespace-nowrap">
-                                 {(item.product.price * item.count).toFixed(2)} ₺
-                              </span>
+                        {cart?.items?.map((item: any, i: number) => (
+                           <div key={i} className="flex items-center gap-3">
+                              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border bg-muted">
+                                 {item.product.images?.[0] ? (
+                                    <Image
+                                       src={item.product.images[0]}
+                                       alt={item.product.title}
+                                       fill
+                                       className="object-cover"
+                                       sizes="48px"
+                                    />
+                                 ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">--</div>
+                                 )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                 <p className="truncate font-medium text-sm">{item.product.title}</p>
+                                 <p className="text-xs text-muted-foreground">
+                                    {item.count} x {item.product.price.toFixed(2)} TL
+                                 </p>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                 <p className="font-semibold text-sm">
+                                    {(item.product.price * item.count).toFixed(2)} TL
+                                 </p>
+                                 {item.product.discount > 0 && (
+                                    <p className="text-xs text-green-600">
+                                       -{(item.product.discount * item.count).toFixed(2)} TL
+                                    </p>
+                                 )}
+                              </div>
                            </div>
                         ))}
                      </div>
+
                      <Separator className="my-4" />
-                     <div className="space-y-2 text-muted-foreground">
+
+                     {/* Cost breakdown */}
+                     <div className="space-y-2.5 text-muted-foreground">
                         <div className="flex justify-between">
-                           <span>Toplam</span>
-                           <span>{costs.total} ₺</span>
+                           <span>Ara Toplam</span>
+                           <span>{costs.total} TL</span>
                         </div>
-                        <div className="flex justify-between">
-                           <span>İndirim</span>
-                           <span>-{costs.discount} ₺</span>
-                        </div>
+                        {parseFloat(costs.productDiscount) > 0 && (
+                           <div className="flex justify-between text-green-600">
+                              <span>Ürün İndirimi</span>
+                              <span>-{costs.productDiscount} TL</span>
+                           </div>
+                        )}
+                        {discountInfo?.valid && parseFloat(costs.couponDiscount) > 0 && (
+                           <div className="flex justify-between text-green-600">
+                              <span className="flex items-center gap-1">
+                                 <Tag className="h-3 w-3" />
+                                 Kupon ({discountCode})
+                              </span>
+                              <span>-{costs.couponDiscount} TL</span>
+                           </div>
+                        )}
                         <div className="flex justify-between">
                            <span>KDV (%{taxRate})</span>
-                           <span>{costs.tax} ₺</span>
+                           <span>{costs.tax} TL</span>
                         </div>
                         <div className="flex justify-between">
                            <span>Kargo</span>
-                           <span className="text-green-600">Ücretsiz</span>
+                           <span className="text-green-600 font-medium">Ücretsiz</span>
                         </div>
                      </div>
+
                      <Separator className="my-4" />
+
                      <div className="flex justify-between font-bold text-lg">
                         <span>Toplam</span>
-                        <span>{costs.payable} ₺</span>
+                        <span>{costs.payable} TL</span>
                      </div>
                   </CardContent>
                   <CardFooter>

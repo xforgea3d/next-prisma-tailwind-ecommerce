@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
             })
             await tx.order.update({
                where: { id: payment.orderId },
-               data: { isPaid: true },
+               data: { isPaid: true, status: 'Uretimde' },
             })
             return { alreadyProcessed: false }
          })

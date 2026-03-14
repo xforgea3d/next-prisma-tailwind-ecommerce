@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import { ColumnDef } from '@tanstack/react-table'
-import { CheckIcon, XIcon } from 'lucide-react'
+import { CheckIcon, XIcon, RotateCcw } from 'lucide-react'
 import { EditIcon as Icon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -75,13 +75,27 @@ export const columns: ColumnDef<OrderColumn>[] = [
    },
    {
       id: 'actions',
-      cell: ({ row }) => (
-         <Link href={`/profile/orders/${row.original.id}`}>
-            <Button size="icon" variant="outline">
-               <Icon className="h-4" />
-            </Button>
-         </Link>
-      ),
+      cell: ({ row }) => {
+         const status = row.original.status
+         const isDelivered = status === 'TeslimEdildi' || status === 'Delivered'
+         return (
+            <div className="flex items-center gap-2">
+               <Link href={`/profile/orders/${row.original.id}`}>
+                  <Button size="icon" variant="outline">
+                     <Icon className="h-4" />
+                  </Button>
+               </Link>
+               {isDelivered && (
+                  <Link href={`/profile/orders/${row.original.id}?iade=true`}>
+                     <Button size="sm" variant="outline" className="text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700">
+                        <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                        İade
+                     </Button>
+                  </Link>
+               )}
+            </div>
+         )
+      },
    },
 ]
 

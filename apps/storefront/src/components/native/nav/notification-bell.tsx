@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { BellIcon, CheckCheckIcon, PackageIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { BellIcon, CheckCheckIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCsrf } from '@/hooks/useCsrf'
 import Link from 'next/link'
 
 interface Notification {
@@ -12,15 +14,12 @@ interface Notification {
    createdAt: string
 }
 
-function isOrderRelated(content: string): boolean {
-   return /sipari[sş]/i.test(content)
-}
-
-function getOrderLink(content: string): string | null {
-   const match = content.match(/[Ss]ipari[sş]\s*#?(\d+)/i)
-   if (match) return `/profile/orders/${match[1]}`
-   if (isOrderRelated(content)) return '/profile/orders'
-   return null
+function getNotificationLink(content: string): string {
+   if (/parça talebi|talep/i.test(content)) return '/profile/quote-requests'
+   if (/sipari[sş]|Siparis/i.test(content)) return '/profile/orders'
+   if (/iade/i.test(content)) return '/profile/orders'
+   if (/indirim|kupon/i.test(content)) return '/cart'
+   return '/profile/notifications'
 }
 
 function relativeTime(dateStr: string): string {
@@ -47,6 +46,8 @@ export function NotificationBell() {
    const [open, setOpen] = useState(false)
    const [expandedId, setExpandedId] = useState<string | null>(null)
    const dropdownRef = useRef<HTMLDivElement>(null)
+   const router = useRouter()
+   const csrfToken = useCsrf()
 
    const fetchNotifications = useCallback(async () => {
       try {
@@ -78,15 +79,17 @@ export function NotificationBell() {
 
    async function markAsRead(ids: string[]) {
       try {
-         await fetch('/api/notifications', {
+         const res = await fetch('/api/notifications', {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
             body: JSON.stringify({ ids }),
          })
-         setNotifications(prev =>
-            prev.map(n => (ids.includes(n.id) ? { ...n, isRead: true } : n))
-         )
-         setUnreadCount(prev => Math.max(0, prev - ids.filter(id => notifications.find(n => n.id === id && !n.isRead)).length))
+         if (res.ok) {
+            await fetchNotifications()
+         }
       } catch {
          // silently fail
       }
@@ -94,13 +97,17 @@ export function NotificationBell() {
 
    async function markAllAsRead() {
       try {
-         await fetch('/api/notifications', {
+         const res = await fetch('/api/notifications', {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+               'Content-Type': 'application/json',
+               ...(csrfToken && { 'x-csrf-token': csrfToken }),
+            },
             body: JSON.stringify({ all: true }),
          })
-         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
-         setUnreadCount(0)
+         if (res.ok) {
+            await fetchNotifications()
+         }
       } catch {
          // silently fail
       }
@@ -145,7 +152,6 @@ export function NotificationBell() {
                      </div>
                   ) : (
                      notifications.map(notification => {
-                        const orderLink = getOrderLink(notification.content)
                         const isExpanded = expandedId === notification.id
 
                         return (
@@ -158,7 +164,9 @@ export function NotificationBell() {
                                  if (!notification.isRead) {
                                     markAsRead([notification.id])
                                  }
-                                 setExpandedId(prev => (prev === notification.id ? null : notification.id))
+                                 const link = getNotificationLink(notification.content)
+                                 setOpen(false)
+                                 router.push(link)
                               }}
                            >
                               <div className="flex items-start gap-2">
@@ -173,19 +181,6 @@ export function NotificationBell() {
                                        <p className="text-xs text-muted-foreground">
                                           {relativeTime(notification.createdAt)}
                                        </p>
-                                       {orderLink && (
-                                          <Link
-                                             href={orderLink}
-                                             className="inline-flex items-center gap-1 text-xs text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
-                                             onClick={(e) => {
-                                                e.stopPropagation()
-                                                setOpen(false)
-                                             }}
-                                          >
-                                             <PackageIcon className="h-3 w-3" />
-                                             Siparisi Gor
-                                          </Link>
-                                       )}
                                     </div>
                                  </div>
                               </div>
