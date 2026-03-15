@@ -7,13 +7,23 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
+import { EmailInput } from '@/components/native/EmailInput'
+import { validateEmail } from '@/lib/email-validation'
 
 export function ContactForm() {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [email, setEmail] = useState('')
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
+
+        const emailErr = validateEmail(email)
+        if (emailErr) {
+            toast({ title: 'Hata', description: emailErr, variant: 'destructive' })
+            return
+        }
+
         setIsSubmitting(true)
 
         // Simulate a short delay
@@ -43,9 +53,10 @@ export function ContactForm() {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">E-posta</Label>
-                    <Input
+                    <EmailInput
                         id="email"
-                        type="email"
+                        value={email}
+                        onChange={setEmail}
                         placeholder="ornek@email.com"
                         required
                         className="rounded-xl"

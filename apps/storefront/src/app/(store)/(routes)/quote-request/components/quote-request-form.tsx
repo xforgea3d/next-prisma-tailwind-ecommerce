@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneInput } from '@/components/native/PhoneInput'
+import { EmailInput } from '@/components/native/EmailInput'
+import { validateEmail } from '@/lib/email-validation'
 import { Button } from '@/components/ui/button'
 import { useAuthenticated } from '@/hooks/useAuthentication'
 import { useUserContext } from '@/state/User'
@@ -67,6 +69,12 @@ export function QuoteRequestForm({ brands }: { brands: BrandOption[] }) {
 
       if (!email || !partDescription) {
          setError('E-posta ve parça açıklaması zorunludur.')
+         return
+      }
+
+      const emailErr = validateEmail(email)
+      if (emailErr) {
+         setError(emailErr)
          return
       }
 
@@ -164,14 +172,14 @@ export function QuoteRequestForm({ brands }: { brands: BrandOption[] }) {
             <label className="text-sm font-medium">
                E-posta <span className="text-red-500">*</span>
             </label>
-            <input
-               type="email"
+            <EmailInput
                value={email}
-               onChange={(e) => setEmail(e.target.value)}
+               onChange={setEmail}
                required
                readOnly={emailFromProfile}
                placeholder="ornek@email.com"
-               className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40 ${emailFromProfile ? 'bg-muted cursor-not-allowed' : ''}`}
+               disabled={emailFromProfile}
+               className={emailFromProfile ? 'bg-muted cursor-not-allowed' : ''}
             />
          </div>
 

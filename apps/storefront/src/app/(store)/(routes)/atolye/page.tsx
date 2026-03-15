@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { CityDistrictSelector } from '@/components/native/CityDistrictSelector'
 import { PhoneInput } from '@/components/native/PhoneInput'
+import { EmailInput } from '@/components/native/EmailInput'
+import { validateEmail } from '@/lib/email-validation'
 import { Button } from '@/components/ui/button'
 import {
     UploadCloudIcon,
@@ -96,6 +98,11 @@ export default function AtolyePage() {
     }
 
     async function handleSubmit() {
+        const emailErr = validateEmail(form.email)
+        if (emailErr) {
+            toast.error(emailErr)
+            return
+        }
         setLoading(true)
         try {
             const fd = new FormData()
@@ -290,7 +297,14 @@ export default function AtolyePage() {
                         <Field label="Ad" value={form.firstName} onChange={v => set('firstName', v)} placeholder="Ahmet" />
                         <Field label="Soyad" value={form.lastName} onChange={v => set('lastName', v)} placeholder="Yılmaz" />
                     </div>
-                    <Field label="E-posta" type="email" value={form.email} onChange={v => set('email', v)} placeholder="ahmet@ornek.com" />
+                    <div>
+                        <label className="text-sm font-semibold mb-1.5 block">E-posta</label>
+                        <EmailInput
+                            value={form.email}
+                            onChange={v => set('email', v)}
+                            placeholder="ahmet@ornek.com"
+                        />
+                    </div>
                     <div>
                         <label className="text-sm font-semibold mb-1.5 block">Telefon</label>
                         <PhoneInput

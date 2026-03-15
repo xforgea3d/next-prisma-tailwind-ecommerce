@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from '@/lib/utils'
 import { isEmailValid } from '@persepolis/regex'
+import { validateEmail } from '@/lib/email-validation'
 import { Loader } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as React from 'react'
@@ -125,13 +126,22 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
    const [email, setEmail] = React.useState('')
    const [password, setPassword] = React.useState('')
    const [errorMsg, setErrorMsg] = React.useState('')
+   const [emailError, setEmailError] = React.useState('')
    const [forgotMode, setForgotMode] = React.useState(false)
    const [forgotMsg, setForgotMsg] = React.useState('')
    const [forgotLoading, setForgotLoading] = React.useState(false)
 
+   function handleEmailChange(val: string) {
+      setEmail(val)
+      const err = validateEmail(val)
+      setEmailError(err || '')
+   }
+
    async function onSubmit(e: React.FormEvent) {
       e.preventDefault()
       if (!email || !password) return
+      const emailErr = validateEmail(email)
+      if (emailErr) { setEmailError(emailErr); return }
       setErrorMsg('')
 
       try {
@@ -239,9 +249,11 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
                autoCorrect="off"
                disabled={isLoading}
                value={email}
-               onChange={(e) => setEmail(e.target.value)}
+               onChange={(e) => handleEmailChange(e.target.value)}
                required
+               className={emailError ? 'border-red-400 focus-visible:ring-red-400' : ''}
             />
+            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
          </div>
          <div className="grid gap-1">
             <div className="flex items-center justify-between">
@@ -269,7 +281,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
          {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
          <Button
             type="submit"
-            disabled={isLoading || !isEmailValid(email) || password.length < 6}
+            disabled={isLoading || !isEmailValid(email) || !!validateEmail(email) || password.length < 6}
          >
             {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Giris Yap
@@ -287,11 +299,20 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
    const [password, setPassword] = React.useState('')
    const [name, setName] = React.useState('')
    const [errorMsg, setErrorMsg] = React.useState('')
+   const [emailError, setEmailError] = React.useState('')
    const [successMsg, setSuccessMsg] = React.useState('')
+
+   function handleEmailChange(val: string) {
+      setEmail(val)
+      const err = validateEmail(val)
+      setEmailError(err || '')
+   }
 
    async function onSubmit(e: React.FormEvent) {
       e.preventDefault()
       if (!email || !password || !name) return
+      const emailErr = validateEmail(email)
+      if (emailErr) { setEmailError(emailErr); return }
       setErrorMsg('')
       setSuccessMsg('')
 
@@ -426,9 +447,11 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
                autoCorrect="off"
                disabled={isLoading}
                value={email}
-               onChange={(e) => setEmail(e.target.value)}
+               onChange={(e) => handleEmailChange(e.target.value)}
                required
+               className={emailError ? 'border-red-400 focus-visible:ring-red-400' : ''}
             />
+            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
          </div>
          <div className="grid gap-1 mb-2">
             <Label className="text-sm font-light text-foreground/60" htmlFor="password-register">
@@ -466,7 +489,7 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
          ) : null}
          <Button
             type="submit"
-            disabled={isLoading || !isEmailValid(email) || password.length < 6 || !name}
+            disabled={isLoading || !isEmailValid(email) || !!validateEmail(email) || password.length < 6 || !name}
          >
             {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Hesap Oluştur
