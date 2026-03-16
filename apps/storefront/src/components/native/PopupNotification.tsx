@@ -41,6 +41,8 @@ export default function PopupNotification() {
    const [modals, setModals] = useState<PopupItem[]>([])
    const shownIdsRef = useRef<Set<string>>(new Set())
    const csrfToken = useCsrf()
+   const csrfRef = useRef(csrfToken)
+   useEffect(() => { csrfRef.current = csrfToken }, [csrfToken])
 
    const fetchAndShowPopups = useCallback(async () => {
       try {
@@ -79,14 +81,15 @@ export default function PopupNotification() {
 
             // Mark as read
             const ids = newItems.map((n) => n.id)
+            const token = csrfRef.current
             try {
                await fetch('/api/notifications', {
                   method: 'PATCH',
                   headers: {
                      'Content-Type': 'application/json',
-                     ...(csrfToken && { 'x-csrf-token': csrfToken }),
+                     ...(token && { 'x-csrf-token': token }),
                   },
-                  body: JSON.stringify({ ids, csrfToken }),
+                  body: JSON.stringify({ ids, csrfToken: token }),
                })
             } catch {
                // non-critical
@@ -95,7 +98,7 @@ export default function PopupNotification() {
       } catch {
          // silently fail
       }
-   }, [csrfToken])
+   }, [])
 
    useEffect(() => {
       fetchAndShowPopups()

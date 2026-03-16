@@ -77,9 +77,15 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_OPTIONS = [
    { value: 'OnayBekleniyor', label: 'Onay Bekliyor' },
    { value: 'Uretimde', label: 'Üretimde' },
+   { value: 'Processing', label: 'Hazırlanıyor' },
    { value: 'Shipped', label: 'Kargoda' },
    { value: 'Delivered', label: 'Teslim Edildi' },
+   { value: 'ReturnProcessing', label: 'İade İşleniyor' },
+   { value: 'ReturnCompleted', label: 'İade Tamamlandı' },
    { value: 'Cancelled', label: 'İptal' },
+   { value: 'RefundProcessing', label: 'İade Ödemesi İşleniyor' },
+   { value: 'RefundCompleted', label: 'İade Ödemesi Tamamlandı' },
+   { value: 'Denied', label: 'Reddedildi' },
 ]
 
 function StatusCell({ order, onStatusChange }: { order: OrderColumn; onStatusChange: (id: string, status: string) => Promise<void> }) {

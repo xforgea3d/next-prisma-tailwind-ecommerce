@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { verifyCsrfToken } from '@/lib/csrf'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -78,8 +79,18 @@ export async function POST(
          return new NextResponse('Product id is required', { status: 400 })
       }
 
-      const body = await req.json()
+      let body: any
+      try {
+         body = await req.json()
+      } catch {
+         return new NextResponse('Geçersiz istek gövdesi', { status: 400 })
+      }
       const { rating, text, images, csrfToken } = body
+
+      // Verify CSRF token
+      if (!csrfToken || !verifyCsrfToken(csrfToken, user.id)) {
+         return new NextResponse('Geçersiz istek', { status: 403 })
+      }
 
       // Validate rating
       if (typeof rating !== 'number' || rating < 1 || rating > 5) {

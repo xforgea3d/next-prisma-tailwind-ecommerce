@@ -13,7 +13,13 @@ export async function POST(req: NextRequest) {
          return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      const { orderId, csrfToken } = await req.json()
+      let body: any
+      try {
+         body = await req.json()
+      } catch {
+         return NextResponse.json({ error: 'Geçersiz istek gövdesi' }, { status: 400 })
+      }
+      const { orderId, csrfToken } = body
       if (!orderId) {
          return NextResponse.json({ error: 'orderId is required' }, { status: 400 })
       }

@@ -26,9 +26,15 @@ export async function POST(
          return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
       }
 
-      const { addressId, csrfToken } = await req.json()
+      let body: any
+      try {
+         body = await req.json()
+      } catch {
+         return NextResponse.json({ error: 'Geçersiz istek gövdesi' }, { status: 400 })
+      }
+      const { addressId, csrfToken } = body
 
-      if (csrfToken && !verifyCsrfToken(csrfToken, userId)) {
+      if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
          return NextResponse.json({ error: 'Gecersiz istek. Sayfayi yenileyip tekrar deneyin.' }, { status: 403 })
       }
 

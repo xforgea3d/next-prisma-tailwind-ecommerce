@@ -57,6 +57,8 @@ export function NotificationBell() {
    const dropdownRef = useRef<HTMLDivElement>(null)
    const router = useRouter()
    const csrfToken = useCsrf()
+   const csrfRef = useRef(csrfToken)
+   useEffect(() => { csrfRef.current = csrfToken }, [csrfToken])
 
    const fetchNotifications = useCallback(async () => {
       try {

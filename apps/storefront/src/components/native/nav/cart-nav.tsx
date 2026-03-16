@@ -78,6 +78,7 @@ export function CartNav() {
 
     const updateCartItem = useCallback(
         async (productId: string, newCount: number) => {
+            if (busyItems.has(productId)) return // already processing
             markBusy(productId, true)
             try {
                 if (authenticated) {

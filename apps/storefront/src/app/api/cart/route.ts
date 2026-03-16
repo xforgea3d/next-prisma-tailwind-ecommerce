@@ -78,7 +78,13 @@ export async function POST(req: Request) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const { productId, count, csrfToken } = await req.json()
+      let body: any
+      try {
+         body = await req.json()
+      } catch {
+         return new NextResponse('Geçersiz istek gövdesi', { status: 400 })
+      }
+      const { productId, count, csrfToken } = body
 
       // Verify CSRF token from body or header
       const headerCsrf = (req as any).headers?.get?.('x-csrf-token') || csrfToken

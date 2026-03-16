@@ -33,7 +33,7 @@ export function CityDistrictSelector({
    disabled,
    cityOnly = false,
 }: CityDistrictSelectorProps) {
-   const districts = city ? getDistricts(city) : []
+   const districts = city ? (getDistricts(city) || []) : []
 
    const handleCityChange = useCallback(
       (newCity: string) => {

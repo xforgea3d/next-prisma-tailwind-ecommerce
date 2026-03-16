@@ -35,11 +35,6 @@ export async function POST(req: NextRequest) {
          return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
       }
 
-      // Idempotency: already processed
-      if (payment.isSuccessful) {
-         return NextResponse.json({ status: 'OK', message: 'Already processed' })
-      }
-
       // Signature validation - REQUIRED in all non-development environments
       const secretKey = process.env.PAYMENT_SECRET_KEY
       if (secretKey) {

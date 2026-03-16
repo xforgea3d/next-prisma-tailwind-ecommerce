@@ -14,16 +14,17 @@ import { useCallback, useEffect, useState } from 'react'
 
 function getTrackingUrl(company: string, trackingNumber: string): string {
    const normalized = company.toLowerCase().replace(/\s+/g, '')
+   const encoded = encodeURIComponent(trackingNumber)
    const urls: Record<string, string> = {
-      'yurtiçikargo': `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${trackingNumber}`,
-      'yurticikargo': `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${trackingNumber}`,
-      'araskargo': `https://www.araskargo.com.tr/tanimlar/gonderi_takip.aspx?code=${trackingNumber}`,
-      'mngkargo': `https://www.mngkargo.com.tr/gonderi-takip?code=${trackingNumber}`,
-      'pttkargo': `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${trackingNumber}`,
-      'ptt': `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${trackingNumber}`,
-      'süratkargo': `https://www.suratkargo.com.tr/gonderi-takip?code=${trackingNumber}`,
-      'suratkargo': `https://www.suratkargo.com.tr/gonderi-takip?code=${trackingNumber}`,
-      'trendyolexpress': `https://www.trendyolexpress.com/gonderi-takip?code=${trackingNumber}`,
+      'yurtiçikargo': `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${encoded}`,
+      'yurticikargo': `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${encoded}`,
+      'araskargo': `https://www.araskargo.com.tr/tanimlar/gonderi_takip.aspx?code=${encoded}`,
+      'mngkargo': `https://www.mngkargo.com.tr/gonderi-takip?code=${encoded}`,
+      'pttkargo': `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${encoded}`,
+      'ptt': `https://gonderitakip.ptt.gov.tr/Track/Verify?q=${encoded}`,
+      'süratkargo': `https://www.suratkargo.com.tr/gonderi-takip?code=${encoded}`,
+      'suratkargo': `https://www.suratkargo.com.tr/gonderi-takip?code=${encoded}`,
+      'trendyolexpress': `https://www.trendyolexpress.com/gonderi-takip?code=${encoded}`,
    }
    return urls[normalized] || ''
 }

@@ -59,7 +59,13 @@ export async function POST(req: Request) {
       const userId = req.headers.get('X-USER-ID')
       if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-      const { addressId, discountCode, csrfToken } = await req.json()
+      let body: any
+      try {
+         body = await req.json()
+      } catch {
+         return new NextResponse('Geçersiz istek gövdesi', { status: 400 })
+      }
+      const { addressId, discountCode, csrfToken } = body
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
@@ -128,7 +134,8 @@ export async function POST(req: Request) {
             where: { id: 1 },
             select: { tax_rate: true },
          })
-         const taxRate = siteSettings?.tax_rate ?? 20
+         let taxRate = siteSettings?.tax_rate ?? 20
+         if (taxRate < 0 || taxRate > 100) taxRate = 20 // safety clamp
 
          const { tax, total, discount, payable } = calculateCosts({ cart, discountCodeData, taxRate })
 
