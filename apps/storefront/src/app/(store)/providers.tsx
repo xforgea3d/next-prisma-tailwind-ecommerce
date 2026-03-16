@@ -2,6 +2,11 @@
 
 import { UserContextProvider } from '@/state/User'
 import { CartContextProvider } from '@/state/Cart'
+import dynamic from 'next/dynamic'
+
+const CartSyncer = dynamic(() => import('@/components/native/CartSyncer'), {
+    ssr: false,
+})
 
 /**
  * Wraps the entire store (all storefront pages) with cart + user state.
@@ -13,6 +18,7 @@ export function StoreProviders({ children }: { children: React.ReactNode }) {
     return (
         <UserContextProvider>
             <CartContextProvider>
+                <CartSyncer />
                 {children}
             </CartContextProvider>
         </UserContextProvider>

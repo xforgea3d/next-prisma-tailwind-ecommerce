@@ -73,6 +73,7 @@ export default function CheckoutPage() {
    const [showNewAddress, setShowNewAddress] = useState(false)
    const [newAddress, setNewAddress] = useState({ address: '', city: '', district: '', phone: '', postalCode: '' })
    const [taxRate, setTaxRate] = useState(20)
+   const [priceRefreshTick, setPriceRefreshTick] = useState(0)
    const [mesafeliChecked, setMesafeliChecked] = useState(false)
    const [onBilgiChecked, setOnBilgiChecked] = useState(false)
    const [iadeChecked, setIadeChecked] = useState(false)
@@ -97,6 +98,12 @@ export default function CheckoutPage() {
             if (data.tax_rate != null) setTaxRate(data.tax_rate)
          })
          .catch(() => {})
+   }, [])
+
+   // Periodically refresh price calculations to catch expired flash sales
+   useEffect(() => {
+      const interval = setInterval(() => setPriceRefreshTick((n) => n + 1), 60000)
+      return () => clearInterval(interval)
    }, [])
 
    // Track begin_checkout event on mount
@@ -160,7 +167,7 @@ export default function CheckoutPage() {
          tax: tax.toFixed(2),
          payable: payable.toFixed(2),
       }
-   }, [cart?.items, taxRate, discountInfo])
+   }, [cart?.items, taxRate, discountInfo, priceRefreshTick])
 
    const handleValidateDiscount = useCallback(async () => {
       if (!discountCode.trim()) {

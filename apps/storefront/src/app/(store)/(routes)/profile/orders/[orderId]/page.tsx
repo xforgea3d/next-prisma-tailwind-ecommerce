@@ -551,17 +551,38 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
                      </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                     {order.orderItems?.map((item: any) => (
+                     {order.orderItems?.map((item: any) => {
+                        const isQuoteItem = item.product?.id === 'quote-request-product' && item.isCustom
+                        const snapshot = item.customSnapshot as any
+                        const displayTitle = isQuoteItem && snapshot
+                           ? `Parça Talebi #${snapshot.quoteNumber}`
+                           : (item.product?.title || 'Ürün')
+                        const displayImage = isQuoteItem && snapshot?.imageUrl
+                           ? snapshot.imageUrl
+                           : item.product?.images?.[0]
+
+                        return (
                         <div key={item.id} className="flex items-center gap-4 py-2">
-                           {item.product?.images?.[0] && (
+                           {displayImage && (
                               <div className="relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border">
-                                 <img src={item.product.images[0]} alt={item.product.title} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                                 <img src={displayImage} alt={displayTitle} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                               </div>
                            )}
                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">{item.product?.title || 'Ürün'}</p>
-                              <p className="text-sm text-muted-foreground">{item.count} adet</p>
-                              {order.status === 'Delivered' && item.product?.id && (
+                              <p className="font-medium truncate">{displayTitle}</p>
+                              {isQuoteItem && snapshot ? (
+                                 <>
+                                    <p className="text-sm text-muted-foreground">{snapshot.partDescription}</p>
+                                    {(snapshot.carBrand || snapshot.carModel) && (
+                                       <p className="text-xs text-muted-foreground">
+                                          {[snapshot.carBrand, snapshot.carModel].filter(Boolean).join(' ')}
+                                       </p>
+                                    )}
+                                 </>
+                              ) : (
+                                 <p className="text-sm text-muted-foreground">{item.count} adet</p>
+                              )}
+                              {order.status === 'Delivered' && item.product?.id && !isQuoteItem && (
                                  <a
                                     href={`/products/${item.product.id}#reviews`}
                                     className="inline-flex items-center gap-1.5 mt-1 text-xs font-medium text-orange-500 border border-orange-500 rounded-md px-2.5 py-1 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors"
@@ -578,7 +599,8 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
                               )}
                            </div>
                         </div>
-                     ))}
+                        )
+                     })}
                   </CardContent>
                </Card>
             </div>
