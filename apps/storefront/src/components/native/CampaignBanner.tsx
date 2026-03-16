@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getActiveCampaign, type Campaign, type DBCampaign, dbCampaignToLegacy } from '@/lib/campaigns'
 import { X, Copy, Check } from 'lucide-react'
 import Link from 'next/link'
@@ -13,20 +14,29 @@ interface DiscountInfo {
 }
 
 export default function CampaignBanner() {
+   const searchParams = useSearchParams()
    const [campaign, setCampaign] = useState<Campaign | null>(null)
    const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null)
    const [dismissed, setDismissed] = useState(true)
    const [mounted, setMounted] = useState(false)
    const [copied, setCopied] = useState(false)
+   const [isPreview, setIsPreview] = useState(false)
 
    useEffect(() => {
-      // Try DB campaigns first, then fall back to hardcoded
       async function loadCampaign() {
          let active: Campaign | null = null
          let discount: DiscountInfo | null = null
+         let previewMode = false
+
+         const previewCampaignId = searchParams.get('campaign_preview')
 
          try {
-            const res = await fetch('/api/campaigns/active')
+            // If preview param exists, fetch that specific campaign
+            const apiUrl = previewCampaignId
+               ? `/api/campaigns/active?preview=${previewCampaignId}`
+               : '/api/campaigns/active'
+
+            const res = await fetch(apiUrl)
             if (res.ok) {
                const dbCampaigns: DBCampaign[] = await res.json()
                if (dbCampaigns.length > 0) {
@@ -37,23 +47,30 @@ export default function CampaignBanner() {
                         percent: dbCampaigns[0].discountCode.percent,
                      }
                   }
+                  if (previewCampaignId) {
+                     previewMode = true
+                  }
                }
             }
          } catch {
             // DB unavailable, fall through to hardcoded
          }
 
-         if (!active) {
+         if (!active && !previewCampaignId) {
             active = getActiveCampaign()
          }
 
          if (!active) return
 
-         const dismissedId = localStorage.getItem(DISMISS_KEY)
-         if (dismissedId === active.id) return
+         // In preview mode, skip dismiss check
+         if (!previewMode) {
+            const dismissedId = localStorage.getItem(DISMISS_KEY)
+            if (dismissedId === active.id) return
+         }
 
          setCampaign(active)
          setDiscountInfo(discount)
+         setIsPreview(previewMode)
          setDismissed(false)
          requestAnimationFrame(() => {
             setMounted(true)
@@ -61,21 +78,21 @@ export default function CampaignBanner() {
       }
 
       loadCampaign()
-   }, [])
+   }, [searchParams])
 
    function handleDismiss() {
       setMounted(false)
       setTimeout(() => {
          setDismissed(true)
-         if (campaign) {
+         if (campaign && !isPreview) {
             localStorage.setItem(DISMISS_KEY, campaign.id)
          }
       }, 300)
    }
 
    async function handleClick() {
-      // Track click event for DB campaigns
-      if (campaign) {
+      // Don't track clicks in preview mode
+      if (campaign && !isPreview) {
          fetch('/api/campaigns/active', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -97,12 +114,19 @@ export default function CampaignBanner() {
    return (
       <div
          className={`relative w-full overflow-hidden transition-all duration-300 ease-out ${
-            mounted ? 'max-h-24 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'
+            mounted ? 'max-h-32 opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'
          }`}
          style={{
             background: `linear-gradient(135deg, ${campaign.theme.primaryColor}18, ${campaign.theme.secondaryColor}18)`,
          }}
       >
+         {/* Preview mode badge */}
+         {isPreview && (
+            <div className="bg-purple-600 text-white text-center text-[11px] font-bold py-0.5 tracking-wider">
+               ONIZLEME MODU
+            </div>
+         )}
+
          <div className="relative flex items-center justify-center gap-3 px-4 py-2.5 text-center sm:gap-4 sm:px-8">
             {/* Emoji */}
             <span className="text-lg sm:text-xl flex-shrink-0">{campaign.theme.emoji}</span>

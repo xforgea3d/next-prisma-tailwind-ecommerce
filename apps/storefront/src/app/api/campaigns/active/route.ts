@@ -5,6 +5,37 @@ export const revalidate = 60 // cache for 60 seconds
 
 export async function GET(request: Request) {
    try {
+      const { searchParams } = new URL(request.url)
+      const previewId = searchParams.get('preview')
+
+      // Preview mode: return specific campaign regardless of dates/isActive
+      if (previewId) {
+         const campaign = await prisma.campaign.findUnique({
+            where: { id: previewId },
+            include: {
+               discountCode: {
+                  select: {
+                     id: true,
+                     code: true,
+                     percent: true,
+                     maxDiscountAmount: true,
+                  },
+               },
+               products: {
+                  select: { id: true },
+               },
+               _count: { select: { products: true } },
+            },
+         })
+
+         if (!campaign) {
+            return NextResponse.json([])
+         }
+
+         // Don't increment views for preview requests
+         return NextResponse.json([campaign])
+      }
+
       const now = new Date()
 
       const campaigns = await prisma.campaign.findMany({

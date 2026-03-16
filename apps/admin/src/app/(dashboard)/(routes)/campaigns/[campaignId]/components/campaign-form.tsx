@@ -151,6 +151,14 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({
    })
 
    const selectedProductIds = form.watch('productIds')
+   const watchedEmoji = form.watch('emoji')
+   const watchedBannerTitle = form.watch('bannerTitle')
+   const watchedBannerSubtitle = form.watch('bannerSubtitle')
+   const watchedBannerCtaText = form.watch('bannerCtaText')
+   const watchedPrimaryColor = form.watch('primaryColor')
+   const watchedSecondaryColor = form.watch('secondaryColor')
+   const watchedGradientFrom = form.watch('gradientFrom')
+   const watchedGradientTo = form.watch('gradientTo')
 
    const toggleProduct = (productId: string) => {
       const current = form.getValues('productIds')
@@ -550,33 +558,36 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({
                         )}
                      />
                   </div>
-                  {/* Live preview */}
-                  <div className="mt-4 rounded-xl border p-4">
-                     <p className="text-xs text-muted-foreground mb-2">Onizleme:</p>
+                  {/* Live Preview - Enhanced */}
+                  <div className="mt-4 rounded-xl overflow-hidden border-2 border-dashed border-muted">
+                     <div className="text-xs text-center text-muted-foreground py-1 bg-muted">
+                        Onizleme — Musteriler bunu gorecek
+                     </div>
                      <div
-                        className="rounded-lg p-4 flex items-center gap-3"
+                        className={`p-4 bg-gradient-to-r ${watchedGradientFrom} ${watchedGradientTo}`}
                         style={{
-                           background: `linear-gradient(135deg, ${form.watch('primaryColor')}18, ${form.watch('secondaryColor')}18)`,
+                           background: `linear-gradient(135deg, ${watchedPrimaryColor}18, ${watchedSecondaryColor}18)`,
                         }}
                      >
-                        <span className="text-xl">{form.watch('emoji')}</span>
-                        <div>
-                           <span
-                              className="text-sm font-bold"
-                              style={{ color: form.watch('primaryColor') }}
-                           >
-                              {form.watch('bannerTitle') || 'Banner basligi'}
-                           </span>
-                           <span className="hidden sm:inline text-xs text-muted-foreground ml-2">
-                              {form.watch('bannerSubtitle') || 'Alt baslik'}
-                           </span>
+                        <div className="flex items-center gap-3">
+                           <span className="text-2xl">{watchedEmoji || '🏷️'}</span>
+                           <div>
+                              <p className="font-bold text-sm" style={{ color: watchedPrimaryColor }}>
+                                 {watchedBannerTitle || 'Banner basligi'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                 {watchedBannerSubtitle || 'Alt baslik'}
+                              </p>
+                           </div>
+                           <div className="ml-auto">
+                              <span
+                                 className="text-xs rounded-full px-3 py-1 font-medium text-white"
+                                 style={{ backgroundColor: watchedPrimaryColor }}
+                              >
+                                 {watchedBannerCtaText || 'CTA Butonu'}
+                              </span>
+                           </div>
                         </div>
-                        <span
-                           className="ml-auto rounded-full px-3 py-1 text-xs font-semibold text-white"
-                           style={{ backgroundColor: form.watch('primaryColor') }}
-                        >
-                           {form.watch('bannerCtaText') || 'CTA'}
-                        </span>
                      </div>
                   </div>
                </div>
