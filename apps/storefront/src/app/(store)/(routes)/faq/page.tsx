@@ -41,7 +41,7 @@ const faqs = [
     },
     {
         question: 'Toptan sipariş verebilir miyim?',
-        answer: 'Evet, toptan ve kurumsal siparişler için özel fiyatlandırma sunmaktayız. Detaylı bilgi almak için info@xforgea3d.com adresinden bizimle iletişime geçebilirsiniz.',
+        answer: 'Evet, toptan ve kurumsal siparişler için özel fiyatlandırma sunmaktayız. Detaylı bilgi almak için xforgea3d@gmail.com adresinden bizimle iletişime geçebilirsiniz.',
     },
     {
         question: 'Ürünlerde garanti var mı?',

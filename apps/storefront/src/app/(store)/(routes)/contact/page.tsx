@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
 import { ContactForm } from './contact-form'
+import prisma from '@/lib/prisma'
 
 export const metadata: Metadata = {
     title: 'İletişim',
@@ -8,7 +9,30 @@ export const metadata: Metadata = {
         'xForgea3D ile iletişime geçin. Sorularınız ve önerileriniz için bize ulaşın.',
 }
 
-export default function ContactPage() {
+const DEFAULTS = {
+    contact_email: 'info@xforgea3d.com',
+    contact_phone: '+90 (538) 288 07 38',
+    whatsapp: '905382880738',
+    address_text: 'Ataşehir, Küçükbakkalköy Mah.\nKayışdağı Cd. No:1\nİstanbul, Türkiye',
+}
+
+export default async function ContactPage() {
+    let settings = DEFAULTS
+    try {
+        const dbSettings = await prisma.siteSettings.findFirst()
+        if (dbSettings) {
+            settings = {
+                contact_email: dbSettings.contact_email || DEFAULTS.contact_email,
+                contact_phone: dbSettings.contact_phone || DEFAULTS.contact_phone,
+                whatsapp: dbSettings.whatsapp || DEFAULTS.whatsapp,
+                address_text: dbSettings.address_text || DEFAULTS.address_text,
+            }
+        }
+    } catch {}
+
+    const phoneRaw = settings.contact_phone.replace(/\D/g, '')
+    const addressLines = settings.address_text.split('\n')
+
     return (
         <div className="pb-16">
             {/* Hero Section */}
@@ -42,16 +66,10 @@ export default function ContactPage() {
                         </p>
                         <div className="space-y-1">
                             <a
-                                href="mailto:info@xforgea3d.com"
+                                href={`mailto:${settings.contact_email}`}
                                 className="block text-sm font-medium text-orange-500 hover:underline"
                             >
-                                info@xforgea3d.com
-                            </a>
-                            <a
-                                href="mailto:destek@xforgea3d.com"
-                                className="block text-sm font-medium text-orange-500 hover:underline"
-                            >
-                                destek@xforgea3d.com
+                                {settings.contact_email}
                             </a>
                         </div>
                     </div>
@@ -66,10 +84,10 @@ export default function ContactPage() {
                             Hafta içi 09:00 - 18:00 arası:
                         </p>
                         <a
-                            href="tel:+905382880738"
+                            href={`tel:+${phoneRaw}`}
                             className="block text-sm font-medium text-orange-500 hover:underline"
                         >
-                            +90 (538) 288 07 38
+                            {settings.contact_phone}
                         </a>
                     </div>
 
@@ -84,18 +102,18 @@ export default function ContactPage() {
                         </p>
                         <p className="text-sm font-medium">
                             xForgea3D Atölye
-                            <br />
-                            Ataşehir, Küçükbakkalköy Mah.
-                            <br />
-                            Kayışdağı Cd. No:1
-                            <br />
-                            İstanbul, Türkiye
+                            {addressLines.map((line, i) => (
+                                <span key={i}>
+                                    <br />
+                                    {line}
+                                </span>
+                            ))}
                         </p>
                     </div>
 
                     {/* WhatsApp */}
                     <a
-                        href="https://wa.me/905382880738"
+                        href={`https://wa.me/${settings.whatsapp}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group rounded-xl border bg-card p-6 space-y-3 transition-all hover:shadow-lg hover:border-green-500/50 hover:-translate-y-1"

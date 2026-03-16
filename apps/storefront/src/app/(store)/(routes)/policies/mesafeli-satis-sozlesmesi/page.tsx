@@ -1,11 +1,30 @@
 import { Metadata } from 'next'
+import prisma from '@/lib/prisma'
 
 export const metadata: Metadata = {
     title: 'Mesafeli Satış Sözleşmesi',
     description: 'xForgea3D Mesafeli Satış Sözleşmesi.',
 }
 
-export default function MesafeliSatisSozlesmesi() {
+const DEFAULTS = {
+    contact_email: 'destek@xforgea3d.com',
+    contact_phone: '+90 (538) 288 07 38',
+    address_text: 'Ataşehir, İstanbul, Türkiye',
+}
+
+export default async function MesafeliSatisSozlesmesi() {
+    let settings = DEFAULTS
+    try {
+        const dbSettings = await prisma.siteSettings.findFirst()
+        if (dbSettings) {
+            settings = {
+                contact_email: dbSettings.contact_email || DEFAULTS.contact_email,
+                contact_phone: dbSettings.contact_phone || DEFAULTS.contact_phone,
+                address_text: dbSettings.address_text || DEFAULTS.address_text,
+            }
+        }
+    } catch {}
+
     return (
         <div className="mx-auto max-w-4xl py-12 prose prose-neutral dark:prose-invert">
             <h1 className="text-3xl font-bold tracking-tight mb-8">Mesafeli Satış Sözleşmesi</h1>
@@ -16,9 +35,9 @@ export default function MesafeliSatisSozlesmesi() {
             <table>
                 <tbody>
                     <tr><td><strong>Ünvanı</strong></td><td>xForgea3D</td></tr>
-                    <tr><td><strong>Adres</strong></td><td>Ataşehir, İstanbul, Türkiye</td></tr>
-                    <tr><td><strong>Telefon</strong></td><td>+90 530 111 22 33</td></tr>
-                    <tr><td><strong>E-posta</strong></td><td>destek@xforgea3d.com</td></tr>
+                    <tr><td><strong>Adres</strong></td><td>{settings.address_text}</td></tr>
+                    <tr><td><strong>Telefon</strong></td><td>{settings.contact_phone}</td></tr>
+                    <tr><td><strong>E-posta</strong></td><td>{settings.contact_email}</td></tr>
                     <tr><td><strong>Web Sitesi</strong></td><td>https://xforgea3d.com</td></tr>
                 </tbody>
             </table>
@@ -61,7 +80,7 @@ export default function MesafeliSatisSozlesmesi() {
                 <li>ALICI, sipariş verirken doğru ve eksiksiz bilgi vermekle yükümlüdür.</li>
                 <li>ALICI, sözleşme konusu ürünün temel nitelikleri, satış fiyatı, ödeme şekli ve teslimata ilişkin ön bilgileri okuyup bilgi sahibi olduğunu ve elektronik ortamda gerekli teyidi verdiğini kabul ve beyan eder.</li>
                 <li>ALICI, ürünü teslim aldıktan sonra cayma hakkı süresi (14 gün) boyunca ürünü olağan inceleme sınırlarını aşmayacak şekilde kullanabilir.</li>
-                <li>ALICI, iade sürecini web sitesi üzerinden &quot;Siparişlerim &gt; İade Talebi Oluştur&quot; bölümünden başlatabilir veya destek@xforgea3d.com adresine yazılı bildirimde bulunabilir.</li>
+                <li>ALICI, iade sürecini web sitesi üzerinden &quot;Siparişlerim &gt; İade Talebi Oluştur&quot; bölümünden başlatabilir veya {settings.contact_email} adresine yazılı bildirimde bulunabilir.</li>
             </ul>
 
             <h2>MADDE 7 - GENEL HÜKÜMLER</h2>

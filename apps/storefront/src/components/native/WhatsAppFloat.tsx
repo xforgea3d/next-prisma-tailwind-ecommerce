@@ -2,12 +2,23 @@
 
 import { useState, useEffect } from 'react'
 
+const DEFAULT_WHATSAPP = '905382880738'
+
 export default function WhatsAppFloat() {
    const [mounted, setMounted] = useState(false)
    const [hovered, setHovered] = useState(false)
+   const [whatsapp, setWhatsapp] = useState(DEFAULT_WHATSAPP)
 
    useEffect(() => {
       const timer = setTimeout(() => setMounted(true), 300)
+
+      fetch('/api/site-settings')
+         .then(res => res.ok ? res.json() : null)
+         .then(data => {
+            if (data?.whatsapp) setWhatsapp(data.whatsapp)
+         })
+         .catch(() => {})
+
       return () => clearTimeout(timer)
    }, [])
 
@@ -96,7 +107,7 @@ export default function WhatsAppFloat() {
 
             {/* Button */}
             <a
-               href="https://wa.me/905382880738"
+               href={`https://wa.me/${whatsapp}`}
                target="_blank"
                rel="noopener noreferrer"
                aria-label="WhatsApp ile iletisime gecin"

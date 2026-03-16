@@ -1,12 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCsrf } from '@/hooks/useCsrf'
 import { Separator } from '@/components/native/separator'
 import config from '@/config/site'
-import { InstagramIcon, TwitterIcon, Mail, ShieldCheck, CreditCard, Lock, Send, MapPin, Phone } from 'lucide-react'
+import { InstagramIcon, Mail, ShieldCheck, CreditCard, Lock, Send, MapPin, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/components/ui/use-toast'
+
+interface SiteSettings {
+   contact_email?: string | null
+   contact_phone?: string | null
+   whatsapp?: string | null
+   address_text?: string | null
+   instagram_url?: string | null
+   tiktok_url?: string | null
+   youtube_url?: string | null
+}
+
+const DEFAULTS: SiteSettings = {
+   contact_email: 'info@xforgea3d.com',
+   contact_phone: '+90 (538) 288 07 38',
+   whatsapp: '905382880738',
+   address_text: 'Ataşehir, İstanbul, Türkiye',
+   instagram_url: 'https://instagram.com/xforgea3d',
+}
 
 const data = [
    {
@@ -79,7 +97,34 @@ function WhatsAppIcon({ className }: { className?: string }) {
    )
 }
 
+function useSiteSettings() {
+   const [settings, setSettings] = useState<SiteSettings>(DEFAULTS)
+
+   useEffect(() => {
+      fetch('/api/site-settings')
+         .then(res => res.ok ? res.json() : DEFAULTS)
+         .then(data => {
+            if (data && Object.keys(data).length > 0) {
+               setSettings({
+                  contact_email: data.contact_email || DEFAULTS.contact_email,
+                  contact_phone: data.contact_phone || DEFAULTS.contact_phone,
+                  whatsapp: data.whatsapp || DEFAULTS.whatsapp,
+                  address_text: data.address_text || DEFAULTS.address_text,
+                  instagram_url: data.instagram_url || DEFAULTS.instagram_url,
+                  tiktok_url: data.tiktok_url || null,
+                  youtube_url: data.youtube_url || null,
+               })
+            }
+         })
+         .catch(() => {})
+   }, [])
+
+   return settings
+}
+
 export default function Footer() {
+   const settings = useSiteSettings()
+
    return (
       <footer className="w-full">
          <Separator className="my-12" />
@@ -92,7 +137,7 @@ export default function Footer() {
          <div className="flex flex-col md:flex-row justify-between gap-8 px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
             <div className="space-y-6">
                <Trademark />
-               <BusinessInfo />
+               <BusinessInfo settings={settings} />
             </div>
             <Links />
          </div>
@@ -103,7 +148,7 @@ export default function Footer() {
          </div>
 
          <Separator className="mt-8 mb-6" />
-         <Socials />
+         <Socials settings={settings} />
       </footer>
    )
 }
@@ -246,58 +291,55 @@ function TrustBadges() {
    )
 }
 
-function BusinessInfo() {
+function BusinessInfo({ settings }: { settings: SiteSettings }) {
+   const phoneRaw = settings.contact_phone?.replace(/\D/g, '') || '905382880738'
+
    return (
       <div className="space-y-2 text-sm text-muted-foreground">
          <div className="flex items-start gap-2">
             <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
-            <span>Ataşehir, İstanbul, Türkiye</span>
+            <span>{settings.address_text || DEFAULTS.address_text}</span>
          </div>
          <div className="flex items-center gap-2">
             <Phone className="h-4 w-4 flex-shrink-0" />
             <a
-               href="tel:+905382880738"
+               href={`tel:+${phoneRaw}`}
                className="transition-colors hover:text-foreground"
             >
-               +90 (538) 288 07 38
+               {settings.contact_phone || DEFAULTS.contact_phone}
             </a>
          </div>
          <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 flex-shrink-0" />
             <a
-               href="mailto:info@xforgea3d.com"
+               href={`mailto:${settings.contact_email || DEFAULTS.contact_email}`}
                className="transition-colors hover:text-foreground"
             >
-               info@xforgea3d.com
+               {settings.contact_email || DEFAULTS.contact_email}
             </a>
          </div>
       </div>
    )
 }
 
-function Socials() {
+function Socials({ settings }: { settings: SiteSettings }) {
+   const whatsappNumber = settings.whatsapp || DEFAULTS.whatsapp
+
    return (
       <div className="mb-6 flex justify-center space-x-6 text-muted-foreground">
+         {(settings.instagram_url || DEFAULTS.instagram_url) && (
+            <a
+               href={settings.instagram_url || DEFAULTS.instagram_url!}
+               target="_blank"
+               rel="noreferrer"
+               className="transition-colors hover:text-foreground"
+            >
+               <InstagramIcon className="h-4" />
+               <span className="sr-only">Instagram sayfası</span>
+            </a>
+         )}
          <a
-            href="https://instagram.com/xforgea3d"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-foreground"
-         >
-            <InstagramIcon className="h-4" />
-            <span className="sr-only">Instagram sayfası</span>
-         </a>
-         <a
-            href="https://twitter.com/xforgea3d"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-foreground"
-         >
-            <TwitterIcon className="h-4" />
-            <span className="sr-only">Twitter sayfası</span>
-         </a>
-         <a
-            href="https://wa.me/905382880738"
+            href={`https://wa.me/${whatsappNumber}`}
             target="_blank"
             rel="noreferrer"
             className="transition-colors hover:text-foreground"
