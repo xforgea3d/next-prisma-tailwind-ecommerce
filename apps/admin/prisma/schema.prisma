@@ -32,6 +32,11 @@ model Profile {
 
   lastCartReminder DateTime?
 
+  kvkkAccepted      Boolean   @default(false)
+  kvkkAcceptedAt    DateTime?
+  marketingConsent  Boolean   @default(false)
+  smsConsent        Boolean   @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

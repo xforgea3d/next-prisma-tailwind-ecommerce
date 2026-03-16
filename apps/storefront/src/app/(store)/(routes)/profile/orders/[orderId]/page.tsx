@@ -682,6 +682,14 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
                <ReturnRequestSection order={order} onReturnCreated={fetchOrder} />
             </div>
          </div>
+
+         {/* Legal Notice */}
+         <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900/50 p-4 text-xs text-muted-foreground leading-relaxed">
+            <p>
+               Bu siparis, Mesafeli Satis Sozlesmesi kapsaminda olusturulmustur. 14 gun
+               icinde cayma hakkiniz bulunmaktadir (kisiye ozel uretim urunler haric).
+            </p>
+         </div>
       </div>
    )
 }

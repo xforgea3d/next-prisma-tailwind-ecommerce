@@ -17,6 +17,10 @@ const CookieConsent = dynamic(() => import('@/components/native/CookieConsent'),
    ssr: false,
 })
 
+const WelcomeOnboarding = dynamic(() => import('@/components/native/WelcomeOnboarding'), {
+   ssr: false,
+})
+
 const PopupNotification = dynamic(
    () => import('@/components/native/PopupNotification'),
    { ssr: false }
@@ -61,6 +65,7 @@ export default async function DashboardLayout({
          <WhatsAppFloat />
          <BackToTop />
          <CookieConsent />
+         <WelcomeOnboarding />
       </>
    )
 }

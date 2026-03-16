@@ -96,7 +96,7 @@ export async function PATCH(req: Request) {
       const userId = req.headers.get('X-USER-ID')
       if (!userId) return new NextResponse('Unauthorized', { status: 401 })
 
-      const { name, phone, avatar, csrfToken } = await req.json()
+      const { name, phone, avatar, kvkkAccepted, marketingConsent, smsConsent, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Gecersiz istek. Sayfayi yenileyip tekrar deneyin.', { status: 403 })
@@ -118,6 +118,12 @@ export async function PATCH(req: Request) {
             ...(name !== undefined && { name: name.trim() }),
             ...(phone !== undefined && { phone: phone.trim() }),
             ...(avatar !== undefined && { avatar }),
+            ...(kvkkAccepted !== undefined && {
+               kvkkAccepted: !!kvkkAccepted,
+               ...(kvkkAccepted && { kvkkAcceptedAt: new Date() }),
+            }),
+            ...(marketingConsent !== undefined && { marketingConsent: !!marketingConsent }),
+            ...(smsConsent !== undefined && { smsConsent: !!smsConsent }),
          },
       })
 
@@ -126,6 +132,9 @@ export async function PATCH(req: Request) {
          email: profile.email,
          name: profile.name,
          avatar: profile.avatar,
+         kvkkAccepted: profile.kvkkAccepted,
+         marketingConsent: profile.marketingConsent,
+         smsConsent: profile.smsConsent,
       })
    } catch (error: any) {
       console.error('[PROFILE_PATCH]', error)

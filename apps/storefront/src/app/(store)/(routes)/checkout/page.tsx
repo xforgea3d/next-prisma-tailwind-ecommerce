@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useCsrf } from '@/hooks/useCsrf'
 import { useCartContext } from '@/state/Cart'
-import { CheckCircle2Icon, ChevronRightIcon, Loader2, MapPin, Plus, Tag, Truck, XCircle } from 'lucide-react'
+import { CheckCircle2Icon, ChevronRightIcon, FileText, Loader2, MapPin, Plus, Scale, ShieldCheck, Tag, Truck, X, XCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -72,6 +72,10 @@ export default function CheckoutPage() {
    const [showNewAddress, setShowNewAddress] = useState(false)
    const [newAddress, setNewAddress] = useState({ address: '', city: '', district: '', phone: '', postalCode: '' })
    const [taxRate, setTaxRate] = useState(20)
+   const [mesafeliChecked, setMesafeliChecked] = useState(false)
+   const [onBilgiChecked, setOnBilgiChecked] = useState(false)
+   const [iadeChecked, setIadeChecked] = useState(false)
+   const [showPreInfoModal, setShowPreInfoModal] = useState(false)
    const searchParams = useSearchParams()
    const discountAppliedFromUrl = useRef(false)
    const discountValidatedRef = useRef(false)
@@ -539,25 +543,207 @@ export default function CheckoutPage() {
                      </div>
                   </CardContent>
                   <CardFooter className="flex flex-col gap-3">
+                     {/* Yasal Onaylar */}
+                     <div className="w-full rounded-lg border border-orange-200 dark:border-orange-800/50 bg-orange-50/50 dark:bg-orange-950/10 p-4 space-y-3">
+                        <div className="flex items-center gap-2 mb-1">
+                           <Scale className="h-4 w-4 text-orange-500" />
+                           <span className="text-sm font-semibold text-foreground">Yasal Onaylar</span>
+                        </div>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={mesafeliChecked}
+                              onChange={(e) => setMesafeliChecked(e.target.checked)}
+                              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-orange-500 accent-orange-500 flex-shrink-0"
+                           />
+                           <span className="text-xs text-muted-foreground leading-relaxed">
+                              <a
+                                 href="/policies/mesafeli-satis-sozlesmesi"
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
+                              >
+                                 Mesafeli Satis Sozlesmesini
+                              </a>{' '}
+                              okudum ve kabul ediyorum.
+                           </span>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={onBilgiChecked}
+                              onChange={(e) => setOnBilgiChecked(e.target.checked)}
+                              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-orange-500 accent-orange-500 flex-shrink-0"
+                           />
+                           <span className="text-xs text-muted-foreground leading-relaxed">
+                              <button
+                                 type="button"
+                                 onClick={(e) => {
+                                    e.preventDefault()
+                                    setShowPreInfoModal(true)
+                                 }}
+                                 className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
+                              >
+                                 On Bilgilendirme Formunu
+                              </button>{' '}
+                              okudum ve onayliyorum.
+                           </span>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={iadeChecked}
+                              onChange={(e) => setIadeChecked(e.target.checked)}
+                              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-orange-500 accent-orange-500 flex-shrink-0"
+                           />
+                           <span className="text-xs text-muted-foreground leading-relaxed">
+                              <a
+                                 href="/policies/iade-kosullari"
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
+                              >
+                                 Iade ve Iptal Kosullarini
+                              </a>{' '}
+                              okudum ve kabul ediyorum.
+                           </span>
+                        </label>
+                     </div>
+
                      <p className="text-xs text-muted-foreground text-center w-full">
-                        🛡️ 14 Gün İade Garantisi | 🔒 Güvenli Ödeme
+                        14 Gun Iade Garantisi | Guvenli Odeme
                      </p>
                      <Button
                         className="w-full"
                         size="lg"
                         onClick={handleOrder}
-                        disabled={loading || !selectedAddress || !cart?.items?.length}
+                        disabled={loading || !selectedAddress || !cart?.items?.length || !mesafeliChecked || !onBilgiChecked || !iadeChecked}
                      >
                         {loading ? (
-                           <><Loader2 className="h-4 w-4 animate-spin mr-2" /> İşleniyor...</>
+                           <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Isleniyor...</>
                         ) : (
-                           'Siparişi Onayla ve Öde'
+                           'Siparisi Onayla ve Ode'
                         )}
                      </Button>
                   </CardFooter>
                </Card>
             </div>
          </div>
+
+         {/* On Bilgilendirme Formu Modal */}
+         {showPreInfoModal && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+               <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900 p-6">
+                  <button
+                     onClick={() => setShowPreInfoModal(false)}
+                     className="absolute top-4 right-4 rounded-full p-1 hover:bg-muted transition-colors"
+                  >
+                     <X className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <div className="flex items-center gap-2 mb-4">
+                     <FileText className="h-5 w-5 text-orange-500" />
+                     <h2 className="text-lg font-bold text-foreground">On Bilgilendirme Formu</h2>
+                  </div>
+
+                  <div className="space-y-4 text-sm">
+                     {/* Satici Bilgileri */}
+                     <div className="rounded-lg border p-3 space-y-1">
+                        <h3 className="font-semibold text-foreground">Satici Bilgileri</h3>
+                        <p className="text-muted-foreground">Unvan: xForgea3D</p>
+                        <p className="text-muted-foreground">Adres: Turkiye</p>
+                        <p className="text-muted-foreground">Telefon: +90 (500) 000 00 00</p>
+                        <p className="text-muted-foreground">E-posta: info@xforgea3d.com</p>
+                     </div>
+
+                     {/* Urun Bilgileri */}
+                     <div className="rounded-lg border p-3 space-y-2">
+                        <h3 className="font-semibold text-foreground">Siparis Edilen Urunler</h3>
+                        {cart?.items?.map((item: any, i: number) => (
+                           <div key={i} className="flex justify-between items-center py-1 border-b border-dashed last:border-0">
+                              <div className="flex-1 min-w-0">
+                                 <p className="truncate font-medium text-xs">{item.product.title}</p>
+                                 <p className="text-xs text-muted-foreground">{item.count} adet</p>
+                              </div>
+                              <span className="text-xs font-semibold ml-2">
+                                 {(item.product.price * item.count).toFixed(2)} TL
+                              </span>
+                           </div>
+                        ))}
+                     </div>
+
+                     {/* Toplam Fiyat */}
+                     <div className="rounded-lg border p-3 space-y-1">
+                        <h3 className="font-semibold text-foreground">Toplam Fiyat</h3>
+                        <div className="flex justify-between">
+                           <span className="text-muted-foreground">Ara Toplam</span>
+                           <span>{costs.total} TL</span>
+                        </div>
+                        <div className="flex justify-between">
+                           <span className="text-muted-foreground">KDV (%{taxRate})</span>
+                           <span>{costs.tax} TL</span>
+                        </div>
+                        <div className="flex justify-between">
+                           <span className="text-muted-foreground">Kargo</span>
+                           <span className="text-green-600">Ucretsiz</span>
+                        </div>
+                        <Separator className="my-1" />
+                        <div className="flex justify-between font-bold">
+                           <span>Genel Toplam</span>
+                           <span>{costs.payable} TL</span>
+                        </div>
+                     </div>
+
+                     {/* Teslimat */}
+                     <div className="rounded-lg border p-3 space-y-1">
+                        <h3 className="font-semibold text-foreground">Teslimat Bilgileri</h3>
+                        <p className="text-muted-foreground">
+                           Teslimat Yontemi: Kargo ile teslimat
+                        </p>
+                        <p className="text-muted-foreground">
+                           Tahmini Teslimat: {getEstimatedDeliveryRange()}
+                        </p>
+                     </div>
+
+                     {/* Odeme Yontemi */}
+                     <div className="rounded-lg border p-3 space-y-1">
+                        <h3 className="font-semibold text-foreground">Odeme Yontemi</h3>
+                        <p className="text-muted-foreground">Kredi/Banka Karti ile online odeme</p>
+                     </div>
+
+                     {/* Cayma Hakki */}
+                     <div className="rounded-lg border border-orange-200 dark:border-orange-800/50 bg-orange-50/30 dark:bg-orange-950/10 p-3 space-y-1">
+                        <h3 className="font-semibold text-foreground flex items-center gap-1.5">
+                           <ShieldCheck className="h-4 w-4 text-orange-500" />
+                           Cayma Hakki
+                        </h3>
+                        <p className="text-muted-foreground text-xs leading-relaxed">
+                           Tuketici, 14 (on dort) gun icinde herhangi bir gerekce gostermeksizin ve
+                           cezai sart odemeksizin sozlesmeden cayma hakkina sahiptir. Cayma hakki
+                           suresi, hizmet ifasina iliskin sozlesmelerde sozlesmenin kuruldugu gun;
+                           mal teslimine iliskin sozlesmelerde ise tuketicinin veya tuketici
+                           tarafindan belirlenen ucuncu kisinin mali teslim aldigi gun baslar.
+                           Ancak tuketici, sozlesmenin kurulmasindan malin teslimine kadar olan
+                           sure icinde de cayma hakkini kullanabilir.
+                        </p>
+                        <p className="text-muted-foreground text-xs leading-relaxed font-medium">
+                           Not: Kisiye ozel uretim urunlerde cayma hakki kullanilamaz.
+                        </p>
+                     </div>
+                  </div>
+
+                  <button
+                     onClick={() => setShowPreInfoModal(false)}
+                     className="mt-4 w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg hover:brightness-110 active:scale-[0.98]"
+                  >
+                     Anladim, Kapat
+                  </button>
+               </div>
+            </div>
+         )}
       </div>
    )
 }
