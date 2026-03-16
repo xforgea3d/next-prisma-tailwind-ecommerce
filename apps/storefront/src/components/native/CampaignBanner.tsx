@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getActiveCampaign, getCampaignEndDate, type Campaign } from '@/lib/campaigns'
+import { getActiveCampaign, type Campaign, type DBCampaign, dbCampaignToLegacy } from '@/lib/campaigns'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -13,18 +13,39 @@ export default function CampaignBanner() {
    const [mounted, setMounted] = useState(false)
 
    useEffect(() => {
-      const active = getActiveCampaign()
-      if (!active) return
+      // Try DB campaigns first, then fall back to hardcoded
+      async function loadCampaign() {
+         let active: Campaign | null = null
 
-      const dismissedId = sessionStorage.getItem(DISMISS_KEY)
-      if (dismissedId === active.id) return
+         try {
+            const res = await fetch('/api/campaigns/active')
+            if (res.ok) {
+               const dbCampaigns: DBCampaign[] = await res.json()
+               if (dbCampaigns.length > 0) {
+                  active = dbCampaignToLegacy(dbCampaigns[0])
+               }
+            }
+         } catch {
+            // DB unavailable, fall through to hardcoded
+         }
 
-      setCampaign(active)
-      setDismissed(false)
-      // Trigger entrance animation
-      requestAnimationFrame(() => {
-         setMounted(true)
-      })
+         if (!active) {
+            active = getActiveCampaign()
+         }
+
+         if (!active) return
+
+         const dismissedId = sessionStorage.getItem(DISMISS_KEY)
+         if (dismissedId === active.id) return
+
+         setCampaign(active)
+         setDismissed(false)
+         requestAnimationFrame(() => {
+            setMounted(true)
+         })
+      }
+
+      loadCampaign()
    }, [])
 
    function handleDismiss() {
@@ -35,6 +56,18 @@ export default function CampaignBanner() {
             sessionStorage.setItem(DISMISS_KEY, campaign.id)
          }
       }, 300)
+   }
+
+   async function handleClick() {
+      // Track click event for DB campaigns
+      if (campaign) {
+         try {
+            // Fire-and-forget click tracking
+            fetch(`/api/campaigns/active?click=${campaign.id}`, { method: 'HEAD' }).catch(() => {})
+         } catch {
+            // ignore
+         }
+      }
    }
 
    if (dismissed || !campaign) return null
@@ -65,6 +98,7 @@ export default function CampaignBanner() {
             {/* CTA */}
             <Link
                href={campaign.banner.ctaLink}
+               onClick={handleClick}
                className="flex-shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-white transition-transform hover:scale-105"
                style={{ backgroundColor: campaign.theme.primaryColor }}
             >

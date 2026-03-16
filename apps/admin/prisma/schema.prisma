@@ -140,6 +140,7 @@ model Product {
 
   categories Category[]
   carModels  CarModel[] @relation("CarModelProducts")
+  campaigns  Campaign[] @relation("CampaignProducts")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -296,6 +297,7 @@ model DiscountCode {
   endDate           DateTime
 
   order Order[]
+  campaigns Campaign[]
 
   createdAt DateTime @default(now())
 
@@ -628,4 +630,49 @@ model ReturnRequest {
   updatedAt     DateTime         @updatedAt
 
   @@index([userId, orderId])
+}
+
+// ── Campaign Management ──────────────────────────────────────
+
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0)
+
+  // Theme
+  emoji          String @default("🏷️")
+  primaryColor   String @default("#f97316")
+  secondaryColor String @default("#f59e0b")
+  gradientFrom   String @default("from-orange-500/10")
+  gradientTo     String @default("to-amber-500/10")
+
+  // Banner
+  bannerTitle    String
+  bannerSubtitle String?
+  bannerCtaText  String  @default("Kampanyayı Gör")
+  bannerCtaLink  String  @default("/products")
+  bannerImageUrl String?
+
+  // Discount
+  discountPercent Int           @default(0)
+  discountCodeId  String?
+  discountCode    DiscountCode? @relation(fields: [discountCodeId], references: [id])
+
+  // Products
+  products Product[] @relation("CampaignProducts")
+
+  // Tracking
+  views   Int   @default(0)
+  clicks  Int   @default(0)
+  orders  Int   @default(0)
+  revenue Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startDate, endDate, isActive])
 }

@@ -17,7 +17,7 @@ import {
    ArrowRight,
    Clock,
 } from 'lucide-react'
-import { getActiveCampaign, getCampaignEndDate } from '@/lib/campaigns'
+import { getActiveCampaign, getCampaignEndDate, dbCampaignToLegacy, getDBCampaignEndDate, type DBCampaign } from '@/lib/campaigns'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import nextDynamic from 'next/dynamic'
@@ -84,24 +84,43 @@ async function fetchHomeData() {
             models: { take: 1, select: { imageUrl: true } },
          },
       }),
+      prisma.campaign.findMany({
+         where: {
+            isActive: true,
+            startDate: { lte: new Date() },
+            endDate: { gte: new Date() },
+         },
+         orderBy: { priority: 'desc' },
+         take: 1,
+         include: {
+            discountCode: {
+               select: { id: true, code: true, percent: true, maxDiscountAmount: true },
+            },
+            _count: { select: { products: true } },
+         },
+      }),
    ])
 
    return Promise.race([query, timeout])
 }
 
 export default async function Index() {
-   const activeCampaign = getActiveCampaign()
-   const campaignEndDate = activeCampaign
-      ? getCampaignEndDate(activeCampaign).toISOString()
-      : process.env.CAMPAIGN_END_DATE ||
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-
-   let featuredProducts: any[] = [], banners: any[] = [], carBrands: any[] = []
+   let featuredProducts: any[] = [], banners: any[] = [], carBrands: any[] = [], dbCampaigns: any[] = []
    try {
-      ;[featuredProducts, banners, carBrands] = await fetchHomeData()
+      ;[featuredProducts, banners, carBrands, dbCampaigns] = await fetchHomeData()
    } catch (e) {
       console.warn('[home] DB unavailable or timed out, rendering empty state:', (e as Error)?.message)
    }
+
+   // DB campaign takes priority, fall back to hardcoded
+   const dbCampaign = dbCampaigns?.[0] as DBCampaign | undefined
+   const activeCampaign = dbCampaign ? dbCampaignToLegacy(dbCampaign) : getActiveCampaign()
+   const campaignEndDate = dbCampaign
+      ? getDBCampaignEndDate(dbCampaign).toISOString()
+      : activeCampaign
+        ? getCampaignEndDate(activeCampaign).toISOString()
+        : process.env.CAMPAIGN_END_DATE ||
+          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
    return (
       <div className="flex flex-col gap-0 -mx-[1.4rem] md:-mx-[4rem] lg:-mx-[6rem] xl:-mx-[8rem] 2xl:-mx-[12rem]">

@@ -21,7 +21,72 @@ export interface Campaign {
    discountSuggestion: number // suggested discount %
 }
 
-export const CAMPAIGNS: Campaign[] = [
+// Database campaign shape
+export interface DBCampaign {
+   id: string
+   name: string
+   description: string | null
+   startDate: string
+   endDate: string
+   isActive: boolean
+   priority: number
+   emoji: string
+   primaryColor: string
+   secondaryColor: string
+   gradientFrom: string
+   gradientTo: string
+   bannerTitle: string
+   bannerSubtitle: string | null
+   bannerCtaText: string
+   bannerCtaLink: string
+   bannerImageUrl: string | null
+   discountPercent: number
+   discountCode: {
+      id: string
+      code: string
+      percent: number
+      maxDiscountAmount: number
+   } | null
+   _count: { products: number }
+   views: number
+   clicks: number
+   orders: number
+   revenue: number
+}
+
+/**
+ * Convert a DB campaign to the legacy Campaign interface for backward compatibility
+ */
+export function dbCampaignToLegacy(db: DBCampaign): Campaign {
+   return {
+      id: db.id,
+      name: db.name,
+      description: db.description || '',
+      startDate: '', // not used for DB campaigns
+      endDate: '',
+      theme: {
+         primaryColor: db.primaryColor,
+         secondaryColor: db.secondaryColor,
+         gradientFrom: db.gradientFrom,
+         gradientTo: db.gradientTo,
+         emoji: db.emoji,
+         icon: 'Tag',
+      },
+      banner: {
+         title: db.bannerTitle,
+         subtitle: db.bannerSubtitle || '',
+         ctaText: db.bannerCtaText,
+         ctaLink: db.bannerCtaLink,
+      },
+      discountSuggestion: db.discountPercent,
+   }
+}
+
+/**
+ * Hardcoded campaigns kept as SUGGESTED_CAMPAIGNS for admin reference
+ * and as a fallback when DB is unavailable.
+ */
+export const SUGGESTED_CAMPAIGNS: Campaign[] = [
    // Ocak - Yeni Yil
    {
       id: 'yilbasi',
@@ -300,6 +365,28 @@ export const CAMPAIGNS: Campaign[] = [
    },
 ]
 
+/**
+ * Fetch active campaigns from DB API
+ */
+export async function getActiveCampaignsFromDB(): Promise<DBCampaign[]> {
+   try {
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+         ? `https://${process.env.VERCEL_URL}`
+         : 'http://localhost:3000'
+      const res = await fetch(`${baseUrl}/api/campaigns/active`, {
+         next: { revalidate: 60 },
+      })
+      if (!res.ok) return []
+      return res.json()
+   } catch {
+      return []
+   }
+}
+
+/**
+ * Get the currently active campaign.
+ * Checks DB first, falls back to hardcoded SUGGESTED_CAMPAIGNS.
+ */
 export function getActiveCampaign(): Campaign | null {
    const now = new Date()
    const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -307,7 +394,7 @@ export function getActiveCampaign(): Campaign | null {
    const today = `${month}-${day}`
 
    return (
-      CAMPAIGNS.find((c) => {
+      SUGGESTED_CAMPAIGNS.find((c) => {
          if (c.startDate <= c.endDate) {
             return today >= c.startDate && today <= c.endDate
          }
@@ -337,4 +424,11 @@ export function getCampaignEndDate(campaign: Campaign): Date {
 
    // Set to end of day
    return new Date(year, month - 1, day, 23, 59, 59)
+}
+
+/**
+ * Get the end date for a DB campaign
+ */
+export function getDBCampaignEndDate(campaign: DBCampaign): Date {
+   return new Date(campaign.endDate)
 }
