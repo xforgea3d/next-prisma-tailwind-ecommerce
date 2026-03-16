@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { CampaignCardActions } from './components/campaign-card-actions'
 
-const STOREFRONT_URL = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const STOREFRONT_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.STOREFRONT_URL || 'https://xforgea3d.vercel.app'
 
 // ── Suggested campaign templates (TR holidays for reference) ──
 const SUGGESTED_CAMPAIGNS = [
@@ -178,13 +178,13 @@ export default async function CampaignsPage() {
                </Link>
             </div>
          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="space-y-4">
                {withStatus.map((c) => {
                   const status = statusConfig[c.status]
                   return (
                      <div
                         key={c.id}
-                        className={`group rounded-xl border p-5 transition-all hover:shadow-lg ${
+                        className={`group rounded-xl border transition-all hover:shadow-lg ${
                            c.status === 'aktif'
                               ? 'border-green-300 dark:border-green-800 bg-green-50/50 dark:bg-green-950/10'
                               : c.status === 'yaklasıyor'
@@ -192,93 +192,59 @@ export default async function CampaignsPage() {
                                 : ''
                         }`}
                      >
-                        <Link href={`/campaigns/${c.id}`}>
-                           <div className="flex items-start gap-4">
-                              {/* Emoji avatar */}
-                              <div
-                                 className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                                 style={{
-                                    background: `linear-gradient(135deg, ${c.primaryColor}20, ${c.secondaryColor}20)`,
-                                 }}
-                              >
-                                 {c.emoji}
-                              </div>
-
-                              <div className="min-w-0 flex-1">
-                                 <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-semibold truncate group-hover:text-orange-500 transition-colors">
-                                       {c.name}
-                                    </h3>
-                                    <span
-                                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold flex-shrink-0 ${status.className}`}
-                                    >
-                                       {status.icon}
-                                       {status.label}
-                                    </span>
+                        <div className="flex flex-col md:flex-row">
+                           {/* Left: campaign info */}
+                           <Link href={`/campaigns/${c.id}`} className="flex-1 p-5">
+                              <div className="flex items-start gap-4">
+                                 <div
+                                    className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                                    style={{ background: `linear-gradient(135deg, ${c.primaryColor}20, ${c.secondaryColor}20)` }}
+                                 >
+                                    {c.emoji}
                                  </div>
-                                 {c.description && (
-                                    <p className="text-sm text-muted-foreground truncate">
-                                       {c.description}
-                                    </p>
-                                 )}
-                                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                       <Calendar className="h-3 w-3" />
-                                       {formatDateRange(c.startDate, c.endDate)}
-                                    </span>
-                                 </div>
-
-                                 {/* Stats row */}
-                                 <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                       <ShoppingBag className="h-3 w-3" />
-                                       {c._count.products} urun
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                       <Eye className="h-3 w-3" />
-                                       {c.views} goruntulenme
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                       <MousePointer className="h-3 w-3" />
-                                       {c.clicks} tiklama
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                       <DollarSign className="h-3 w-3" />
-                                       {c.orders} siparis
-                                    </span>
-                                 </div>
-
-                                 {c.discountCode && (
-                                    <div className="mt-2">
-                                       <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 text-[11px] font-medium">
-                                          %{c.discountCode.percent} - {c.discountCode.code}
+                                 <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                       <h3 className="font-semibold truncate group-hover:text-orange-500 transition-colors">{c.name}</h3>
+                                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold flex-shrink-0 ${status.className}`}>
+                                          {status.icon} {status.label}
                                        </span>
                                     </div>
-                                 )}
+                                    {c.description && <p className="text-sm text-muted-foreground truncate">{c.description}</p>}
+                                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                       <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDateRange(c.startDate, c.endDate)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+                                       <span className="flex items-center gap-1"><ShoppingBag className="h-3 w-3" />{c._count.products} ürün</span>
+                                       <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{c.views} görüntülenme</span>
+                                       <span className="flex items-center gap-1"><MousePointer className="h-3 w-3" />{c.clicks} tıklama</span>
+                                       <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />{c.orders} sipariş</span>
+                                    </div>
+                                    {c.discountCode && (
+                                       <div className="mt-2">
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 text-[11px] font-medium">
+                                             %{c.discountCode.percent} - {c.discountCode.code}
+                                          </span>
+                                       </div>
+                                    )}
+                                 </div>
                               </div>
+                           </Link>
+
+                           {/* Right: actions + warnings */}
+                           <div className="flex flex-col justify-center gap-2 p-4 md:p-5 md:pl-0 md:border-l md:border-border/50 md:min-w-[180px]">
+                              <CampaignCardActions campaignId={c.id} isActive={c.isActive} storefrontUrl={STOREFRONT_URL} />
+                              {c._count.products === 0 && (
+                                 <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-md px-2 py-1">
+                                    ⚠️ Ürün eklenmemiş
+                                 </div>
+                              )}
+                              {!c.discountCode && (
+                                 <div className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 rounded-md px-2 py-1">
+                                    💡 Kupon kodu bağlayın
+                                 </div>
+                              )}
                            </div>
-                        </Link>
-
-                        {/* Warnings & Tips */}
-                        <div className="mt-3 space-y-1.5">
-                           {c._count.products === 0 && (
-                              <div className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-md px-2 py-1">
-                                 <span>&#9888;&#65039;</span> Urun eklenmemis
-                              </div>
-                           )}
-                           {!c.discountCode && (
-                              <div className="flex items-center gap-1.5 text-[11px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 rounded-md px-2 py-1">
-                                 <span>&#128161;</span> Kupon kodu baglayarak donusumu artirabilirsiniz
-                              </div>
-                           )}
                         </div>
-
-                        {/* Action Buttons */}
-                        <CampaignCardActions
-                           campaignId={c.id}
-                           isActive={c.isActive}
-                           storefrontUrl={STOREFRONT_URL}
-                        />
                      </div>
                   )
                })}
