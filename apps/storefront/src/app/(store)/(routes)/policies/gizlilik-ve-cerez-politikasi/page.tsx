@@ -58,33 +58,33 @@ export default function GizlilikOdul() {
                     </thead>
                     <tbody>
                         <tr className="border-b">
-                            <td className="py-3 px-4"><code>logged-in</code></td>
+                            <td className="py-3 px-4">Oturum Çerezi</td>
                             <td className="py-3 px-4">Zorunlu</td>
-                            <td className="py-3 px-4">Oturum durumu kontrolü</td>
+                            <td className="py-3 px-4">Giriş durumunuzun takibi</td>
                             <td className="py-3 px-4">1 yıl</td>
                         </tr>
                         <tr className="border-b">
-                            <td className="py-3 px-4"><code>sb-*-auth-token</code></td>
+                            <td className="py-3 px-4">Kimlik Doğrulama Çerezi</td>
                             <td className="py-3 px-4">Zorunlu</td>
-                            <td className="py-3 px-4">Supabase kimlik doğrulama</td>
-                            <td className="py-3 px-4">Oturum</td>
+                            <td className="py-3 px-4">Güvenli giriş ve hesap erişimi</td>
+                            <td className="py-3 px-4">Oturum süresince</td>
                         </tr>
                         <tr className="border-b">
-                            <td className="py-3 px-4"><code>cookie-consent</code></td>
+                            <td className="py-3 px-4">Çerez Tercihi</td>
                             <td className="py-3 px-4">Zorunlu</td>
-                            <td className="py-3 px-4">Çerez tercih kaydı</td>
+                            <td className="py-3 px-4">Çerez onay tercihlerinizin kaydı</td>
                             <td className="py-3 px-4">1 yıl</td>
                         </tr>
                         <tr className="border-b">
-                            <td className="py-3 px-4"><code>xforgea3d_product_filters</code></td>
-                            <td className="py-3 px-4">Zorunlu</td>
-                            <td className="py-3 px-4">Ürün filtre tercihleri</td>
-                            <td className="py-3 px-4">Oturum</td>
-                        </tr>
-                        <tr className="border-b">
-                            <td className="py-3 px-4"><code>recently_viewed</code></td>
+                            <td className="py-3 px-4">Filtre Tercihi</td>
                             <td className="py-3 px-4">İşlevsel</td>
-                            <td className="py-3 px-4">Son görüntülenen ürünler</td>
+                            <td className="py-3 px-4">Ürün filtreleme tercihleriniz</td>
+                            <td className="py-3 px-4">Oturum süresince</td>
+                        </tr>
+                        <tr className="border-b">
+                            <td className="py-3 px-4">Görüntüleme Geçmişi</td>
+                            <td className="py-3 px-4">İşlevsel</td>
+                            <td className="py-3 px-4">Son baktığınız ürünlerin gösterimi</td>
                             <td className="py-3 px-4">30 gün</td>
                         </tr>
                     </tbody>

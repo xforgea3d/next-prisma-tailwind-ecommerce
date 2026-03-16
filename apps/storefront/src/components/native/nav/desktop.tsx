@@ -90,7 +90,7 @@ export function MainNav() {
 }
 
 export function NavMenu() {
-   const [activeCatImg, setActiveCatImg] = useState('/nav-bg.png')
+   const [activeCatImg, setActiveCatImg] = useState('https://wsomqsbgclyhhtaocxio.supabase.co/storage/v1/object/public/ecommerce/categories/cat-all.png')
    const [activeCatTitle, setActiveCatTitle] = useState('Tüm Kategoriler')
    const [activeCatDesc, setActiveCatDesc] = useState('Tüm 3D baskı ürünlerimize kategoriye göre göz atın.')
 
@@ -356,7 +356,7 @@ function CategoriesDropdown({
            href: `/products?category=${encodeURIComponent(c.title)}`,
            description: c.description || `${c.title} kategorisindeki ürünleri keşfedin.`,
            emoji: categoryEmojis[c.title] || '📦',
-           image: c.imageUrl || '/nav-bg.png',
+           image: c.imageUrl || 'https://wsomqsbgclyhhtaocxio.supabase.co/storage/v1/object/public/ecommerce/categories/cat-all.png',
         }))
       : [] // No fallback — if no categories in DB, show empty
 
@@ -563,7 +563,7 @@ function CollectionsDropdown({ collections }: { collections: DbCollection[] }) {
       <div className="p-4 w-[480px] md:w-[560px]">
          <div className="relative w-full h-28 rounded-xl overflow-hidden mb-3">
             <img
-               src="/nav-bg.png"
+               src="https://wsomqsbgclyhhtaocxio.supabase.co/storage/v1/object/public/ecommerce/categories/cat-all.png"
                alt="Koleksiyonlar"
                className="absolute inset-0 h-full w-full object-cover object-top"
             />
