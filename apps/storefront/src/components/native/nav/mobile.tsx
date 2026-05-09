@@ -7,6 +7,7 @@ import Config from '@/config/site'
 import { cn } from '@/lib/utils'
 import { MenuIcon, CarIcon, ChevronRight } from 'lucide-react'
 import Link, { LinkProps } from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
@@ -115,7 +116,7 @@ export function MobileNav() {
                                        >
                                           {brand.logoUrl ? (
                                              <div className="w-7 h-7 flex items-center justify-center bg-white rounded-md border border-border/40 shadow-sm">
-                                                <img src={brand.logoUrl} alt={brand.name} width={18} height={18} className="object-contain" />
+                                                <Image src={brand.logoUrl} alt={brand.name} width={18} height={18} className="object-contain" />
                                              </div>
                                           ) : (
                                              <div className="w-7 h-7 rounded-md bg-foreground/10 flex items-center justify-center text-[10px] font-bold">

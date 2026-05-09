@@ -6,6 +6,7 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { SearchIcon, ChevronLeftIcon, ChevronRightIcon, ImageOffIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 
 const ProductLightbox = dynamic(() => import('./ProductLightbox'), { ssr: false })
 
@@ -135,12 +136,14 @@ export default function Carousel({ images, disableZoom = false }: { images: stri
                            disableZoom ? "h-[400px] max-h-[400px]" : "h-[420px]"
                         )}
                      >
-                        <img
+                        <Image
                            src={src}
                            className="absolute inset-0 h-full w-full object-contain pointer-events-none"
                            alt={`Product image ${i + 1}`}
-                           loading={i === 0 ? 'eager' : 'lazy'}
+                           priority={i === 0}
                            draggable={false}
+                           fill
+                           sizes="(max-width: 768px) 100vw, 90vw"
                            onError={(e) => {
                               const img = e.target as HTMLImageElement
                               img.style.display = 'none'
@@ -214,7 +217,7 @@ export default function Carousel({ images, disableZoom = false }: { images: stri
                            : 'border-transparent opacity-50 hover:opacity-80'
                      )}
                   >
-                     <img src={src} className="absolute inset-0 h-full w-full object-cover" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                     <Image src={src} className="absolute inset-0 h-full w-full object-cover" alt="" fill sizes="56px" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   </button>
                ))}
             </div>

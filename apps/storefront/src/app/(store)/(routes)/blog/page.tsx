@@ -2,6 +2,7 @@ export const revalidate = 3600
 
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronRightIcon } from 'lucide-react'
 const formatTR = (d: Date) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d)
 import { Heading } from '@/components/native/heading'
@@ -57,7 +58,7 @@ export default async function BlogPage() {
                <Link key={post.id} href={`/blog/${post.slug}`} className="group block rounded-xl border overflow-hidden hover:shadow-md transition-shadow">
                   {post.cover_image_url ? (
                      <div className="relative h-48 w-full">
-                        <img src={post.cover_image_url} alt={post.title_tr} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                        <Image src={post.cover_image_url} alt={post.title_tr} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                      </div>
                   ) : (
                      <div className="h-48 bg-muted flex items-center justify-center text-muted-foreground text-sm">

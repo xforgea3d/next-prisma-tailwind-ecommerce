@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { getActiveCampaign, getCampaignEndDate, dbCampaignToLegacy, getDBCampaignEndDate, type DBCampaign } from '@/lib/campaigns'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import nextDynamic from 'next/dynamic'
 
@@ -375,7 +376,7 @@ export default async function Index() {
                {banners.map((banner: any) => (
                   <Link key={banner.id} href={banner.link || '/products'}>
                      <div className="rounded-xl overflow-hidden border hover:shadow-lg transition-shadow">
-                        <img src={banner.image} alt={banner.label || ''} className="w-full h-auto object-cover" />
+                        <Image src={banner.image} alt={banner.label || ''} className="w-full h-auto object-cover" width={600} height={400} />
                      </div>
                   </Link>
                ))}

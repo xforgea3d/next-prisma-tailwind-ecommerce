@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
          maxAge: 5 * 60, // 5 minutes
       })
 
-      // Log admin action
-      console.log(`[ADMIN_2FA] User ${user.id} (${user.email}) verified 2FA at ${new Date().toISOString()}`)
+      // Log admin action (no PII)
+      console.log(`[ADMIN_2FA] 2FA verified at ${new Date().toISOString()}`)
 
       return response
    } catch (error) {

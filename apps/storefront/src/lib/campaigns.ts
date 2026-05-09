@@ -370,9 +370,8 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
  */
 export async function getActiveCampaignsFromDB(): Promise<DBCampaign[]> {
    try {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-         ? `https://${process.env.VERCEL_URL}`
-         : 'http://localhost:3000'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+         || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
       const res = await fetch(`${baseUrl}/api/campaigns/active`, {
          next: { revalidate: 60 },
       })

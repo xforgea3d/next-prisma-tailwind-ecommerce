@@ -9,6 +9,7 @@ import { useAuthenticated } from '@/hooks/useAuthentication'
 import { useCsrf } from '@/hooks/useCsrf'
 import { cn } from '@/lib/utils'
 import InstagramCTA from '@/components/native/InstagramCTA'
+import Image from 'next/image'
 import { AlertCircle, CheckCircle, Clock, Copy, CreditCard, ExternalLink, Loader2, MapPin, Package, Printer, RotateCcw, Send, Star, Truck, XCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCallback, useEffect, useState } from 'react'
@@ -565,7 +566,7 @@ export default function OrderDetailPage({ params }: { params: { orderId: string 
                         <div key={item.id} className="flex items-center gap-4 py-2">
                            {displayImage && (
                               <div className="relative h-16 w-16 flex-shrink-0 rounded-md overflow-hidden border">
-                                 <img src={displayImage} alt={displayTitle} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                                 <Image src={displayImage} alt={displayTitle} className="absolute inset-0 h-full w-full object-cover" fill sizes="64px" />
                               </div>
                            )}
                            <div className="flex-1 min-w-0">

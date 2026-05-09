@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { ZoomInIcon, ZoomOutIcon, RotateCcwIcon, XIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import { useEffect, useState, useRef } from 'react'
 
 interface ProductLightboxProps {
@@ -150,7 +151,7 @@ export default function ProductLightbox({
                                                 : "border-transparent opacity-40 hover:opacity-70"
                                         )}
                                     >
-                                        <img src={img} className="absolute inset-0 h-full w-full object-cover" alt="" />
+                                        <Image src={img} className="absolute inset-0 h-full w-full object-cover" alt="" fill sizes="56px" />
                                     </button>
                                 ))}
                             </div>
