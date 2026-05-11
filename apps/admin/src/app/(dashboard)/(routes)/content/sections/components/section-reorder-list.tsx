@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +29,7 @@ export function SectionReorderList({ initialSections }: { initialSections: Secti
     async function toggleEnabled(id: string, current: boolean) {
         setSaving(id)
         try {
-            const res = await fetch(`/api/content/sections/${id}`, {
+            const res = await fetch(adminPath(`/api/content/sections/${id}`), {
                 method: 'PATCH',
                 body: JSON.stringify({ is_enabled: !current }),
                 headers: { 'Content-Type': 'application/json' },
@@ -50,7 +51,7 @@ export function SectionReorderList({ initialSections }: { initialSections: Secti
             ;[next[idx], next[swapIdx]] = [next[swapIdx], next[idx]]
         const reordered = next.map((s, i) => ({ ...s, sort_order: i }))
         setSections(reordered)
-        const res = await fetch('/api/content/sections/reorder', {
+        const res = await fetch(adminPath('/api/content/sections/reorder'), {
             method: 'POST',
             body: JSON.stringify(reordered.map(s => ({ id: s.id, sort_order: s.sort_order }))),
             headers: { 'Content-Type': 'application/json' },
@@ -67,7 +68,7 @@ export function SectionReorderList({ initialSections }: { initialSections: Secti
     async function saveEdit(id: string) {
         setSaving(id)
         try {
-            const res = await fetch(`/api/content/sections/${id}`, {
+            const res = await fetch(adminPath(`/api/content/sections/${id}`), {
                 method: 'PATCH',
                 body: JSON.stringify({
                     title_tr: editTitle,

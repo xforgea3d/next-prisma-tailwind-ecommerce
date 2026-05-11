@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -49,7 +50,7 @@ export function ReturnForm({
       }
       setLoading(true)
       try {
-         const res = await fetch(`/api/returns/${returnId}`, {
+         const res = await fetch(adminPath(`/api/returns/${returnId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -76,7 +77,7 @@ export function ReturnForm({
       setStatus(newStatus)
       setLoading(true)
       try {
-         const res = await fetch(`/api/returns/${returnId}`, {
+         const res = await fetch(adminPath(`/api/returns/${returnId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -91,7 +92,7 @@ export function ReturnForm({
 
          toast.success('Durum guncellendi')
          router.refresh()
-         window.location.href = '/returns'
+         window.location.href = adminPath('/returns')
       } catch (error) {
          toast.error('Bir hata olustu')
          console.error(error)

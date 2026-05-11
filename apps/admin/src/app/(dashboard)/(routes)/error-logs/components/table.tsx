@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -54,7 +55,7 @@ const sourceConfig: Record<string, { icon: any; label: string }> = {
 function ExpandableDetails({ row, onRefresh }: { row: ErrorLogColumn; onRefresh: () => void }) {
    const toggleResolved = async () => {
       try {
-         await fetch(`/api/error-logs/${row.id}`, {
+         await fetch(adminPath(`/api/error-logs/${row.id}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ resolved: !row.resolved }),
@@ -69,7 +70,7 @@ function ExpandableDetails({ row, onRefresh }: { row: ErrorLogColumn; onRefresh:
    const deleteError = async () => {
       if (!confirm('Bu hatayı silmek istediğinize emin misiniz?')) return
       try {
-         await fetch(`/api/error-logs/${row.id}`, { method: 'DELETE' })
+         await fetch(adminPath(`/api/error-logs/${row.id}`), { method: 'DELETE' })
          toast.success('Hata silindi')
          onRefresh()
       } catch {
@@ -142,7 +143,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ data }) => {
       if (ids.length === 0) return
       try {
          setLoading(true)
-         const res = await fetch('/api/error-logs/bulk', {
+         const res = await fetch(adminPath('/api/error-logs/bulk'), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids, resolved: true }),
@@ -163,7 +164,7 @@ export const ErrorLogsTable: React.FC<ErrorLogsTableProps> = ({ data }) => {
       if (!confirm(`${ids.length} hatayı silmek istediğinize emin misiniz?`)) return
       try {
          setLoading(true)
-         const res = await fetch('/api/error-logs/bulk', {
+         const res = await fetch(adminPath('/api/error-logs/bulk'), {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids }),

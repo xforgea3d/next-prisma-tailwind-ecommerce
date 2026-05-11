@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -76,20 +77,20 @@ export function BlogPostForm({ initialData }: { initialData: BlogPost | null }) 
                 published_at: data.status === 'published' ? new Date().toISOString() : null,
             }
             if (isNew) {
-                const res = await fetch('/api/content/blog', {
+                const res = await fetch(adminPath('/api/content/blog'), {
                     method: 'POST', body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'application/json' },
                 })
                 if (!res.ok) throw new Error('Oluşturma başarısız')
             } else {
-                const res = await fetch(`/api/content/blog/${params.postId}`, {
+                const res = await fetch(adminPath(`/api/content/blog/${params.postId}`), {
                     method: 'PATCH', body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'application/json' },
                 })
                 if (!res.ok) throw new Error('Güncelleme başarısız')
             }
             router.refresh()
-            router.push('/content/blog')
+            router.push(adminPath('/content/blog'))
             toast.success(isNew ? 'Yazı oluşturuldu.' : 'Yazı güncellendi.')
         } catch {
             toast.error('Bir hata oluştu.')
@@ -101,10 +102,10 @@ export function BlogPostForm({ initialData }: { initialData: BlogPost | null }) 
     const onDelete = async () => {
         try {
             setLoading(true)
-            const res = await fetch(`/api/content/blog/${params.postId}`, { method: 'DELETE' })
+            const res = await fetch(adminPath(`/api/content/blog/${params.postId}`), { method: 'DELETE' })
             if (!res.ok) throw new Error('Silme başarısız')
             router.refresh()
-            router.push('/content/blog')
+            router.push(adminPath('/content/blog'))
             toast.success('Yazı silindi.')
         } catch {
             toast.error('Bir hata oluştu.')

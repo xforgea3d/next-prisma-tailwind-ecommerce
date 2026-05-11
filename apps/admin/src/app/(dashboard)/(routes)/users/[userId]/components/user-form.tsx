@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -64,14 +65,14 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            const res = await fetch(`/api/users/${params.userId}`, {
+            const res = await fetch(adminPath(`/api/users/${params.userId}`), {
                method: 'PATCH',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(data),
             })
             if (!res.ok) throw new Error(await res.text())
          } else {
-            const res = await fetch(`/api/users`, {
+            const res = await fetch(adminPath(`/api/users`), {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(data),
@@ -80,7 +81,7 @@ export const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
          }
 
          router.refresh()
-         router.push(`/users`)
+         router.push(adminPath(`/users`))
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Bir hata oluştu.')

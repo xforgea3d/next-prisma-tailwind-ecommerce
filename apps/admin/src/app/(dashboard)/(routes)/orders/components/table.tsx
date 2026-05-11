@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -226,7 +227,7 @@ export const OrdersClient: React.FC<OrdersClientProps> = ({ data }) => {
 
    const handleStatusChange = useCallback(async (orderId: string, newStatus: string) => {
       try {
-         const res = await fetch(`/api/orders/${orderId}`, {
+         const res = await fetch(adminPath(`/api/orders/${orderId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus }),

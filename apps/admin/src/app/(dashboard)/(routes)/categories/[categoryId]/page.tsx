@@ -10,13 +10,16 @@ const CategoryPage = async ({
    params: { categoryId: string }
 }) => {
    try {
-      const category = await prisma.category.findUnique({
-         where: {
-            id: params.categoryId,
-         },
-      })
+      const category =
+         params.categoryId === 'new'
+            ? null
+            : await prisma.category.findUnique({
+                 where: {
+                    id: params.categoryId,
+                 },
+              })
 
-      if (!category) {
+      if (params.categoryId !== 'new' && !category) {
          notFound()
       }
 

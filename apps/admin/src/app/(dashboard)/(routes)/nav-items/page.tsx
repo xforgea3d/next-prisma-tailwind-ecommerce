@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
@@ -59,7 +60,7 @@ export default function NavItemsPage() {
 
    const fetchItems = async () => {
       try {
-         const res = await fetch('/api/nav-items')
+         const res = await fetch(adminPath('/api/nav-items'))
          if (res.ok) {
             const data = await res.json()
             setItems(data)
@@ -80,7 +81,7 @@ export default function NavItemsPage() {
       }
       try {
          setSaving(true)
-         const res = await fetch('/api/nav-items', {
+         const res = await fetch(adminPath('/api/nav-items'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -111,7 +112,7 @@ export default function NavItemsPage() {
       if (!deleteTarget) return
       try {
          setSaving(true)
-         const res = await fetch(`/api/nav-items/${deleteTarget}`, { method: 'DELETE' })
+         const res = await fetch(adminPath(`/api/nav-items/${deleteTarget}`), { method: 'DELETE' })
          if (!res.ok) throw new Error('Silme başarısız')
          await fetchItems()
          toast.success('Menü öğesi silindi')
@@ -126,7 +127,7 @@ export default function NavItemsPage() {
 
    const handleToggleVisibility = async (item: NavItem) => {
       try {
-         const res = await fetch(`/api/nav-items/${item.id}`, {
+         const res = await fetch(adminPath(`/api/nav-items/${item.id}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isVisible: !item.isVisible }),
@@ -143,7 +144,7 @@ export default function NavItemsPage() {
       if (!editId) return
       try {
          setSaving(true)
-         const res = await fetch(`/api/nav-items/${editId}`, {
+         const res = await fetch(adminPath(`/api/nav-items/${editId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -173,7 +174,7 @@ export default function NavItemsPage() {
          isVisible: si.isVisible,
       }))
       try {
-         const res = await fetch('/api/nav-items', {
+         const res = await fetch(adminPath('/api/nav-items'), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: updated }),
@@ -194,7 +195,7 @@ export default function NavItemsPage() {
          isVisible: si.isVisible,
       }))
       try {
-         const res = await fetch('/api/nav-items', {
+         const res = await fetch(adminPath('/api/nav-items'), {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ items: updated }),

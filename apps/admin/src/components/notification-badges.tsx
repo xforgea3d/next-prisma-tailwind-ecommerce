@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, MessageSquare, AlertTriangle, RotateCcw } from 'lucide-react'
@@ -17,7 +18,7 @@ export function NotificationBadges() {
 
    useEffect(() => {
       const fetchCounts = () => {
-         fetch('/api/notifications/counts?t=' + Date.now(), { cache: 'no-store' })
+         fetch(adminPath('/api/notifications/counts?t=') + Date.now(), { cache: 'no-store' })
             .then(r => {
                if (!r.ok) throw new Error('Failed to fetch')
                return r.json()

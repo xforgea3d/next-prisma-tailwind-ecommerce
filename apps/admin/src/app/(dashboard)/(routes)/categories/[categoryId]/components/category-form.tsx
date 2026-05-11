@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import {
@@ -71,14 +72,14 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
          setLoading(true)
          const url = initialData ? `/api/categories/${params.categoryId}` : `/api/categories`
          const method = initialData ? 'PATCH' : 'POST'
-         const res = await fetch(url, {
+         const res = await fetch(adminPath(url), {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
          })
          if (!res.ok) throw new Error(await res.text())
          router.refresh()
-         window.location.href = '/categories'
+         window.location.href = adminPath('/categories')
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Bir hata oluştu: ' + (error?.message || ''))
@@ -91,14 +92,14 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       try {
          setLoading(true)
 
-         const res = await fetch(`/api/categories/${params.categoryId}`, {
+         const res = await fetch(adminPath(`/api/categories/${params.categoryId}`), {
             method: 'DELETE',
             cache: 'no-store',
          })
          if (!res.ok) throw new Error('Silme başarısız')
 
          router.refresh()
-         window.location.href = '/categories'
+         window.location.href = adminPath('/categories')
          toast.success('Kategori silindi.')
       } catch (error: any) {
          toast.error(

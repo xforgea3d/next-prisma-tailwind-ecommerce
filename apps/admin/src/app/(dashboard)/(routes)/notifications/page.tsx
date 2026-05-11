@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Heading } from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
@@ -37,7 +38,7 @@ export default function NotificationsPage() {
    const [selectedCoupon, setSelectedCoupon] = useState('')
 
    useEffect(() => {
-      fetch('/api/users')
+      fetch(adminPath('/api/users'))
          .then(r => {
             if (!r.ok) throw new Error()
             return r.json()
@@ -45,7 +46,7 @@ export default function NotificationsPage() {
          .then(setUsers)
          .catch(() => {})
 
-      fetch('/api/discount-codes')
+      fetch(adminPath('/api/discount-codes'))
          .then(r => {
             if (!r.ok) throw new Error()
             return r.json()
@@ -89,7 +90,7 @@ export default function NotificationsPage() {
             return
          }
 
-         const res = await fetch('/api/notifications/send', {
+         const res = await fetch(adminPath('/api/notifications/send'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),

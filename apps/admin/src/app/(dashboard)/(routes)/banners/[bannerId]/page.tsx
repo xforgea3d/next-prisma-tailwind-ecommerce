@@ -6,13 +6,16 @@ import { BannerForm } from './components/banner-form'
 
 const Page = async ({ params }: { params: { bannerId: string } }) => {
    try {
-      const banner = await prisma.banner.findUnique({
-         where: {
-            id: params.bannerId,
-         },
-      })
+      const banner =
+         params.bannerId === 'new'
+            ? null
+            : await prisma.banner.findUnique({
+                 where: {
+                    id: params.bannerId,
+                 },
+              })
 
-      if (!banner) {
+      if (params.bannerId !== 'new' && !banner) {
          notFound()
       }
 

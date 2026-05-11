@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import {
@@ -97,7 +98,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
       const slug = newSlug || slugify(newName)
       try {
          setLoading(true)
-         const res = await fetch(`/api/car-brands/${brandId}/models`, {
+         const res = await fetch(adminPath(`/api/car-brands/${brandId}/models`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -123,7 +124,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
       if (!editModel || !editName) return
       try {
          setLoading(true)
-         const res = await fetch(`/api/car-brands/${brandId}/models/${editModel.id}`, {
+         const res = await fetch(adminPath(`/api/car-brands/${brandId}/models/${editModel.id}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -148,7 +149,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
       if (!deleteTarget) return
       try {
          setLoading(true)
-         const res = await fetch(`/api/car-brands/${brandId}/models/${deleteTarget}`, { method: 'DELETE' })
+         const res = await fetch(adminPath(`/api/car-brands/${brandId}/models/${deleteTarget}`), { method: 'DELETE' })
          if (!res.ok) throw new Error('Silme başarısız')
          router.refresh()
          toast.success('Model silindi.')
@@ -170,11 +171,11 @@ export const ModelForm: React.FC<ModelFormProps> = ({ brandId, brandName, models
          setUploadingId(modelId)
          const formData = new FormData()
          formData.append('file', file)
-         const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData })
+         const uploadRes = await fetch(adminPath('/api/upload'), { method: 'POST', body: formData })
          if (!uploadRes.ok) throw new Error('Upload failed')
          const { url } = await uploadRes.json()
 
-         const patchRes = await fetch(`/api/car-brands/${brandId}/models/${modelId}`, {
+         const patchRes = await fetch(adminPath(`/api/car-brands/${brandId}/models/${modelId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ imageUrl: url }),

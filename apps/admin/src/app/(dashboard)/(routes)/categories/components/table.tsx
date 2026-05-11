@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import { ColumnDef } from '@tanstack/react-table'
@@ -31,7 +32,7 @@ export const CategoriesClient: React.FC<CategoriesClientProps> = ({ data }) => {
       if (!deleteId) return
       try {
          setLoading(true)
-         const res = await fetch(`/api/categories/${deleteId}`, { method: 'DELETE' })
+         const res = await fetch(adminPath(`/api/categories/${deleteId}`), { method: 'DELETE' })
          if (!res.ok) throw new Error('Silme başarısız')
          toast.success('Kategori silindi.')
          window.location.reload()
@@ -46,7 +47,7 @@ export const CategoriesClient: React.FC<CategoriesClientProps> = ({ data }) => {
    const onToggleVisibility = async (id: string, currentValue: boolean) => {
       try {
          setTogglingId(id)
-         const res = await fetch(`/api/categories/${id}`, {
+         const res = await fetch(adminPath(`/api/categories/${id}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isVisible: !currentValue }),

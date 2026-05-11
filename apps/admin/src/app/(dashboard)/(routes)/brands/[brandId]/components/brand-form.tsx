@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import {
@@ -67,14 +68,14 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
          setLoading(true)
          const url = initialData ? `/api/brands/${params.brandId}` : `/api/brands`
          const method = initialData ? 'PATCH' : 'POST'
-         const res = await fetch(url, {
+         const res = await fetch(adminPath(url), {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
          })
          if (!res.ok) throw new Error(await res.text())
          router.refresh()
-         window.location.href = '/brands'
+         window.location.href = adminPath('/brands')
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Bir hata oluştu: ' + (error?.message || ''))
@@ -87,14 +88,14 @@ export const BrandForm: React.FC<BrandFormProps> = ({ initialData }) => {
       try {
          setLoading(true)
 
-         const res = await fetch(`/api/brands/${params.brandId}`, {
+         const res = await fetch(adminPath(`/api/brands/${params.brandId}`), {
             method: 'DELETE',
             cache: 'no-store',
          })
          if (!res.ok) throw new Error('Silme başarısız')
 
          router.refresh()
-         window.location.href = '/brands'
+         window.location.href = adminPath('/brands')
          toast.success('Koleksiyon silindi.')
       } catch (error: any) {
          toast.error(

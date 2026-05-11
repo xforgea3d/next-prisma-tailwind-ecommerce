@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -33,7 +34,7 @@ export function QuoteResponseForm({
 
       setLoading(true)
       try {
-         const res = await fetch(`/api/quote-requests/${quoteId}`, {
+         const res = await fetch(adminPath(`/api/quote-requests/${quoteId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

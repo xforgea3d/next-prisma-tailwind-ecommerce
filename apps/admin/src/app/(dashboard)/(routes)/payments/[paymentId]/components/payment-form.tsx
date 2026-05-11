@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -77,14 +78,14 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
          setLoading(true)
 
          if (initialData) {
-            const res = await fetch(`/api/payments/${params.paymentId}`, {
+            const res = await fetch(adminPath(`/api/payments/${params.paymentId}`), {
                method: 'PATCH',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(data),
             })
             if (!res.ok) throw new Error(await res.text())
          } else {
-            const res = await fetch(`/api/payments`, {
+            const res = await fetch(adminPath(`/api/payments`), {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(data),
@@ -94,7 +95,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
 
          router.refresh()
          toast.success(toastMessage)
-         router.push(`/payments`)
+         router.push(adminPath(`/payments`))
       } catch (error: any) {
          toast.error('Bir hata oluştu.')
       } finally {

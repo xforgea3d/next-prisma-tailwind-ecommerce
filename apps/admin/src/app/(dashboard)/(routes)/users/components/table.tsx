@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
@@ -37,7 +38,7 @@ function SendNotificationButton({ userId, userName }: { userId: string; userName
       if (!message.trim()) return
       setLoading(true)
       try {
-         const res = await fetch('/api/notifications/send', {
+         const res = await fetch(adminPath('/api/notifications/send'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, content: message.trim() }),

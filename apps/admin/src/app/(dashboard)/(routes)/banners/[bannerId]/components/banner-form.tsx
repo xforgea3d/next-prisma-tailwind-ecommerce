@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import * as z from 'zod'
 import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -69,14 +70,14 @@ export const BannerForm: React.FC<BannerFormProps> = ({ initialData }) => {
          setLoading(true)
          const url = initialData ? `/api/banners/${params.bannerId}` : `/api/banners`
          const method = initialData ? 'PATCH' : 'POST'
-         const res = await fetch(url, {
+         const res = await fetch(adminPath(url), {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
          })
          if (!res.ok) throw new Error(await res.text())
          router.refresh()
-         window.location.href = '/banners'
+         window.location.href = adminPath('/banners')
          toast.success(toastMessage)
       } catch (error: any) {
          toast.error('Bir hata oluştu: ' + (error?.message || ''))
@@ -89,14 +90,14 @@ export const BannerForm: React.FC<BannerFormProps> = ({ initialData }) => {
       try {
          setLoading(true)
 
-         const res = await fetch(`/api/banners/${params.bannerId}`, {
+         const res = await fetch(adminPath(`/api/banners/${params.bannerId}`), {
             method: 'DELETE',
             cache: 'no-store',
          })
          if (!res.ok) throw new Error('Silme başarısız')
 
          router.refresh()
-         window.location.href = '/banners'
+         window.location.href = adminPath('/banners')
          toast.success('Banner silindi.')
       } catch (error: any) {
          toast.error(

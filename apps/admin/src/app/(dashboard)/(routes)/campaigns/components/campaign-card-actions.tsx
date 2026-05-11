@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExternalLink, Power, PowerOff } from 'lucide-react'
@@ -32,7 +33,7 @@ export function CampaignCardActions({
       e.stopPropagation()
       try {
          setToggling(true)
-         const res = await fetch(`/api/campaigns/${campaignId}`, {
+         const res = await fetch(adminPath(`/api/campaigns/${campaignId}`), {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isActive: !isActive }),

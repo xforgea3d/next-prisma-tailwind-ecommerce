@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import {
@@ -183,7 +184,7 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({
             ? `/api/campaigns/${params.campaignId}`
             : `/api/campaigns`
          const method = initialData ? 'PATCH' : 'POST'
-         const res = await fetch(url, {
+         const res = await fetch(adminPath(url), {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -194,7 +195,7 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({
          })
          if (!res.ok) throw new Error(await res.text())
          toast.success(toastMessage)
-         window.location.href = '/campaigns'
+         window.location.href = adminPath('/campaigns')
       } catch (error: any) {
          toast.error('Bir hata olustu: ' + (error?.message || ''))
       } finally {
@@ -205,13 +206,13 @@ export const CampaignForm: React.FC<CampaignFormProps> = ({
    const onDelete = async () => {
       try {
          setLoading(true)
-         const res = await fetch(`/api/campaigns/${params.campaignId}`, {
+         const res = await fetch(adminPath(`/api/campaigns/${params.campaignId}`), {
             method: 'DELETE',
             cache: 'no-store',
          })
          if (!res.ok) throw new Error('Silme basarisiz')
          router.refresh()
-         router.push('/campaigns')
+         router.push(adminPath('/campaigns'))
          toast.success('Kampanya silindi.')
       } catch (error: any) {
          toast.error('Kampanya silinemedi.')

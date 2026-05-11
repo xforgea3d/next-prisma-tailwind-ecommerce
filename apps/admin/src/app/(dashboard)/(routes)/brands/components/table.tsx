@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/ui/data-table'
 import { ColumnDef } from '@tanstack/react-table'
@@ -29,7 +30,7 @@ export const BrandsClient: React.FC<BrandsClientProps> = ({ data }) => {
       if (!deleteId) return
       try {
          setLoading(true)
-         const res = await fetch(`/api/brands/${deleteId}`, { method: 'DELETE' })
+         const res = await fetch(adminPath(`/api/brands/${deleteId}`), { method: 'DELETE' })
          if (!res.ok) throw new Error('Silme başarısız')
          toast.success('Koleksiyon silindi.')
          router.refresh()

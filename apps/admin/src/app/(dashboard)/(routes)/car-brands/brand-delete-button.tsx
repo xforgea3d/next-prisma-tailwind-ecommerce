@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
@@ -20,7 +21,7 @@ export const BrandDeleteButton: React.FC<BrandDeleteButtonProps> = ({ brandId, b
    const onDelete = async () => {
       try {
          setLoading(true)
-         const res = await fetch(`/api/car-brands/${brandId}`, { method: 'DELETE' })
+         const res = await fetch(adminPath(`/api/car-brands/${brandId}`), { method: 'DELETE' })
          if (!res.ok) throw new Error(await res.text())
          router.refresh()
          toast.success(`${brandName} silindi.`)

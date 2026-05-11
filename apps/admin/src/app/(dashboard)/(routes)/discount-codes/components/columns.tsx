@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AlertModal } from '@/components/modals/alert-modal'
@@ -48,7 +49,7 @@ const DeleteAction = ({ id }: { id: string }) => {
    const onDelete = async () => {
       try {
          setLoading(true)
-         const res = await fetch(`/api/discount-codes/${id}`, {
+         const res = await fetch(adminPath(`/api/discount-codes/${id}`), {
             method: 'DELETE',
             cache: 'no-store',
          })

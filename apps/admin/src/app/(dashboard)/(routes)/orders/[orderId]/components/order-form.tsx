@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -101,7 +102,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
    const onSubmit = async (data: OrderFormValues) => {
       try {
          setLoading(true)
-         const res = await fetch(`/api/orders/${params.orderId}`, {
+         const res = await fetch(adminPath(`/api/orders/${params.orderId}`), {
             method: 'PATCH',
             body: JSON.stringify(data),
             cache: 'no-store',

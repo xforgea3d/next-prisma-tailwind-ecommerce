@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -52,7 +53,7 @@ export function SiteSettingsForm({ initialData }: { initialData: FormValues }) {
     const onSubmit = async (data: FormValues) => {
         try {
             setLoading(true)
-            await fetch('/api/settings/site', {
+            await fetch(adminPath('/api/settings/site'), {
                 method: 'PATCH',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' },

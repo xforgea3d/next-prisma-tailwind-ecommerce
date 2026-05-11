@@ -1,5 +1,6 @@
 'use client'
 
+import { adminPath } from '@/lib/base-path'
 import { AlertModal } from '@/components/modals/alert-modal'
 import { Button } from '@/components/ui/button'
 import {
@@ -105,7 +106,7 @@ export const DiscountForm: React.FC<DiscountFormProps> = ({ initialData }) => {
             ? `/api/discount-codes/${params.codeId}`
             : `/api/discount-codes`
          const method = initialData ? 'PATCH' : 'POST'
-         const res = await fetch(url, {
+         const res = await fetch(adminPath(url), {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -115,7 +116,7 @@ export const DiscountForm: React.FC<DiscountFormProps> = ({ initialData }) => {
          // Refresh first to invalidate client cache, then navigate
          router.refresh()
          // Use window.location for a full page navigation to guarantee fresh data
-         window.location.href = '/discount-codes'
+         window.location.href = adminPath('/discount-codes')
       } catch (error: any) {
          toast.error('Bir hata olustu: ' + (error?.message || ''))
       } finally {
@@ -126,13 +127,13 @@ export const DiscountForm: React.FC<DiscountFormProps> = ({ initialData }) => {
    const onDelete = async () => {
       try {
          setLoading(true)
-         const res = await fetch(`/api/discount-codes/${params.codeId}`, {
+         const res = await fetch(adminPath(`/api/discount-codes/${params.codeId}`), {
             method: 'DELETE',
             cache: 'no-store',
          })
          if (!res.ok) throw new Error('Silme basarisiz')
          router.refresh()
-         router.push('/discount-codes')
+         router.push(adminPath('/discount-codes'))
          toast.success('Kupon silindi.')
       } catch (error: any) {
          toast.error('Kupon silinemedi. Bu kuponu kullanan siparisler olabilir.')
