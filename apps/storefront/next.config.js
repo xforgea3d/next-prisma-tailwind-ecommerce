@@ -71,7 +71,7 @@ module.exports = {
             beforeFiles: [
                 {
                     source: '/admin07',
-                    destination: 'https://xforgea-admin.vercel.app/admin07/login',
+                    destination: 'https://xforgea-admin.vercel.app/admin07',
                 },
                 {
                     source: '/admin07/:path*',

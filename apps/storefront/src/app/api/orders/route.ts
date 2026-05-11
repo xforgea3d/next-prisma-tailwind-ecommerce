@@ -73,6 +73,18 @@ export async function POST(req: Request) {
 
       if (!addressId) return new NextResponse('addressId is required', { status: 400 })
 
+      const hasPaymentProvider =
+         Boolean(process.env.PAYMENT_API_KEY) &&
+         Boolean(process.env.PAYMENT_SECRET_KEY) &&
+         Boolean(process.env.PAYMENT_MERCHANT_ID)
+
+      if (process.env.NODE_ENV === 'production' && !hasPaymentProvider) {
+         return new NextResponse(
+            'Online ödeme altyapısı hazırlanıyor. Yapı Kredi Sanal POS entegrasyonu tamamlandığında sipariş alınabilecektir.',
+            { status: 503 }
+         )
+      }
+
       // Verify address belongs to this user
       const address = await prisma.address.findFirst({
          where: { id: addressId, userId },
@@ -349,7 +361,7 @@ export async function POST(req: Request) {
          })
       }
 
-      return NextResponse.json(order)
+      return NextResponse.json(actualOrder)
    } catch (error: any) {
       if (error?.message === 'INVALID_DISCOUNT') {
          return new NextResponse('Geçersiz veya süresi dolmuş indirim kodu', { status: 400 })
