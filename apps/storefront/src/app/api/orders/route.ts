@@ -226,7 +226,7 @@ export async function POST(req: Request) {
          })
 
          // Pre-check low stock inside transaction (before committing)
-         const orderProductIds = order.orderItems.map((item) => item.productId)
+         const orderProductIds = created.orderItems.map((item) => item.productId)
          const productsForNotif = await tx.product.findMany({
             where: { id: { in: orderProductIds } },
             select: { id: true, title: true, stock: true },
