@@ -11,7 +11,7 @@ function adminUrl(path: string, requestUrl: string) {
 export async function middleware(request: NextRequest) {
    if (request.nextUrl.pathname.startsWith('/api/auth')) return NextResponse.next()
 
-   const ALLOWED_ADMIN_EMAIL = process.env.ADMIN_EMAIL
+   const ALLOWED_ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim().toLowerCase()
 
    const isLoginPage = request.nextUrl.pathname === '/login'
 
@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
 
    // If user is on /login and already authenticated as admin, redirect to dashboard
    if (isLoginPage) {
-      if (user && ALLOWED_ADMIN_EMAIL && user.email?.toLowerCase() === ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+      if (user && ALLOWED_ADMIN_EMAIL && user.email?.trim().toLowerCase() === ALLOWED_ADMIN_EMAIL) {
          const response = NextResponse.redirect(adminUrl('/', request.url))
          supabaseResponse.cookies.getAll().forEach((cookie) => {
             response.cookies.set(cookie.name, cookie.value, cookie as any)
@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(adminUrl('/login', request.url))
    }
 
-   if (user.email?.toLowerCase() !== ALLOWED_ADMIN_EMAIL.toLowerCase()) {
+   if (user.email?.trim().toLowerCase() !== ALLOWED_ADMIN_EMAIL) {
       if (isTargetingAPI()) {
          return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
       }
