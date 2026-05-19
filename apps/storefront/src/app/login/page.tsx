@@ -45,16 +45,16 @@ export default function AuthenticationPage() {
                   <h2 className="text-3xl font-bold leading-tight text-white">
                      Fikrine{' '}
                      <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                        Sekil Ver
+                        Şekil Ver
                      </span>
                      ,<br />
                      Katman Katman{' '}
                      <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-                        Uret.
+                        Üret.
                      </span>
                   </h2>
                   <p className="max-w-sm text-sm leading-relaxed text-zinc-400">
-                     Turkiye&apos;nin premium 3D baski markasi ile hayallerinizi gercege donusturun.
+                     Türkiye&apos;nin premium 3D baskı markası ile hayallerinizi gerçeğe dönüştürün.
                   </p>
                </div>
 
@@ -67,8 +67,8 @@ export default function AuthenticationPage() {
                         </svg>
                      </div>
                      <div>
-                        <p className="text-sm font-medium text-white">Kisiye Ozel 3D Baski</p>
-                        <p className="text-xs text-zinc-500">Tasariminizi gonderin, biz uretelim</p>
+                        <p className="text-sm font-medium text-white">Kişiye Özel 3D Baskı</p>
+                        <p className="text-xs text-zinc-500">Tasarımınızı gönderin, biz üretelim</p>
                      </div>
                   </div>
 
@@ -83,8 +83,8 @@ export default function AuthenticationPage() {
                         </svg>
                      </div>
                      <div>
-                        <p className="text-sm font-medium text-white">Turkiye Geneli Kargo</p>
-                        <p className="text-xs text-zinc-500">Hizli ve guvenli teslimat</p>
+                        <p className="text-sm font-medium text-white">Türkiye Geneli Kargo</p>
+                        <p className="text-xs text-zinc-500">Hızlı ve güvenli teslimat</p>
                      </div>
                   </div>
 
@@ -96,8 +96,8 @@ export default function AuthenticationPage() {
                         </svg>
                      </div>
                      <div>
-                        <p className="text-sm font-medium text-white">14 Gun Iade Garantisi</p>
-                        <p className="text-xs text-zinc-500">Kosulsuz memnuniyet</p>
+                        <p className="text-sm font-medium text-white">14 Gün İade Garantisi</p>
+                        <p className="text-xs text-zinc-500">Koşulsuz memnuniyet</p>
                      </div>
                   </div>
                </div>
@@ -122,14 +122,14 @@ export default function AuthenticationPage() {
                         ))}
                      </div>
                      <p className="text-xs text-zinc-400">
-                        <span className="font-semibold text-white">1000+</span> Mutlu Musteri
+                        <span className="font-semibold text-white">14 Gün</span> İade Garantisi
                      </p>
                   </div>
                </div>
 
                <blockquote className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
                   <p className="text-sm leading-relaxed text-zinc-300">
-                     &ldquo;xForgea3D ile siparis verdigim figur hayallerimden de guzel geldi. Kalite ve detay calismasi inanilmaz.&rdquo;
+                     &ldquo;xForgea3D ile sipariş verdiğim figür hayallerimden de güzel geldi. Kalite ve detay çalışması inanılmaz.&rdquo;
                   </p>
                   <footer className="mt-2 text-xs text-zinc-500">Mert K., Ankara</footer>
                </blockquote>

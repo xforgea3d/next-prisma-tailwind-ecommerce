@@ -270,6 +270,8 @@ enum OrderStatusEnum {
 model Address {
   id         String @id @default(cuid())
   country    String @default("IRI")
+  fullName   String?
+  title      String?
   address    String
   city       String
   phone      String

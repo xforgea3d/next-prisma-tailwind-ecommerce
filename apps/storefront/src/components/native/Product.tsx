@@ -39,9 +39,9 @@ function getFlashSaleTimeLeft(endDate: string | Date | null | undefined): string
    if (diff <= 0) return null
    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-   if (days > 0) return `${days}g ${hours}s kaldi`
+   if (days > 0) return `${days}g ${hours}s kaldı`
    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-   return `${hours}s ${mins}dk kaldi`
+   return `${hours}s ${mins}dk kaldı`
 }
 
 // isFlashSaleActive is now imported from @/lib/flash-sale
@@ -99,7 +99,7 @@ export const Product = ({
                   {flashActive && (
                      <div className="absolute top-2 left-2 flex flex-col gap-1">
                         <span className="inline-flex items-center rounded-full bg-red-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm animate-pulse">
-                           ⚡ Ozel Firsat
+                           ⚡ Özel Fırsat
                         </span>
                         {flashTimeLeft && (
                            <span className="inline-flex items-center rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">

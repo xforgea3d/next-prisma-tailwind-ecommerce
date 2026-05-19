@@ -52,17 +52,6 @@ export default function WhatsAppFloat() {
                }
             }
 
-            @keyframes whatsapp-dot-pulse {
-               0%, 100% {
-                  transform: scale(1);
-                  opacity: 1;
-               }
-               50% {
-                  transform: scale(1.3);
-                  opacity: 0.7;
-               }
-            }
-
             @keyframes whatsapp-tooltip-in {
                0% {
                   opacity: 0;
@@ -86,10 +75,6 @@ export default function WhatsAppFloat() {
 
             .whatsapp-tooltip {
                animation: whatsapp-tooltip-in 0.25s ease-out forwards;
-            }
-
-            .whatsapp-dot {
-               animation: whatsapp-dot-pulse 1.5s ease-in-out infinite;
             }
          `}</style>
 
@@ -118,9 +103,6 @@ export default function WhatsAppFloat() {
                }`}
                style={{ backgroundColor: '#25D366' }}
             >
-               {/* Notification dot */}
-               <span className="whatsapp-dot absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white" />
-
                {/* WhatsApp SVG Icon */}
                <svg
                   className="w-6 h-6 md:w-7 md:h-7"

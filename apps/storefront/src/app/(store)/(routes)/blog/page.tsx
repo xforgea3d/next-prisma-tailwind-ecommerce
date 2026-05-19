@@ -7,7 +7,7 @@ import { ChevronRightIcon } from 'lucide-react'
 const formatTR = (d: Date) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d)
 
 export const metadata = {
-   title: 'Blog | xForgea3D',
+   title: 'Blog',
    description: '3D baskı dünyasından haberler, ipuçları ve hikayeler.',
 }
 

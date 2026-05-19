@@ -25,13 +25,13 @@ export default function OtpEmail({
 }: OtpEmailProps) {
     const isReset = type === 'reset'
     const previewText = isReset
-        ? `xForgea3D - Sifre sifirlama kodunuz: ${code}`
-        : `xForgea3D - Dogrulama kodunuz: ${code}`
+        ? `xForgea3D - Şifre sıfırlama kodunuz: ${code}`
+        : `xForgea3D - Doğrulama kodunuz: ${code}`
 
-    const heading = isReset ? 'Sifre Sifirlama' : 'E-posta Dogrulama'
+    const heading = isReset ? 'Şifre Sıfırlama' : 'E-posta Doğrulama'
     const description = isReset
-        ? 'Sifrenizi sifirlamak icin asagidaki kodu kullanin.'
-        : 'Hesabinizi dogrulamak icin asagidaki kodu girin.'
+        ? 'Şifrenizi sıfırlamak için aşağıdaki kodu kullanın.'
+        : 'Hesabınızı doğrulamak için aşağıdaki kodu girin.'
 
     return (
         <Html>
@@ -142,7 +142,7 @@ export default function OtpEmail({
                                     margin: '0 0 16px 0',
                                 }}
                             >
-                                Bu kod 10 dakika icerisinde gecerliligini yitirecektir.
+                                Bu kod 10 dakika içerisinde geçerliliğini yitirecektir.
                             </Text>
 
                             <Hr
@@ -161,8 +161,8 @@ export default function OtpEmail({
                                     lineHeight: '18px',
                                 }}
                             >
-                                Bu islemi siz baslatmadiyseniz bu e-postayi guvenlice yok sayabilirsiniz.
-                                Hesabiniz guvendedir.
+                                Bu işlemi siz başlatmadıysa bu e-postayı güvenlikçe yok sayabilirsiniz.
+                                Hesabınız güvendedir.
                             </Text>
                         </Section>
 
@@ -175,7 +175,7 @@ export default function OtpEmail({
                                     margin: '0',
                                 }}
                             >
-                                &copy; {new Date().getFullYear()} xForgea3D. Tum haklari saklidir.
+                                &copy; {new Date().getFullYear()} xForgea3D. Tüm hakları saklıdır.
                             </Text>
                         </Section>
                     </Container>

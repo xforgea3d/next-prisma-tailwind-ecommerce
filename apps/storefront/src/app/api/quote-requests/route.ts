@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
       if (!data.email || !data.partDescription) {
          return NextResponse.json(
-            { error: 'E-posta ve parca aciklamasi zorunludur' },
+            { error: 'E-posta ve parça açıklaması zorunludur' },
             { status: 400 }
          )
       }
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       }
 
       if (data.partDescription.length > 2000) {
-         return NextResponse.json({ error: 'Aciklama cok uzun (maks 2000 karakter)' }, { status: 400 })
+         return NextResponse.json({ error: 'Açıklama çok uzun (maks 2000 karakter)' }, { status: 400 })
       }
 
       // Upload image to Supabase Storage if provided

@@ -75,7 +75,7 @@ function getFlashSaleCountdown(endDate: string | Date | null | undefined): { act
    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
    return {
       active: true,
-      text: `Bu firsat ${days} gun ${hours} saat ${minutes} dk sonra bitiyor!`,
+      text: `Bu fırsat ${days} gün ${hours} saat ${minutes} dk sonra bitiyor!`,
       days,
       hours,
       minutes,
@@ -178,7 +178,7 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
                </h1>
                {isFlashActive && (
                   <Badge className="bg-red-600 text-white text-xs animate-pulse">
-                     ⚡ Ozel Firsat
+                     ⚡ Özel Fırsat
                   </Badge>
                )}
             </div>
@@ -201,7 +201,7 @@ export const DataSection = ({ product }: { product: ProductWithIncludes }) => {
                         {basePrice.toFixed(2)} ₺
                      </span>
                      <Badge variant="destructive" className="text-xs">
-                        %{flashDiscountPct} Indirim
+                        %{flashDiscountPct} İndirim
                      </Badge>
                   </>
                )}

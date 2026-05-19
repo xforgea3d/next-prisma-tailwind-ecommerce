@@ -82,7 +82,7 @@ function ThemeToggle() {
       <Button
          variant="outline"
          size="icon"
-         aria-label="Tema degistir"
+         aria-label="Tema değiştir"
          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
          suppressHydrationWarning
       >

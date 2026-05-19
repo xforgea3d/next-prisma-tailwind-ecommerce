@@ -19,7 +19,7 @@ export default function IadeKosullari() {
             <ul>
                 <li>İade edilecek ürünlerin orijinal kutusu/ambalajı ve etiketleriyle birlikte eksiksiz ve hasarsız olarak teslim edilmesi gerekmektedir.</li>
                 <li>3D baskı ürünlerinde kullanım izi, kırılma, montajlama deformasyonu veya kullanıcı kaynaklı fiziksel hasar tespit edilen ürünlerin iadesi kabul edilmemektedir.</li>
-                <li>İade işlemi artık doğrudan web sitemiz üzerinden başlatılabilir (aşağıdaki &quot;Online İade Talebi&quot; bölümüne bakınız). Alternatif olarak <strong>destek@xforgea3d.com</strong> adresi üzerinden de bizimle iletişime geçebilirsiniz.</li>
+                <li>İade işlemi artık doğrudan web sitemiz üzerinden başlatılabilir (aşağıdaki &quot;Online İade Talebi&quot; bölümüne bakınız). Alternatif olarak <strong>info@xforgea3d.com</strong> adresi üzerinden de bizimle iletişime geçebilirsiniz.</li>
             </ul>
 
             <h2>3. Online İade Talebi</h2>

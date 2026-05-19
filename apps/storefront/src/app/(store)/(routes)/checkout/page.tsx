@@ -21,6 +21,8 @@ import { trackBeginCheckout, trackPurchase } from '@/lib/gtag'
 
 interface Address {
    id: string
+   fullName?: string
+   title?: string
    address: string
    city: string
    phone: string
@@ -71,7 +73,7 @@ export default function CheckoutPage() {
    const [loading, setLoading] = useState(false)
    const [loadingAddresses, setLoadingAddresses] = useState(true)
    const [showNewAddress, setShowNewAddress] = useState(false)
-   const [newAddress, setNewAddress] = useState({ address: '', city: '', district: '', phone: '', postalCode: '' })
+   const [newAddress, setNewAddress] = useState({ fullName: '', title: '', address: '', city: '', district: '', phone: '', postalCode: '' })
    const [taxRate, setTaxRate] = useState(20)
    const [priceRefreshTick, setPriceRefreshTick] = useState(0)
    const [mesafeliChecked, setMesafeliChecked] = useState(false)
@@ -149,8 +151,9 @@ export default function CheckoutPage() {
       const couponDiscount = discountInfo?.discountAmount ?? 0
       const totalDiscount = productDiscount + couponDiscount
       const afterDiscount = Math.max(total - totalDiscount, 0)
-      const tax = afterDiscount * (taxRate / 100)
-      const payable = afterDiscount + tax
+      // Back-calculate KDV component from price that already includes VAT
+      const tax = afterDiscount * (taxRate / (100 + taxRate))
+      const payable = afterDiscount
       return {
          total: total.toFixed(2),
          productDiscount: productDiscount.toFixed(2),
@@ -214,7 +217,7 @@ export default function CheckoutPage() {
    }, [])
 
    const handleNewAddress = useCallback(async () => {
-      if (!newAddress.address || !newAddress.city || !newAddress.phone || !newAddress.postalCode) {
+      if (!newAddress.fullName || !newAddress.address || !newAddress.city || !newAddress.phone || !newAddress.postalCode) {
          toast.error('Tüm adres alanlarını doldurun')
          return
       }
@@ -233,7 +236,7 @@ export default function CheckoutPage() {
          setAddresses((prev) => [...prev, created])
          setSelectedAddress(created.id)
          setShowNewAddress(false)
-         setNewAddress({ address: '', city: '', district: '', phone: '', postalCode: '' })
+         setNewAddress({ fullName: '', title: '', address: '', city: '', district: '', phone: '', postalCode: '' })
          toast.success('Adres eklendi')
       } catch {
          toast.error('Adres eklenirken hata oluştu')
@@ -317,7 +320,7 @@ export default function CheckoutPage() {
                <li aria-current="page">
                   <div className="flex items-center gap-2">
                      <ChevronRightIcon className="h-4" />
-                     <span className="text-sm font-medium text-foreground">Siparisi Tamamla</span>
+                     <span className="text-sm font-medium text-foreground">Siparişi Tamamla</span>
                   </div>
                </li>
             </ol>
@@ -358,6 +361,7 @@ export default function CheckoutPage() {
                                     : 'hover:border-muted-foreground/30'
                               }`}
                            >
+                              {addr.fullName && <p className="text-sm font-semibold">{addr.fullName}</p>}
                               <p className="font-medium">{addr.address}</p>
                               <p className="text-sm text-muted-foreground">
                                  {addr.city} - {addr.postalCode}
@@ -369,6 +373,24 @@ export default function CheckoutPage() {
 
                      {showNewAddress ? (
                         <div className="space-y-3 rounded-lg border p-4">
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                 <Label>Ad Soyad *</Label>
+                                 <Input
+                                    placeholder="Alıcı adı soyadı"
+                                    value={newAddress.fullName}
+                                    onChange={(e) => setNewAddress((p) => ({ ...p, fullName: e.target.value }))}
+                                 />
+                              </div>
+                              <div>
+                                 <Label>Adres Başlığı</Label>
+                                 <Input
+                                    placeholder="Ev, İş, vb."
+                                    value={newAddress.title}
+                                    onChange={(e) => setNewAddress((p) => ({ ...p, title: e.target.value }))}
+                                 />
+                              </div>
+                           </div>
                            <div>
                               <Label>Şehir / İlçe / Posta Kodu</Label>
                               <CityDistrictSelector
@@ -425,7 +447,7 @@ export default function CheckoutPage() {
                                  Kod uygulandı! %{discountInfo.percent} indirim
                               </p>
                               <p className="text-xs text-green-600 dark:text-green-500">
-                                 {discountInfo.discountAmount.toFixed(2)} TL indirim uygulanacak
+                                 {discountInfo.discountAmount.toFixed(2)} ₺ indirim uygulanacak
                               </p>
                            </div>
                            <Button variant="ghost" size="sm" onClick={handleClearDiscount} className="text-green-700 hover:text-red-600">
@@ -507,21 +529,21 @@ export default function CheckoutPage() {
                                     )}
                                  </p>
                                  <p className="text-xs text-muted-foreground">
-                                    {item.count} x {itemPrice.toFixed(2)} TL
+                                    {item.count} x {itemPrice.toFixed(2)} ₺
                                     {itemFlashSale && (
                                        <span className="ml-1 line-through text-muted-foreground/60">
-                                          {item.product.price.toFixed(2)} TL
+                                          {item.product.price.toFixed(2)} ₺
                                        </span>
                                     )}
                                  </p>
                               </div>
                               <div className="text-right flex-shrink-0">
                                  <p className={`font-semibold text-sm ${itemFlashSale ? 'text-red-600 dark:text-red-400' : ''}`}>
-                                    {(itemPrice * item.count).toFixed(2)} TL
+                                    {(itemPrice * item.count).toFixed(2)} ₺
                                  </p>
                                  {!itemFlashSale && item.product.discount > 0 && (
                                     <p className="text-xs text-green-600">
-                                       -{(item.product.discount * item.count).toFixed(2)} TL
+                                       -{(item.product.discount * item.count).toFixed(2)} ₺
                                     </p>
                                  )}
                               </div>
@@ -536,12 +558,12 @@ export default function CheckoutPage() {
                      <div className="space-y-2.5 text-muted-foreground">
                         <div className="flex justify-between">
                            <span>Ara Toplam</span>
-                           <span>{costs.total} TL</span>
+                           <span>{costs.total} ₺</span>
                         </div>
                         {parseFloat(costs.productDiscount) > 0 && (
                            <div className="flex justify-between text-green-600">
                               <span>Ürün İndirimi</span>
-                              <span>-{costs.productDiscount} TL</span>
+                              <span>-{costs.productDiscount} ₺</span>
                            </div>
                         )}
                         {discountInfo?.valid && parseFloat(costs.couponDiscount) > 0 && (
@@ -550,12 +572,12 @@ export default function CheckoutPage() {
                                  <Tag className="h-3 w-3" />
                                  Kupon ({discountCode})
                               </span>
-                              <span>-{costs.couponDiscount} TL</span>
+                              <span>-{costs.couponDiscount} ₺</span>
                            </div>
                         )}
                         <div className="flex justify-between">
-                           <span>KDV (%{taxRate})</span>
-                           <span>{costs.tax} TL</span>
+                           <span>KDV (%{taxRate}, dahil)</span>
+                           <span>{costs.tax} ₺</span>
                         </div>
                         <div className="flex justify-between">
                            <span>Kargo</span>
@@ -573,7 +595,7 @@ export default function CheckoutPage() {
 
                      <div className="flex justify-between font-bold text-lg">
                         <span>Toplam</span>
-                        <span>{costs.payable} TL</span>
+                        <span>{costs.payable} ₺</span>
                      </div>
                   </CardContent>
                   <CardFooter className="flex flex-col gap-3">
@@ -598,7 +620,7 @@ export default function CheckoutPage() {
                                  rel="noopener noreferrer"
                                  className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
                               >
-                                 Mesafeli Satis Sozlesmesini
+                                 Mesafeli Satış Sözleşmesini
                               </a>{' '}
                               okudum ve kabul ediyorum.
                            </span>
@@ -620,9 +642,9 @@ export default function CheckoutPage() {
                                  }}
                                  className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
                               >
-                                 On Bilgilendirme Formunu
+                                 Ön Bilgilendirme Formunu
                               </button>{' '}
-                              okudum ve onayliyorum.
+                              okudum ve onaylıyorum.
                            </span>
                         </label>
 
@@ -640,7 +662,7 @@ export default function CheckoutPage() {
                                  rel="noopener noreferrer"
                                  className="text-orange-500 underline underline-offset-2 hover:text-orange-600 font-medium"
                               >
-                                 Iade ve Iptal Kosullarini
+                                 İade ve İptal Koşullarını
                               </a>{' '}
                               okudum ve kabul ediyorum.
                            </span>
@@ -648,7 +670,7 @@ export default function CheckoutPage() {
                      </div>
 
                      <p className="text-xs text-muted-foreground text-center w-full">
-                        14 Gun Iade Garantisi | Guvenli Odeme
+                        14 Gün İade Garantisi | Güvenli Ödeme
                      </p>
                      <Button
                         className="w-full"
@@ -657,9 +679,9 @@ export default function CheckoutPage() {
                         disabled={loading || !selectedAddress || !cart?.items?.length || !mesafeliChecked || !onBilgiChecked || !iadeChecked}
                      >
                         {loading ? (
-                           <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Isleniyor...</>
+                           <><Loader2 className="h-4 w-4 animate-spin mr-2" /> İşleniyor...</>
                         ) : (
-                           'Siparisi Onayla ve Ode'
+                           'Siparişi Onayla ve Öde'
                         )}
                      </Button>
                   </CardFooter>
@@ -667,7 +689,7 @@ export default function CheckoutPage() {
             </div>
          </div>
 
-         {/* On Bilgilendirme Formu Modal */}
+         {/* Ön Bilgilendirme Formu Modal */}
          {showPreInfoModal && (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900 p-6">
@@ -680,22 +702,22 @@ export default function CheckoutPage() {
 
                   <div className="flex items-center gap-2 mb-4">
                      <FileText className="h-5 w-5 text-orange-500" />
-                     <h2 className="text-lg font-bold text-foreground">On Bilgilendirme Formu</h2>
+                     <h2 className="text-lg font-bold text-foreground">Ön Bilgilendirme Formu</h2>
                   </div>
 
                   <div className="space-y-4 text-sm">
                      {/* Satici Bilgileri */}
                      <div className="rounded-lg border p-3 space-y-1">
-                        <h3 className="font-semibold text-foreground">Satici Bilgileri</h3>
+                        <h3 className="font-semibold text-foreground">Satıcı Bilgileri</h3>
                         <p className="text-muted-foreground">Unvan: xForgea3D</p>
-                        <p className="text-muted-foreground">Adres: Turkiye</p>
+                        <p className="text-muted-foreground">Adres: Türkiye</p>
                         <p className="text-muted-foreground">Telefon: +90 (500) 000 00 00</p>
                         <p className="text-muted-foreground">E-posta: info@xforgea3d.com</p>
                      </div>
 
-                     {/* Urun Bilgileri */}
+                     {/* Ürün Bilgileri */}
                      <div className="rounded-lg border p-3 space-y-2">
-                        <h3 className="font-semibold text-foreground">Siparis Edilen Urunler</h3>
+                        <h3 className="font-semibold text-foreground">Sipariş Edilen Ürünler</h3>
                         {cart?.items?.map((item: any, i: number) => {
                            const modalFlashSale = isFlashSaleActive(item.product)
                            const modalPrice = modalFlashSale ? item.product.flashSalePrice : item.product.price
@@ -706,7 +728,7 @@ export default function CheckoutPage() {
                                  <p className="text-xs text-muted-foreground">{item.count} adet</p>
                               </div>
                               <span className="text-xs font-semibold ml-2">
-                                 {(modalPrice * item.count).toFixed(2)} TL
+                                 {(modalPrice * item.count).toFixed(2)} ₺
                               </span>
                            </div>
                            )
@@ -718,20 +740,20 @@ export default function CheckoutPage() {
                         <h3 className="font-semibold text-foreground">Toplam Fiyat</h3>
                         <div className="flex justify-between">
                            <span className="text-muted-foreground">Ara Toplam</span>
-                           <span>{costs.total} TL</span>
+                           <span>{costs.total} ₺</span>
                         </div>
                         <div className="flex justify-between">
-                           <span className="text-muted-foreground">KDV (%{taxRate})</span>
-                           <span>{costs.tax} TL</span>
+                           <span className="text-muted-foreground">KDV (%{taxRate}, dahil)</span>
+                           <span>{costs.tax} ₺</span>
                         </div>
                         <div className="flex justify-between">
                            <span className="text-muted-foreground">Kargo</span>
-                           <span className="text-green-600">Ucretsiz</span>
+                           <span className="text-green-600">Ücretsiz</span>
                         </div>
                         <Separator className="my-1" />
                         <div className="flex justify-between font-bold">
                            <span>Genel Toplam</span>
-                           <span>{costs.payable} TL</span>
+                           <span>{costs.payable} ₺</span>
                         </div>
                      </div>
 
@@ -739,36 +761,36 @@ export default function CheckoutPage() {
                      <div className="rounded-lg border p-3 space-y-1">
                         <h3 className="font-semibold text-foreground">Teslimat Bilgileri</h3>
                         <p className="text-muted-foreground">
-                           Teslimat Yontemi: Kargo ile teslimat
+                           Teslimat Yöntemi: Kargo ile teslimat
                         </p>
                         <p className="text-muted-foreground">
                            Tahmini Teslimat: {getEstimatedDeliveryRange()}
                         </p>
                      </div>
 
-                     {/* Odeme Yontemi */}
+                     {/* Ödeme Yöntemi */}
                      <div className="rounded-lg border p-3 space-y-1">
-                        <h3 className="font-semibold text-foreground">Odeme Yontemi</h3>
-                        <p className="text-muted-foreground">Kredi/Banka Karti ile online odeme</p>
+                        <h3 className="font-semibold text-foreground">Ödeme Yöntemi</h3>
+                        <p className="text-muted-foreground">Kredi/Banka Kartı ile online ödeme</p>
                      </div>
 
-                     {/* Cayma Hakki */}
+                     {/* Cayma Hakkı */}
                      <div className="rounded-lg border border-orange-200 dark:border-orange-800/50 bg-orange-50/30 dark:bg-orange-950/10 p-3 space-y-1">
                         <h3 className="font-semibold text-foreground flex items-center gap-1.5">
                            <ShieldCheck className="h-4 w-4 text-orange-500" />
-                           Cayma Hakki
+                           Cayma Hakkı
                         </h3>
                         <p className="text-muted-foreground text-xs leading-relaxed">
-                           Tuketici, 14 (on dort) gun icinde herhangi bir gerekce gostermeksizin ve
-                           cezai sart odemeksizin sozlesmeden cayma hakkina sahiptir. Cayma hakki
-                           suresi, hizmet ifasina iliskin sozlesmelerde sozlesmenin kuruldugu gun;
-                           mal teslimine iliskin sozlesmelerde ise tuketicinin veya tuketici
-                           tarafindan belirlenen ucuncu kisinin mali teslim aldigi gun baslar.
-                           Ancak tuketici, sozlesmenin kurulmasindan malin teslimine kadar olan
-                           sure icinde de cayma hakkini kullanabilir.
+                           Tüketici, 14 (on dört) gün içinde herhangi bir gerekçe göstermeksizin ve
+                           cezai şart ödemeksizin sözleşmeden cayma hakkına sahiptir. Cayma hakkı
+                           süresi, hizmet ifasına ilişkin sözleşmelerde sözleşmenin kurulduğu gün;
+                           mal teslimine ilişkin sözleşmelerde ise tüketicinin veya tüketici
+                           tarafından belirlenen üçüncü kişinin malı teslim aldığı gün başlar.
+                           Ancak tüketici, sözleşmenin kurulmasından malın teslimine kadar olan
+                           süre içinde de cayma hakkını kullanabilir.
                         </p>
                         <p className="text-muted-foreground text-xs leading-relaxed font-medium">
-                           Not: Kisiye ozel uretim urunlerde cayma hakki kullanilamaz.
+                           Not: Kişiye özel üretim ürünlerde cayma hakkı kullanılamaz.
                         </p>
                      </div>
                   </div>
@@ -777,7 +799,7 @@ export default function CheckoutPage() {
                      onClick={() => setShowPreInfoModal(false)}
                      className="mt-4 w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg hover:brightness-110 active:scale-[0.98]"
                   >
-                     Anladim, Kapat
+                     Anladım, Kapat
                   </button>
                </div>
             </div>

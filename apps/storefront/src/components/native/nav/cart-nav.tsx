@@ -355,7 +355,7 @@ export function CartNav() {
                                         className="h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100 disabled:opacity-40"
                                         onClick={(e) => handleRemoveItem(e, productId)}
                                         disabled={isBusy}
-                                        aria-label="Urunu kaldir"
+                                        aria-label="Ürünü kaldır"
                                     >
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </button>

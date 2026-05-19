@@ -172,7 +172,7 @@ export default function AtolyePage() {
                     <SparklesIcon className="h-3 w-3" />
                     Atölye — Özel Tasarım
                 </span>
-                <h1 className="text-3xl font-black tracking-tight">Kendi Tasarımını Bask</h1>
+                <h1 className="text-3xl font-black tracking-tight">Kendi Tasarımını Bastır</h1>
                 <p className="mt-2 text-muted-foreground">
                     SVG dosyanı yükle, renk seç, bilgilerini gir — fiyat teklifini en kısa sürede iletiyoruz.
                 </p>

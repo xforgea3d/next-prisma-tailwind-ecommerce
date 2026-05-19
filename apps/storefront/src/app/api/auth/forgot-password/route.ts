@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
         // Always return success to prevent email enumeration
         return NextResponse.json({
             success: true,
-            message: 'Eger bu e-posta adresi kayitliysa, sifre sifirlama baglantisi gonderildi.',
+            message: 'Eğer bu e-posta adresi kayıtlıysa, şifre sıfırlama bağlantısı gönderildi.',
         })
     } catch (error) {
         console.error('[forgot-password] Error:', error)
         return NextResponse.json(
-            { error: 'Beklenmeyen bir hata olustu.' },
+            { error: 'Beklenmeyen bir hata oluştu.' },
             { status: 500 }
         )
     }

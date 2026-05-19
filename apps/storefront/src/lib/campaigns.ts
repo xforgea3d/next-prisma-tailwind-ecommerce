@@ -87,11 +87,11 @@ export function dbCampaignToLegacy(db: DBCampaign): Campaign {
  * and as a fallback when DB is unavailable.
  */
 export const SUGGESTED_CAMPAIGNS: Campaign[] = [
-   // Ocak - Yeni Yil
+   // Ocak - Yeni Yıl
    {
       id: 'yilbasi',
-      name: 'Yeni Yil Indirimleri',
-      description: 'Yeni yila ozel firsatlar',
+      name: 'Yeni Yıl İndirimleri',
+      description: 'Yeni yıla özel fırsatlar',
       startDate: '12-25',
       endDate: '01-05',
       theme: {
@@ -103,18 +103,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Gift',
       },
       banner: {
-         title: 'Yeni Yila Ozel %20 Indirim!',
-         subtitle: 'Sevdiklerinize 3D baski hediyeler',
-         ctaText: 'Hediyeleri Kesfet',
+         title: 'Yeni Yıla Özel %20 İndirim!',
+         subtitle: 'Sevdiklerinize 3D baskı hediyeler',
+         ctaText: 'Hediyeleri Keşfet',
          ctaLink: '/products?sort=featured',
       },
       discountSuggestion: 20,
    },
-   // Subat - Sevgililer Gunu
+   // Şubat - Sevgililer Günü
    {
       id: 'sevgililer',
-      name: 'Sevgililer Gunu',
-      description: '14 Subat ozel urunler',
+      name: 'Sevgililer Günü',
+      description: '14 Şubat özel ürünler',
       startDate: '02-07',
       endDate: '02-15',
       theme: {
@@ -126,18 +126,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Heart',
       },
       banner: {
-         title: 'Sevgililer Gunune Ozel Tasarimlar',
-         subtitle: 'Kisiye ozel 3D baski hediyelerle sevginizi gosterin',
-         ctaText: 'Hediye Sec',
+         title: 'Sevgililer Gününe Özel Tasarımlar',
+         subtitle: 'Kişiye özel 3D baskı hediyelerle sevginizi gösterin',
+         ctaText: 'Hediye Seç',
          ctaLink: '/products?category=Dekoratif',
       },
       discountSuggestion: 15,
    },
-   // Mart - Kadinlar Gunu
+   // Mart - Kadınlar Günü
    {
       id: 'kadinlar',
-      name: '8 Mart Dunya Kadinlar Gunu',
-      description: 'Kadinlar Gunune ozel firsatlar',
+      name: '8 Mart Dünya Kadınlar Günü',
+      description: 'Kadınlar Gününe özel fırsatlar',
       startDate: '03-05',
       endDate: '03-09',
       theme: {
@@ -149,9 +149,9 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Flower2',
       },
       banner: {
-         title: 'Kadinlar Gunune Ozel',
-         subtitle: 'Hayatinizdaki ozel kadinlara benzersiz hediyeler',
-         ctaText: 'Hediyeleri Gor',
+         title: 'Kadınlar Gününe Özel',
+         subtitle: 'Hayatınızdaki özel kadınlara benzersiz hediyeler',
+         ctaText: 'Hediyeleri Gör',
          ctaLink: '/products',
       },
       discountSuggestion: 10,
@@ -159,8 +159,8 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
    // Nisan - 23 Nisan
    {
       id: '23nisan',
-      name: '23 Nisan Cocuk Bayrami',
-      description: 'Ulusal Egemenlik ve Cocuk Bayrami',
+      name: '23 Nisan Çocuk Bayramı',
+      description: 'Ulusal Egemenlik ve Çocuk Bayramı',
       startDate: '04-20',
       endDate: '04-24',
       theme: {
@@ -172,18 +172,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'PartyPopper',
       },
       banner: {
-         title: '23 Nisan Cocuk Bayrami Senligi!',
-         subtitle: 'Cocuklar icin eglenceli 3D figurler ve oyuncaklar',
-         ctaText: 'Figurleri Kesfet',
+         title: '23 Nisan Çocuk Bayramı Şenliği!',
+         subtitle: 'Çocuklar için eğlenceli 3D figürler ve oyuncaklar',
+         ctaText: 'Figürleri Keşfet',
          ctaLink: '/products?category=Fig%C3%BCrler',
       },
       discountSuggestion: 15,
    },
-   // Mayis - Anneler Gunu
+   // Mayıs - Anneler Günü
    {
       id: 'anneler',
-      name: 'Anneler Gunu',
-      description: 'Anneler Gunune ozel hediyeler',
+      name: 'Anneler Günü',
+      description: 'Anneler Gününe özel hediyeler',
       startDate: '05-08',
       endDate: '05-15',
       theme: {
@@ -195,18 +195,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Heart',
       },
       banner: {
-         title: 'Anneler Gunune Ozel',
-         subtitle: 'Annenize en guzel hediye: kisiye ozel 3D baski',
+         title: 'Anneler Gününe Özel',
+         subtitle: 'Annenize en güzel hediye: kişiye özel 3D baskı',
          ctaText: 'Anneye Hediye',
          ctaLink: '/products?category=Dekoratif',
       },
       discountSuggestion: 15,
    },
-   // Haziran - Babalar Gunu
+   // Haziran - Babalar Günü
    {
       id: 'babalar',
-      name: 'Babalar Gunu',
-      description: 'Babalar Gunune ozel hediyeler',
+      name: 'Babalar Günü',
+      description: 'Babalar Gününe özel hediyeler',
       startDate: '06-15',
       endDate: '06-22',
       theme: {
@@ -218,18 +218,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Trophy',
       },
       banner: {
-         title: 'Babalar Gunune Ozel',
-         subtitle: 'Babaniza ozel arac aksesuarlari ve figurler',
+         title: 'Babalar Gününe Özel',
+         subtitle: 'Babanıza özel araç aksesuarları ve figürler',
          ctaText: 'Babaya Hediye',
          ctaLink: '/products?category=Ara%C3%A7%20Aksesuarlar%C4%B1',
       },
       discountSuggestion: 15,
    },
-   // Temmuz-Agustos - Yaz Indirimi
+   // Temmuz-Ağustos - Yaz İndirimi
    {
       id: 'yaz',
-      name: 'Yaz Indirimleri',
-      description: 'Yaz kampanyasi firsatlari',
+      name: 'Yaz İndirimleri',
+      description: 'Yaz kampanyası fırsatları',
       startDate: '07-01',
       endDate: '08-31',
       theme: {
@@ -241,18 +241,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Sun',
       },
       banner: {
-         title: 'Yaz Kampanyasi Basladi!',
-         subtitle: 'Tum urunlerde buyuk indirimler',
-         ctaText: 'Indirimleri Gor',
+         title: 'Yaz Kampanyası Başladı!',
+         subtitle: 'Tüm ürünlerde büyük indirimler',
+         ctaText: 'İndirimleri Gör',
          ctaLink: '/products?sort=featured',
       },
       discountSuggestion: 25,
    },
-   // Eylul - Okula Donus
+   // Eylül - Okula Dönüş
    {
       id: 'okul',
-      name: 'Okula Donus',
-      description: 'Okula donus kampanyasi',
+      name: 'Okula Dönüş',
+      description: 'Okula dönüş kampanyası',
       startDate: '09-01',
       endDate: '09-15',
       theme: {
@@ -264,9 +264,9 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'GraduationCap',
       },
       banner: {
-         title: 'Okula Donus Kampanyasi',
-         subtitle: 'Masaustu aksesuarlar ve kisiye ozel okul urunleri',
-         ctaText: 'Urunleri Gor',
+         title: 'Okula Dönüş Kampanyası',
+         subtitle: 'Masaüstü aksesuarlar ve kişiye özel okul ürünleri',
+         ctaText: 'Ürünleri Gör',
          ctaLink: '/products?category=Aksesuarlar',
       },
       discountSuggestion: 10,
@@ -274,8 +274,8 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
    // Ekim - 29 Ekim
    {
       id: '29ekim',
-      name: '29 Ekim Cumhuriyet Bayrami',
-      description: 'Cumhuriyet Bayrami kutlamalari',
+      name: '29 Ekim Cumhuriyet Bayramı',
+      description: 'Cumhuriyet Bayramı kutlamaları',
       startDate: '10-26',
       endDate: '10-30',
       theme: {
@@ -287,18 +287,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Flag',
       },
       banner: {
-         title: 'Cumhuriyet Bayrami Kutlu Olsun!',
-         subtitle: 'Bayrama ozel indirimler',
-         ctaText: 'Kampanyayi Gor',
+         title: 'Cumhuriyet Bayramı Kutlu Olsun!',
+         subtitle: 'Bayrama özel indirimler',
+         ctaText: 'Kampanyayı Gör',
          ctaLink: '/products',
       },
       discountSuggestion: 29,
    },
-   // Kasim - Black Friday / 11.11
+   // Kasım - Black Friday / 11.11
    {
       id: 'blackfriday',
-      name: 'Efsane Cuma / Kasim Indirimleri',
-      description: 'Yilin en buyuk indirimleri',
+      name: 'Efsane Cuma / Kasım İndirimleri',
+      description: 'Yılın en büyük indirimleri',
       startDate: '11-11',
       endDate: '11-30',
       theme: {
@@ -310,9 +310,9 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Percent',
       },
       banner: {
-         title: 'EFSANE KASIM INDIRIMLERI',
-         subtitle: "Yilin en buyuk indirimleri basladi! %40'a varan firsatlar",
-         ctaText: 'Firsatlari Yakala',
+         title: 'EFSANE KASIM İNDİRİMLERİ',
+         subtitle: "Yılın en büyük indirimleri başladı! %40'a varan fırsatlar",
+         ctaText: 'Fırsatları Yakala',
          ctaLink: '/products?sort=most_expensive',
       },
       discountSuggestion: 40,
@@ -320,8 +320,8 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
    // Ramazan (approximate - changes yearly)
    {
       id: 'ramazan',
-      name: 'Ramazan Bayrami',
-      description: 'Ramazan Bayramina ozel firsatlar',
+      name: 'Ramazan Bayramı',
+      description: 'Ramazan Bayramına özel fırsatlar',
       startDate: '03-28',
       endDate: '04-02',
       theme: {
@@ -333,18 +333,18 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Moon',
       },
       banner: {
-         title: 'Ramazan Bayraminiz Kutlu Olsun',
-         subtitle: 'Bayram hediyelerinde ozel indirimler',
-         ctaText: 'Hediyeleri Gor',
+         title: 'Ramazan Bayramınız Kutlu Olsun',
+         subtitle: 'Bayram hediyelerinde özel indirimler',
+         ctaText: 'Hediyeleri Gör',
          ctaLink: '/products',
       },
       discountSuggestion: 15,
    },
-   // Kurban Bayrami (approximate)
+   // Kurban Bayramı (approximate)
    {
       id: 'kurban',
-      name: 'Kurban Bayrami',
-      description: 'Kurban Bayramina ozel firsatlar',
+      name: 'Kurban Bayramı',
+      description: 'Kurban Bayramına özel fırsatlar',
       startDate: '06-05',
       endDate: '06-10',
       theme: {
@@ -356,9 +356,9 @@ export const SUGGESTED_CAMPAIGNS: Campaign[] = [
          icon: 'Moon',
       },
       banner: {
-         title: 'Kurban Bayraminiz Mubarek Olsun',
+         title: 'Kurban Bayramınız Mübarek Olsun',
          subtitle: 'Bayram hediyelerinde %15 indirim',
-         ctaText: 'Hediyeleri Gor',
+         ctaText: 'Hediyeleri Gör',
          ctaLink: '/products',
       },
       discountSuggestion: 15,
@@ -397,7 +397,7 @@ export function getActiveCampaign(): Campaign | null {
          if (c.startDate <= c.endDate) {
             return today >= c.startDate && today <= c.endDate
          }
-         // Handle year-crossing campaigns (like Yilbasi: 12-25 to 01-05)
+         // Handle year-crossing campaigns (like Yılbaşı: 12-25 to 01-05)
          return today >= c.startDate || today <= c.endDate
       }) || null
    )

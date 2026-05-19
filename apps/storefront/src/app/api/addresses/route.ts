@@ -38,7 +38,7 @@ export async function POST(req: Request) {
          return new NextResponse('Unauthorized', { status: 401 })
       }
 
-      const { address, city, phone, postalCode, csrfToken } = await req.json()
+      const { fullName, title, address, city, phone, postalCode, csrfToken } = await req.json()
 
       if (!csrfToken || !verifyCsrfToken(csrfToken, userId)) {
          return new NextResponse('Geçersiz istek. Sayfayı yenileyip tekrar deneyin.', { status: 403 })
@@ -50,8 +50,8 @@ export async function POST(req: Request) {
          return new NextResponse('En fazla 10 adres ekleyebilirsiniz', { status: 400 })
       }
 
-      if (!address || !city || !phone) {
-         return new NextResponse('Adres, şehir ve telefon zorunlu alanlardır', { status: 400 })
+      if (!fullName || !address || !city || !phone) {
+         return new NextResponse('Ad Soyad, adres, şehir ve telefon zorunlu alanlardır', { status: 400 })
       }
 
       if (address.length > 500 || city.length > 100) {
@@ -66,6 +66,8 @@ export async function POST(req: Request) {
       const object = await prisma.address.create({
          data: {
             user: { connect: { id: userId } },
+            fullName: fullName.trim(),
+            title: title?.trim() || null,
             city: city.trim(),
             address: address.trim(),
             phone: phoneClean,

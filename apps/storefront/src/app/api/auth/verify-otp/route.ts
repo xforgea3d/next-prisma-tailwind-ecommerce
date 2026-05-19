@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
         if (!email || !code) {
             return NextResponse.json(
-                { error: 'E-posta ve dogrulama kodu gerekli.' },
+                { error: 'E-posta ve doğrulama kodu gerekli.' },
                 { status: 400 }
             )
         }
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
         if (!otp) {
             return NextResponse.json(
-                { error: 'Dogrulama kodu bulunamadi. Yeni bir kod isteyin.' },
+                { error: 'Doğrulama kodu bulunamadı. Yeni bir kod isteyin.' },
                 { status: 400 }
             )
         }
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             // Delete expired OTP
             await prisma.otp.delete({ where: { id: otp.id } })
             return NextResponse.json(
-                { error: 'Dogrulama kodunun suresi doldu. Yeni bir kod isteyin.' },
+                { error: 'Doğrulama kodunun süresi doldu. Yeni bir kod isteyin.' },
                 { status: 400 }
             )
         }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error('[verify-otp] Error:', error)
         return NextResponse.json(
-            { error: 'Beklenmeyen bir hata olustu.' },
+            { error: 'Beklenmeyen bir hata oluştu.' },
             { status: 500 }
         )
     }

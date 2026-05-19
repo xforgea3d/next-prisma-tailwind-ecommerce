@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
         if (recentCount >= 3) {
             return NextResponse.json(
-                { error: 'Cok fazla deneme. Lutfen birkas dakika bekleyin.' },
+                { error: 'Çok fazla deneme. Lütfen birkaç dakika bekleyin.' },
                 { status: 429 }
             )
         }
@@ -71,8 +71,8 @@ export async function POST(req: NextRequest) {
 
         // Send via Resend
         const subject = type === 'reset'
-            ? 'xForgea3D - Sifre Sifirlama Kodu'
-            : 'xForgea3D - Dogrulama Kodu'
+            ? 'xForgea3D - Şifre Sıfırlama Kodu'
+            : 'xForgea3D - Doğrulama Kodu'
 
         const result = await sendEmailViaResend({
             to: email,
@@ -83,16 +83,16 @@ export async function POST(req: NextRequest) {
         if (!result.success) {
             console.error('[send-otp] Resend error:', result.error)
             return NextResponse.json(
-                { error: 'E-posta gonderilemedi. Lutfen tekrar deneyin.' },
+                { error: 'E-posta gönderilemedi. Lütfen tekrar deneyin.' },
                 { status: 500 }
             )
         }
 
-        return NextResponse.json({ success: true, message: 'Dogrulama kodu gonderildi.' })
+        return NextResponse.json({ success: true, message: 'Doğrulama kodu gönderildi.' })
     } catch (error) {
         console.error('[send-otp] Error:', error)
         return NextResponse.json(
-            { error: 'Beklenmeyen bir hata olustu.' },
+            { error: 'Beklenmeyen bir hata oluştu.' },
             { status: 500 }
         )
     }

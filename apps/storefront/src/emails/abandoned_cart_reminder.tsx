@@ -126,8 +126,8 @@ export const AbandonedCartEmail = ({
                   <Text className="text-[#666666] text-[12px] leading-[24px] text-center">
                      Bu e-posta sepetinizdeki ürünleri hatırlatmak için gönderilmiştir.
                      Sorunuz varsa bize{' '}
-                     <Link href="mailto:destek@xforgea3d.com" className="text-[#f97316]">
-                        destek@xforgea3d.com
+                     <Link href="mailto:info@xforgea3d.com" className="text-[#f97316]">
+                        info@xforgea3d.com
                      </Link>{' '}
                      adresinden ulaşabilirsiniz.
                   </Text>

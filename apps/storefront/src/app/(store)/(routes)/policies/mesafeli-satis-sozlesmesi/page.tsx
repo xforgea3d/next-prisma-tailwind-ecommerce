@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 const DEFAULTS = {
-    contact_email: 'destek@xforgea3d.com',
+    contact_email: 'info@xforgea3d.com',
     contact_phone: '+90 (538) 288 07 38',
     address_text: 'Ataşehir, İstanbul, Türkiye',
 }

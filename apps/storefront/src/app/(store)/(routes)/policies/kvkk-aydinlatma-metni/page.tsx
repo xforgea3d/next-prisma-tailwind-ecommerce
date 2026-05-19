@@ -20,7 +20,7 @@ export default function KvkkAydinlatma() {
             <h2>1. Veri Sorumlusunun Kimliği</h2>
             <p>
                 KVKK kapsamında veri sorumlusu sıfatı <strong>xForgea3D</strong>'ye aittir. Her türlü soru,
-                onay ve taleplerinizi <strong>destek@xforgea3d.com</strong> adresi üzerinden iletebilirsiniz.
+                onay ve taleplerinizi <strong>info@xforgea3d.com</strong> adresi üzerinden iletebilirsiniz.
             </p>
 
             <h2>2. Kişisel Verilerin Hangi Amaçla İşleneceği</h2>

@@ -218,7 +218,7 @@ export const Item = ({ cartItem }) => {
          return (
             <div className="flex gap-2 items-center">
                <Badge className="flex gap-2 bg-red-600" variant="destructive">
-                  <span>⚡ Ozel Firsat</span>
+                  <span>⚡ Özel Fırsat</span>
                   <span>%{salePct}</span>
                </Badge>
                <h2 className="text-red-600 dark:text-red-400 font-bold">{product.flashSalePrice.toFixed(2)} &#8378;</h2>
@@ -248,24 +248,36 @@ export const Item = ({ cartItem }) => {
          <CardHeader className="p-0 md:hidden">
             <div className="relative h-32 w-full">
                <Link href={`/products/${product?.id}`}>
-                  <img
-                     className="absolute inset-0 h-full w-full rounded-t-lg object-cover"
-                     src={product?.images?.[0] ?? ''}
-                     alt="product image"
-                     loading="lazy"
-                  />
+                  {product?.images?.[0] ? (
+                     <img
+                        className="absolute inset-0 h-full w-full rounded-t-lg object-cover"
+                        src={product.images[0]}
+                        alt={product?.title || 'Ürün görseli'}
+                        loading="lazy"
+                     />
+                  ) : (
+                     <div className="absolute inset-0 h-full w-full rounded-t-lg bg-muted flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+                     </div>
+                  )}
                </Link>
             </div>
          </CardHeader>
          <CardContent className="grid grid-cols-6 gap-4 p-3">
             <div className="relative w-full col-span-2 hidden md:inline-flex">
                <Link href={`/products/${product?.id}`}>
-                  <img
-                     className="absolute inset-0 h-full w-full rounded-lg object-cover"
-                     src={product?.images?.[0] ?? ''}
-                     alt="item image"
-                     loading="lazy"
-                  />
+                  {product?.images?.[0] ? (
+                     <img
+                        className="absolute inset-0 h-full w-full rounded-lg object-cover"
+                        src={product.images[0]}
+                        alt={product?.title || 'Ürün görseli'}
+                        loading="lazy"
+                     />
+                  ) : (
+                     <div className="absolute inset-0 h-full w-full rounded-lg bg-muted flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-muted-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
+                     </div>
+                  )}
                </Link>
             </div>
             <div className="col-span-4 block space-y-2">

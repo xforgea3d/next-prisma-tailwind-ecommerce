@@ -15,13 +15,13 @@ export function OrganizationJsonLd() {
          height: 512,
       },
       description:
-         "Turkiye'nin premium 3D baski markasi. Yuksek kaliteli figurler, heykeller, dekoratif urunler ve kisiye ozel 3D baski cozumleri.",
+         "Türkiye'nin premium 3D baskı markası. Yüksek kaliteli figürler, heykeller, dekoratif ürünler ve kişiye özel 3D baskı çözümleri.",
       foundingDate: '2024',
       founders: [{ '@type': 'Person', name: 'xForgea3D Team' }],
       address: {
          '@type': 'PostalAddress',
          addressCountry: 'TR',
-         addressLocality: 'Turkiye',
+         addressLocality: 'Türkiye',
       },
       contactPoint: {
          '@type': 'ContactPoint',
@@ -49,7 +49,7 @@ export function WebSiteJsonLd() {
       '@id': `${SITE_URL}/#website`,
       url: SITE_URL,
       name: 'xForgea3D',
-      description: 'Premium 3D Baski Urunleri',
+      description: 'Premium 3D Baskı Ürünleri',
       publisher: { '@id': `${SITE_URL}/#organization` },
       inLanguage: 'tr-TR',
       potentialAction: {

@@ -77,7 +77,7 @@ const data = [
             url: '/faq',
          },
          {
-            label: 'Kargo Takibi',
+            label: 'Kargo & Teslimat Bilgileri',
             url: '/shipping',
          },
       ],

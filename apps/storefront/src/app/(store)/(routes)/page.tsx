@@ -15,6 +15,7 @@ import {
    Car,
    ArrowRight,
    Clock,
+   ShieldCheck,
 } from 'lucide-react'
 import { getActiveCampaign, getCampaignEndDate, dbCampaignToLegacy, getDBCampaignEndDate, type DBCampaign } from '@/lib/campaigns'
 import Link from 'next/link'
@@ -235,10 +236,10 @@ export default async function Index() {
                <div className="px-[1.4rem] md:px-[4rem] lg:px-[6rem] xl:px-[8rem] 2xl:px-[12rem]">
                   <div className="mb-6 text-center">
                      <h2 className="text-3xl font-bold tracking-tight text-red-600 dark:text-red-400">
-                        ⚡ Ozel Firsatlar
+                        ⚡ Özel Fırsatlar
                      </h2>
                      <p className="mt-2 text-sm text-muted-foreground">
-                        Sinirli sureli indirimler — kacirmayin!
+                        Sınırlı süreli indirimler — kaçırmayın!
                      </p>
                   </div>
                   <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-red-300 dark:scrollbar-thumb-red-700">
@@ -270,7 +271,7 @@ export default async function Index() {
                                     </div>
                                     <div className="absolute bottom-2 left-2 right-2">
                                        <span className="inline-flex items-center rounded-md bg-black/70 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white w-full justify-center">
-                                          {daysLeft > 0 ? `${daysLeft}g ${hoursLeft}s kaldi` : `${hoursLeft}s kaldi`}
+                                          {daysLeft > 0 ? `${daysLeft}g ${hoursLeft}s kaldı` : `${hoursLeft}s kaldı`}
                                        </span>
                                     </div>
                                  </div>
@@ -391,12 +392,6 @@ export default async function Index() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                {[
                   {
-                     icon: <Star className="h-8 w-8 text-orange-500" />,
-                     title: 'Premium Kalite',
-                     desc: 'Endüstriyel sınıf filament ve hassas yazıcılarla üretim.',
-                     stat: { end: 99, suffix: '%', label: 'Müşteri Memnuniyeti' },
-                  },
-                  {
                      icon: <Layers3 className="h-8 w-8 text-orange-500" />,
                      title: 'Detay Hassasiyeti',
                      desc: '0.1mm katman çözünürlüğüyle mükemmel yüzey kalitesi.',
@@ -413,6 +408,12 @@ export default async function Index() {
                      title: 'Türkiye\'ye Kargo',
                      desc: 'Türkiye\'nin her iline hızlı ve güvenli teslimat.',
                      stat: { end: 81, suffix: '', label: 'İl Teslimat' },
+                  },
+                  {
+                     icon: <ShieldCheck className="h-8 w-8 text-orange-500" />,
+                     title: 'Güvenli Alışveriş',
+                     desc: 'Teslimat tarihinden itibaren 14 gün koşulsuz iade garantisi.',
+                     stat: { end: 14, suffix: ' Gün', label: 'İade Garantisi' },
                   },
                ].map(({ icon, title, desc, stat }) => (
                   <div

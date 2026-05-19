@@ -54,7 +54,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
          if (error) {
             console.error('Google OAuth Error:', error.message)
-            alert('Google ile giris su anda aktif degil. Lutfen e-posta/sifre ile giris yapin.')
+            alert('Google ile giriş şu anda aktif değil. Lütfen e-posta/şifre ile giriş yapın.')
          }
       } catch (error) {
          console.error('Google OAuth unexpected error:', error)
@@ -146,7 +146,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
          })
 
          if (error) {
-            setErrorMsg('E-posta veya sifre hatali.')
+            setErrorMsg('E-posta veya şifre hatalı.')
             console.error('SignIn Error:', error.message)
          } else if (data.session) {
             setLoggedInCookie()
@@ -154,7 +154,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
             window.location.assign(target)
          }
       } catch {
-         setErrorMsg('Beklenmeyen bir hata olustu.')
+         setErrorMsg('Beklenmeyen bir hata oluştu.')
       } finally {
          setIsLoading(false)
       }
@@ -177,10 +177,10 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
          if (data.success) {
             setForgotMsg(data.message)
          } else {
-            setErrorMsg(data.error || 'Bir hata olustu.')
+            setErrorMsg(data.error || 'Bir hata oluştu.')
          }
       } catch {
-         setErrorMsg('Beklenmeyen bir hata olustu.')
+         setErrorMsg('Beklenmeyen bir hata oluştu.')
       } finally {
          setForgotLoading(false)
       }
@@ -215,14 +215,14 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
                disabled={forgotLoading || !!validateEmail(email)}
             >
                {forgotLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-               Sifre Sifirlama Baglantisi Gonder
+               Şifre Sıfırlama Bağlantısı Gönder
             </Button>
             <button
                type="button"
                className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
                onClick={() => { setForgotMode(false); setForgotMsg(''); setErrorMsg('') }}
             >
-               Girisse don
+               Girişe dön
             </button>
          </form>
       )
@@ -252,14 +252,14 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
          <div className="grid gap-1">
             <div className="flex items-center justify-between">
                <Label className="text-sm font-light text-foreground/60" htmlFor="password-login">
-                  Sifre
+                  Şifre
                </Label>
                <button
                   type="button"
                   className="text-xs text-muted-foreground underline underline-offset-4 hover:text-primary"
                   onClick={() => { setForgotMode(true); setErrorMsg('') }}
                >
-                  Sifremi unuttum
+                  Şifremi unuttum
                </button>
             </div>
             <Input
@@ -278,7 +278,7 @@ function SignInForm({ isLoading, setIsLoading, supabase }) {
             disabled={isLoading || !!validateEmail(email) || password.length < 6}
          >
             {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-            Giris Yap
+            Giriş Yap
          </Button>
       </form>
    )
@@ -396,8 +396,8 @@ function SignUpForm({ isLoading, setIsLoading, supabase }) {
                </div>
             </div>
             <div className="text-center space-y-1">
-               <h3 className="text-lg font-semibold">Hosgeldiniz! 🎉</h3>
-               <p className="text-sm text-muted-foreground">Hesabiniz olusturuldu, yonlendiriliyorsunuz...</p>
+               <h3 className="text-lg font-semibold">Hoşgeldiniz! 🎉</h3>
+               <p className="text-sm text-muted-foreground">Hesabınız oluşturuldu, yönlendiriliyorsunuz...</p>
             </div>
          </div>
       )

@@ -44,8 +44,9 @@ export function Receipt() {
       }
 
       const afterDiscountAmount = totalAmount - discountAmount
-      const taxAmount = afterDiscountAmount * (taxRate / 100)
-      const payableAmount = afterDiscountAmount + taxAmount
+      // Back-calculate KDV component from price that already includes VAT
+      const taxAmount = afterDiscountAmount * (taxRate / (100 + taxRate))
+      const payableAmount = afterDiscountAmount
 
       return {
          totalAmount: totalAmount.toFixed(2),
@@ -64,7 +65,7 @@ export function Receipt() {
          <CardContent className="p-4 text-sm">
             <div className="block space-y-[1vh]">
                <div className="flex justify-between">
-                  <p>Toplam Tutar</p>
+                  <p>Ara Toplam</p>
                   <h3>{costs.totalAmount} ₺</h3>
                </div>
                <div className="flex justify-between">
@@ -72,7 +73,7 @@ export function Receipt() {
                   <h3>{costs.discountAmount} ₺</h3>
                </div>
                <div className="flex justify-between">
-                  <p>KDV (%{taxRate})</p>
+                  <p>KDV (%{taxRate}, dahil)</p>
                   <h3>{costs.taxAmount} ₺</h3>
                </div>
             </div>
