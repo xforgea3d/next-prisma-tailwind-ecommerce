@@ -2,7 +2,7 @@ export const revalidate = 3600
 
 import prisma from '@/lib/prisma'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { BlogPostJsonLd } from '@/app/json-ld'
+import { BlogPostJsonLd, BreadcrumbJsonLd } from '@/app/json-ld'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -85,8 +85,13 @@ export default async function BlogPostPage({ params }: Props) {
             </ol>
          </nav>
 
-         {/* JSON-LD BlogPosting Schema */}
+         {/* JSON-LD Schemas */}
          <BlogPostJsonLd post={post} />
+         <BreadcrumbJsonLd items={[
+            { name: 'Ana Sayfa', href: '/' },
+            { name: 'Blog', href: '/blog' },
+            { name: post.title_tr },
+         ]} />
 
          {post.cover_image_url && (
             <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-8">

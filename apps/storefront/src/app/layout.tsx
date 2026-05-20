@@ -3,7 +3,7 @@ import { ThemeProvider } from '@/providers/theme-provider'
 import { GlobalErrorHandler } from '@/components/GlobalErrorHandler'
 import GoogleAnalytics from '@/components/native/GoogleAnalytics'
 import ClarityAnalytics from '@/components/native/ClarityAnalytics'
-import { OrganizationJsonLd, WebSiteJsonLd } from './json-ld'
+import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from './json-ld'
 import { Inter } from 'next/font/google'
 import dynamic from 'next/dynamic'
 import type { Metadata } from 'next'
@@ -123,6 +123,7 @@ export default async function RootLayout({
             <GlobalErrorHandler />
             <OrganizationJsonLd />
             <WebSiteJsonLd />
+            <LocalBusinessJsonLd />
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                <NavigationProgressBar />
                <LazyToastProvider />

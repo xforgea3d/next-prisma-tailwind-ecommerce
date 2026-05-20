@@ -70,6 +70,94 @@ export function WebSiteJsonLd() {
    )
 }
 
+// ── LocalBusiness Schema (critical for local SEO) ────────────
+export function LocalBusinessJsonLd() {
+   const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      '@id': `${SITE_URL}/#localbusiness`,
+      name: 'xForgea3D',
+      alternateName: 'xForgea 3D Baskı',
+      url: SITE_URL,
+      image: `${SITE_URL}/logo.png`,
+      description: 'Antalya merkezli profesyonel 3D baskı ve yazıcı hizmetleri. Kişiye özel üretim, araç aksesuarları, figürler, prototipler ve endüstriyel 3D baskı çözümleri.',
+      telephone: '+905382880738',
+      email: 'info@xforgea3d.com',
+      priceRange: '₺₺',
+      currenciesAccepted: 'TRY',
+      paymentAccepted: 'Kredi Kartı, Banka Kartı, Havale',
+      address: {
+         '@type': 'PostalAddress',
+         streetAddress: 'Muratpaşa',
+         addressLocality: 'Antalya',
+         addressRegion: 'Antalya',
+         postalCode: '07100',
+         addressCountry: 'TR',
+      },
+      geo: {
+         '@type': 'GeoCoordinates',
+         latitude: 36.8841,
+         longitude: 30.7056,
+      },
+      areaServed: [
+         { '@type': 'City', name: 'Antalya' },
+         { '@type': 'AdministrativeArea', name: 'Muratpaşa' },
+         { '@type': 'AdministrativeArea', name: 'Konyaaltı' },
+         { '@type': 'AdministrativeArea', name: 'Kepez' },
+         { '@type': 'AdministrativeArea', name: 'Akdeniz Bölgesi' },
+         { '@type': 'Country', name: 'Türkiye' },
+      ],
+      hasOfferCatalog: {
+         '@type': 'OfferCatalog',
+         name: '3D Baskı Hizmetleri',
+         itemListElement: [
+            { '@type': 'OfferCatalog', name: 'Kişiye Özel 3D Baskı' },
+            { '@type': 'OfferCatalog', name: 'Araç Aksesuarları' },
+            { '@type': 'OfferCatalog', name: '3D Figürler ve Heykeller' },
+            { '@type': 'OfferCatalog', name: 'Prototip Üretim' },
+            { '@type': 'OfferCatalog', name: 'Endüstriyel 3D Baskı' },
+         ],
+      },
+      sameAs: [
+         'https://www.instagram.com/xforgea3d/',
+      ],
+      parentOrganization: { '@id': `${SITE_URL}/#organization` },
+   }
+
+   return (
+      <script
+         type="application/ld+json"
+         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+   )
+}
+
+// ── BreadcrumbList Schema ────────────────────────────────────
+interface BreadcrumbItem {
+   name: string
+   href?: string
+}
+
+export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }) {
+   const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items.map((item, i) => ({
+         '@type': 'ListItem',
+         position: i + 1,
+         name: item.name,
+         ...(item.href && { item: item.href.startsWith('/') ? `${SITE_URL}${item.href}` : item.href }),
+      })),
+   }
+
+   return (
+      <script
+         type="application/ld+json"
+         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+   )
+}
+
 // ── Product JSON-LD (for product detail pages) ───────────────
 interface ProductReviewForJsonLd {
    rating: number

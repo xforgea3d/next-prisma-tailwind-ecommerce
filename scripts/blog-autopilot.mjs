@@ -513,6 +513,33 @@ async function main() {
       console.warn('ISR revalidation skipped (non-fatal):', e.message)
     }
 
+    // 8. IndexNow — ping Bing/Yandex for instant indexing
+    const blogUrl = `${siteUrl}/blog/${slug}`
+    try {
+      const indexNowPayload = {
+        host: 'xforgea3d.com',
+        key: 'xforgea3d',
+        keyLocation: `${siteUrl}/xforgea3d.txt`,
+        urlList: [blogUrl, `${siteUrl}/blog`, `${siteUrl}/sitemap.xml`],
+      }
+      const inRes = await fetch('https://api.indexnow.org/indexnow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(indexNowPayload),
+      })
+      console.log(`IndexNow: ${inRes.status} ${inRes.statusText}`)
+    } catch (e) {
+      console.warn('IndexNow ping skipped (non-fatal):', e.message)
+    }
+
+    // 9. Google ping — notify sitemap update
+    try {
+      await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(`${siteUrl}/sitemap.xml`)}`)
+      console.log('Google sitemap ping sent')
+    } catch (e) {
+      console.warn('Google ping skipped (non-fatal):', e.message)
+    }
+
     console.log(`[${new Date().toISOString()}] Done.`)
   } catch (e) {
     console.error('FATAL:', e)
