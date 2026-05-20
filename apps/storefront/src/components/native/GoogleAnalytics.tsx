@@ -1,67 +1,69 @@
 'use client'
 
 import Script from 'next/script'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+
+const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
 
 export default function GoogleAnalytics() {
-   const [consentGiven, setConsentGiven] = useState(false)
-   const googleID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID
-
    useEffect(() => {
+      if (!GA_ID) return
+
       const checkConsent = () => {
          try {
             const consent = localStorage.getItem('cookie-consent')
-            if (consent) {
-               const parsed = JSON.parse(consent)
-               // Support both { analytics: true } object format and simple "accepted" string
-               if (
-                  parsed === 'accepted' ||
-                  parsed === true ||
-                  parsed?.analytics === true
-               ) {
-                  setConsentGiven(true)
-               }
+            if (!consent) return
+            const parsed = JSON.parse(consent)
+            const accepted =
+               parsed === 'accepted' ||
+               parsed === true ||
+               parsed?.analytics === true
+            if (accepted) {
+               window.gtag?.('consent', 'update', {
+                  analytics_storage: 'granted',
+               })
             }
          } catch {
-            // If parsing fails, check as plain string
             const consent = localStorage.getItem('cookie-consent')
             if (consent === 'accepted' || consent === 'true') {
-               setConsentGiven(true)
+               window.gtag?.('consent', 'update', {
+                  analytics_storage: 'granted',
+               })
             }
          }
       }
 
       checkConsent()
 
-      // Re-check when cookie consent changes (custom event from cookie banner)
-      const handleConsentChange = () => checkConsent()
-      window.addEventListener('cookie-consent-updated', handleConsentChange)
-      window.addEventListener('storage', handleConsentChange)
-
+      window.addEventListener('cookie-consent-updated', checkConsent)
+      window.addEventListener('storage', checkConsent)
       return () => {
-         window.removeEventListener('cookie-consent-updated', handleConsentChange)
-         window.removeEventListener('storage', handleConsentChange)
+         window.removeEventListener('cookie-consent-updated', checkConsent)
+         window.removeEventListener('storage', checkConsent)
       }
    }, [])
 
-   if (!googleID || !consentGiven) return null
-
-   const gtag = `https://www.googletagmanager.com/gtag/js?id=${googleID}`
-   const gscript = {
-      __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${googleID}', {
-                  page_path: window.location.pathname,
-                });
-              `,
-   }
+   if (!GA_ID) return null
 
    return (
       <>
-         <Script src={gtag} async />
-         <Script id="gscript" dangerouslySetInnerHTML={gscript} />
+         <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            strategy="afterInteractive"
+         />
+         <Script id="gtag-init" strategy="afterInteractive">
+            {`
+               window.dataLayer = window.dataLayer || [];
+               function gtag(){dataLayer.push(arguments);}
+               gtag('consent', 'default', {
+                  analytics_storage: 'denied',
+               });
+               gtag('js', new Date());
+               gtag('config', '${GA_ID}', {
+                  page_path: window.location.pathname,
+               });
+            `}
+         </Script>
       </>
    )
 }
